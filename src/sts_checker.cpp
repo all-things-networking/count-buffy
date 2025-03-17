@@ -4,7 +4,8 @@
 
 #include "sts_checker.hpp"
 
-STSChecker::STSChecker(int n, int k, int c, int me, int md): n(n), k(k), c(c), me(me), md(md) {
+STSChecker::STSChecker(const int n, const int k, const int c, const int me, const int md): n(n), k(k), c(c), me(me),
+    md(md) {
     I = slv.int_vectors(k, n, "I");
     E = slv.int_vectors(k, n, "E");
     D = slv.int_vectors(k, n, "D");
@@ -45,10 +46,10 @@ void STSChecker::check_wl_not_qry_unsat() {
 }
 
 void STSChecker::bl_size(int j) {
-    auto Ej = E[j];
-    auto Bj = B[j];
-    auto Sj = S[j];
-    auto Oj = O[j];
+    const auto Ej = E[j];
+    const auto Bj = B[j];
+    const auto Sj = S[j];
+    const auto Oj = O[j];
     slv.add(Sj[0] == 0, format("S[{}][0] == 0", j));
     for (int i = 1; i < n; ++i) {
         expr e = (implies(!Bj[i], (Sj[i] == slv.ctx.int_val(0))) & (Sj[i] == (Sj[i - 1] + Ej[i] - Oj[i])));
@@ -70,10 +71,10 @@ void STSChecker::enqs(int j) {
 
 
 void STSChecker::drops(int j) {
-    auto Dj = D[j];
-    auto Ej = E[j];
-    auto Bj = B[j];
-    auto Sj = S[j];
+    const auto Dj = D[j];
+    const auto Ej = E[j];
+    const auto Bj = B[j];
+    const auto Sj = S[j];
     for (int i = 1; i < n; ++i) {
         auto e = (ite(Bj[i], implies(Dj[i] > 0, (Sj[i - 1] + Ej[i]) == c), Dj[i] == 0));
         slv.add(e, format("Drops[{}][{}] = constr", j, i));
@@ -81,9 +82,9 @@ void STSChecker::drops(int j) {
 }
 
 void STSChecker::enq_deq_sum(int j) {
-    auto Ij = I[j];
-    auto Ej = E[j];
-    auto Dj = D[j];
+    const auto Ij = I[j];
+    const auto Ej = E[j];
+    const auto Dj = D[j];
     for (int i = 0; i < n; ++i) {
         auto expr = (Ij[i] == (Ej[i] + Dj[i]));
         slv.add(expr, format("Inp[{}][{}] = constr", j, i));
@@ -95,14 +96,10 @@ void STSChecker::inputs(const int j) {
     enqs(j);
     drops(j);
     enq_deq_sum(j);
-    // s.add(bl_size(s.ctx, E[j], B[j], S[j], O[j]), format("bsize({})", j));
-    // s.add(enqs(s.ctx, E[j], B[j], S[j]), format("enqs({})", j));
-    // s.add(drops(s.ctx, D[j], E[j], B[j], S[j]), format("drops({})", j));
-    // s.add(inputs(s.ctx, I[j], E[j], D[j]), format("inps({})", j));
 }
 
 
-expr STSChecker::workload(int n) {
+expr STSChecker::workload(const int n) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < n; ++i) {
         res = res && (I[0][i] + I[1][i]) > 0;
@@ -127,8 +124,8 @@ expr STSChecker::trs(const evv &B, int n) {
         ev const &b = get_buf_vec_at_i(B, i);
         ev const &bp = get_buf_vec_at_i(B, i + 1);
         for (int j = 0; j < k; ++j) {
-            for (int k = j + 1; k < k; ++k) {
-                res = res && (implies(b[j], implies(b[k], bp[k])));
+            for (int l = j + 1; l < k; ++l) {
+                res = res && (implies(b[j], implies(b[l], bp[l])));
             }
         }
     }
@@ -137,11 +134,6 @@ expr STSChecker::trs(const evv &B, int n) {
 
 expr STSChecker::out() {
     expr res = slv.ctx.bool_val(true);
-    // for (int j = 0; j < K; ++j) {
-    //     for (int i = 0; i < N; ++i) {
-    //         res = res & !B[j][i];
-    //     }
-    // }
     for (int i = 0; i < n; ++i) {
         res = res && out(get_buf_vec_at_i(B, i), get_buf_vec_at_i(O, i));
     }

@@ -10,8 +10,8 @@ SmtSolver::SmtSolver(): s(ctx) {
     s.set(p);
 }
 
-vector<expr> &SmtSolver::bool_vector(int n, string name) {
-    vector<expr> *result = new vector<expr>[n];
+vector<expr> &SmtSolver::bool_vector(const int n, const string &name) {
+    const auto result = new vector<expr>[n];
     for (int i = 0; i < n; i++) {
         string vname = name;
         vname += to_string(i);
@@ -21,8 +21,8 @@ vector<expr> &SmtSolver::bool_vector(int n, string name) {
     return *result;
 }
 
-vector<ev> &SmtSolver::bool_vectors(int k, int n, string name) {
-    vector<ev> *result = new vector<ev>[k];
+vector<ev> &SmtSolver::bool_vectors(const int k, const int n, const string &name) {
+    auto *result = new vector<ev>[k];
     for (int i = 0; i < k; i++) {
         string vname = name;
         vname += to_string(i);
@@ -32,8 +32,8 @@ vector<ev> &SmtSolver::bool_vectors(int k, int n, string name) {
     return *result;
 }
 
-vector<expr> &SmtSolver::int_vector(int n, string name) {
-    vector<expr> *result = new vector<expr>[n];
+vector<expr> &SmtSolver::int_vector(const int n, const string &name) {
+    auto *result = new vector<expr>[n];
     for (int i = 0; i < n; i++) {
         string vname = name;
         vname += "_" + to_string(i);
@@ -43,8 +43,8 @@ vector<expr> &SmtSolver::int_vector(int n, string name) {
     return *result;
 }
 
-vector<ev> &SmtSolver::int_vectors(int k, int n, string name) {
-    vector<ev> *result = new vector<ev>[k];
+vector<ev> &SmtSolver::int_vectors(const int k, const int n, const string &name) {
+    const auto result = new vector<ev>[k];
     for (int i = 0; i < k; i++) {
         string vname = name;
         vname += "_" + to_string(i);
@@ -73,16 +73,15 @@ model SmtSolver::check_sat() {
 void SmtSolver::check_unsat() {
     switch (s.check()) {
         case unsat: cout << "Done!\n";
-        // cout << s.unsat_core() << endl;
             break;
         default:
             throw runtime_error("Model is SAT!");
     }
 }
 
-void SmtSolver::add_bound(evv vv, int lower, int upper) {
-    for (auto v: vv) {
-        for (auto e: v) {
+void SmtSolver::add_bound(const evv &vv, const int lower, const int upper) {
+    for (const auto& v: vv) {
+        for (const auto& e: v) {
             s.add((e >= lower) & (e <= upper));
         }
     }

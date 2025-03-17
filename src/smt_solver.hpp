@@ -22,17 +22,17 @@ class SmtSolver {
 
     SmtSolver();
 
-    ev &bool_vector(int n, string name);
+    ev &bool_vector(int n, const string &name);
 
-    evv &bool_vectors(int k, int, string name);
+    evv &bool_vectors(int k, int, const string &name);
 
-    ev &int_vector(int n, string name);
+    ev &int_vector(int n, const string &name);
 
-    evv &int_vectors(int k, int, string name);
+    evv &int_vectors(int k, int, const string &name);
 
     void add(const expr &e, const string &name);
 
-    void add_bound(evv vv, int lower, int upper);
+    void add_bound(const evv &vv, int lower, int upper);
 
     model check_sat();
 
