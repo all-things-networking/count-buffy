@@ -8,6 +8,8 @@
 
 class STSChecker {
 public:
+    virtual ~STSChecker() = default;
+
     SmtSolver slv;
     evv I;
     evv E;
@@ -31,24 +33,21 @@ public:
 
     void enqs(int j);
 
-
     void drops(int j);
 
     void enq_deq_sum(int j);
 
-    void inputs(
-        int j);
-
-
-    expr workload(int n);
-
-    expr out(const ev &bv, const ev &ov);
-
-    expr trs(const evv &B, int n);
+    void inputs(int j);
 
     expr out();
 
-    expr query(int m);
+    virtual expr workload(int n) = 0;
+
+    virtual expr out(const ev &bv, const ev &ov) = 0;
+
+    virtual expr trs(const evv &B, int n) = 0;
+
+    virtual expr query(int m) = 0;
 };
 
 
