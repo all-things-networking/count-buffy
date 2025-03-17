@@ -1,13 +1,9 @@
-//
-// Created by Amir Hossein Seyhani on 3/17/25.
-//
-
 #include "prio_sts.hpp"
 
-PrioSTS::PrioSTS(int n, int k, int c, int me, int md): STSChecker(n,k,c,me,md){
+PrioSTS::PrioSTS(int n, int k, int c, int me, int md): STSChecker(n, k, c, me, md) {
 }
 
-expr PrioSTS::workload(const int n) {
+expr PrioSTS::workload() {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < n; ++i) {
         res = res && (I[0][i] + I[1][i]) > 0;
@@ -16,7 +12,7 @@ expr PrioSTS::workload(const int n) {
     return res;
 }
 
-expr PrioSTS::out(const ev &bv, const ev &ov) {
+expr PrioSTS::out(const ev &bv, const ev &sv, const ev &ov) {
     expr res = slv.ctx.bool_val(true);
     expr not_until = slv.ctx.bool_val(true);
     for (int i = 0; i < k; ++i) {
@@ -26,19 +22,16 @@ expr PrioSTS::out(const ev &bv, const ev &ov) {
     return res;
 }
 
-expr PrioSTS::trs(const evv &B, int n) {
+expr PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
     expr res = slv.ctx.bool_val(true);
-    for (int i = 0; i < n - 1; ++i) {
-        ev const &b = get_buf_vec_at_i(B, i);
-        ev const &bp = get_buf_vec_at_i(B, i + 1);
-        for (int j = 0; j < k; ++j) {
-            for (int l = j + 1; l < k; ++l) {
-                res = res && (implies(b[j], implies(b[l], bp[l])));
-            }
+    for (int j = 0; j < k; ++j) {
+        for (int l = j + 1; l < k; ++l) {
+            res = res && (implies(b[j], implies(b[l], bp[l])));
         }
     }
     return res;
 }
+
 
 expr PrioSTS::query(const int m) {
     expr res = slv.ctx.bool_val(false);
@@ -51,4 +44,8 @@ expr PrioSTS::query(const int m) {
         res = res || part;
     }
     return res;
+}
+
+expr PrioSTS::init(const ev &b0, const ev &s0) {
+    return slv.ctx.bool_val(true);
 }

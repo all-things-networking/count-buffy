@@ -2,6 +2,7 @@
 #include<vector>
 #include"z3++.h"
 #include "src/prio_sts.hpp"
+#include "src/rr_checker.hpp"
 
 using namespace std;
 using namespace z3;
@@ -21,8 +22,10 @@ int main(const int argc, const char *argv[]) {
     int n = atoi(argv[1]);
     int k = atoi(argv[2]);
     int c = atoi(argv[3]);
-    STSChecker *sts = new PrioSTS(n, k, c, MAX_ENQ, MAX_DEQ);
-    sts->check_wl_sat();
+    // STSChecker *sts = new PrioSTS(n, k, c, MAX_ENQ, MAX_DEQ);
+    STSChecker *sts = new RRChecker(n, k, c, MAX_ENQ, MAX_DEQ);
+    auto m = sts->check_wl_sat();
+    sts->print(m);
     sts->check_wl_not_qry_unsat();
     return 0;
 }

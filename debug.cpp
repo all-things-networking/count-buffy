@@ -37,18 +37,6 @@ int main(){
     // // slv.check_sat();
     // return 0;
     // auto m = slv.check_sat();
-    // cout << "I:" << endl;
-    // print(I, m);
-    // cout << "E:" << endl;
-    // print(E, m);
-    // cout << "D:" << endl;
-    // print(D, m);
-    // cout << "B:" << endl;
-    // print(B, m);
-    // cout << "S:" << endl;
-    // print(S, m);
-    // cout << "O:" << endl;
-    // print(O, m);
     // return 0;
 
     // const vector i = {0, 2, 2, 0, 0, 0, 1, 0, 0, 0};

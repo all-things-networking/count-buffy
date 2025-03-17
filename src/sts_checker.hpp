@@ -15,8 +15,9 @@ public:
     evv E;
     evv D;
     evv B;
-    evv O;
     evv S;
+    evv O;
+    evv L;
     int n;
     int k;
     int c;
@@ -25,7 +26,7 @@ public:
 
     STSChecker(int n, int k, int c, int me, int md);
 
-    void check_wl_sat();
+    model check_wl_sat();
 
     void check_wl_not_qry_unsat();
 
@@ -41,13 +42,19 @@ public:
 
     expr out();
 
-    virtual expr workload(int n) = 0;
+    virtual expr workload() = 0;
 
-    virtual expr out(const ev &bv, const ev &ov) = 0;
+    virtual expr out(const ev &bv, const ev &sv, const ev &ov) = 0;
 
-    virtual expr trs(const evv &B, int n) = 0;
+    virtual expr trs(ev const &b, ev const &s, ev const &bp, ev const &sp) = 0;
+
+    virtual expr init(ev const &b0, ev const &s0) = 0;
+
+    void trs();
 
     virtual expr query(int m) = 0;
+
+    void print(model m);
 };
 
 
