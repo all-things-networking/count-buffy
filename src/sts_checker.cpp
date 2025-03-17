@@ -1,0 +1,162 @@
+//
+// Created by Amir Hossein Seyhani on 3/17/25.
+//
+
+#include "sts_checker.hpp"
+
+STSChecker::STSChecker(int n, int k, int c, int me, int md): n(n), k(k), c(c), me(me), md(md) {
+    I = slv.int_vectors(k, n, "I");
+    E = slv.int_vectors(k, n, "E");
+    D = slv.int_vectors(k, n, "D");
+    B = slv.bool_vectors(k, n, "B");
+    O = slv.int_vectors(k, n, "O");
+    S = slv.int_vectors(k, n, "S");
+    slv.add_bound(I, 0, me);
+    slv.add_bound(E, 0, me);
+    slv.add_bound(D, 0, me);
+    slv.add_bound(O, 0, md);
+    slv.add_bound(S, 0, c);
+}
+
+void STSChecker::check_wl_sat() {
+    slv.s.push();
+    slv.add(workload(n), "Workload");
+    slv.add(query(5), "Query");
+    slv.add(out(), "Out");
+    slv.add(trs(B, n), "Trs");
+    for (int j = 0; j < k; ++j) {
+        inputs(j);
+    }
+    slv.check_sat();
+    slv.s.pop();
+}
+
+void STSChecker::check_wl_not_qry_unsat() {
+    slv.s.push();
+    slv.add(workload(n), "Workload");
+    slv.add(!query(5), "Query");
+    slv.add(out(), "Out");
+    slv.add(trs(B, n), "Trs");
+    for (int j = 0; j < k; ++j) {
+        inputs(j);
+    }
+    slv.check_unsat();
+    slv.s.pop();
+}
+
+void STSChecker::bl_size(int j) {
+    auto Ej = E[j];
+    auto Bj = B[j];
+    auto Sj = S[j];
+    auto Oj = O[j];
+    slv.add(Sj[0] == 0, format("S[{}][0] == 0", j));
+    for (int i = 1; i < n; ++i) {
+        expr e = (implies(!Bj[i], (Sj[i] == slv.ctx.int_val(0))) & (Sj[i] == (Sj[i - 1] + Ej[i] - Oj[i])));
+        slv.add(e, format("S[{}][{}] == constr", j, i));
+    }
+}
+
+void STSChecker::enqs(int j) {
+    const auto Ej = E[j];
+    const auto Bj = B[j];
+    const auto Sj = S[j];
+    for (int i = 1; i < n; ++i) {
+        expr lt_cap = ((c - Sj[i - 1]) >= Ej[i]);
+        expr blogged = (((Ej[i] > 0) || (Sj[i - 1] > 0)) == Bj[i]);
+        expr e = blogged && lt_cap;
+        slv.add(e, format("Enqs[{}][{}] = constr", j, i));
+    }
+}
+
+
+void STSChecker::drops(int j) {
+    auto Dj = D[j];
+    auto Ej = E[j];
+    auto Bj = B[j];
+    auto Sj = S[j];
+    for (int i = 1; i < n; ++i) {
+        auto e = (ite(Bj[i], implies(Dj[i] > 0, (Sj[i - 1] + Ej[i]) == c), Dj[i] == 0));
+        slv.add(e, format("Drops[{}][{}] = constr", j, i));
+    }
+}
+
+void STSChecker::enq_deq_sum(int j) {
+    auto Ij = I[j];
+    auto Ej = E[j];
+    auto Dj = D[j];
+    for (int i = 0; i < n; ++i) {
+        auto expr = (Ij[i] == (Ej[i] + Dj[i]));
+        slv.add(expr, format("Inp[{}][{}] = constr", j, i));
+    }
+}
+
+void STSChecker::inputs(const int j) {
+    bl_size(j);
+    enqs(j);
+    drops(j);
+    enq_deq_sum(j);
+    // s.add(bl_size(s.ctx, E[j], B[j], S[j], O[j]), format("bsize({})", j));
+    // s.add(enqs(s.ctx, E[j], B[j], S[j]), format("enqs({})", j));
+    // s.add(drops(s.ctx, D[j], E[j], B[j], S[j]), format("drops({})", j));
+    // s.add(inputs(s.ctx, I[j], E[j], D[j]), format("inps({})", j));
+}
+
+
+expr STSChecker::workload(int n) {
+    expr res = slv.ctx.bool_val(true);
+    for (int i = 0; i < n; ++i) {
+        res = res && (I[0][i] + I[1][i]) > 0;
+        res = res && (I[2][i] > 0);
+    }
+    return res;
+}
+
+expr STSChecker::out(const ev &bv, const ev &ov) {
+    expr res = slv.ctx.bool_val(true);
+    expr not_until = slv.ctx.bool_val(true);
+    for (int i = 0; i < k; ++i) {
+        res = res && ite(not_until && bv[i], ov[i] == slv.ctx.int_val(1), ov[i] == slv.ctx.int_val(0));
+        not_until = not_until && (!bv[i]);
+    }
+    return res;
+}
+
+expr STSChecker::trs(const evv &B, int n) {
+    expr res = slv.ctx.bool_val(true);
+    for (int i = 0; i < n - 1; ++i) {
+        ev const &b = get_buf_vec_at_i(B, i);
+        ev const &bp = get_buf_vec_at_i(B, i + 1);
+        for (int j = 0; j < k; ++j) {
+            for (int k = j + 1; k < k; ++k) {
+                res = res && (implies(b[j], implies(b[k], bp[k])));
+            }
+        }
+    }
+    return res;
+}
+
+expr STSChecker::out() {
+    expr res = slv.ctx.bool_val(true);
+    // for (int j = 0; j < K; ++j) {
+    //     for (int i = 0; i < N; ++i) {
+    //         res = res & !B[j][i];
+    //     }
+    // }
+    for (int i = 0; i < n; ++i) {
+        res = res && out(get_buf_vec_at_i(B, i), get_buf_vec_at_i(O, i));
+    }
+    return res;
+}
+
+expr STSChecker::query(const int m) {
+    expr res = slv.ctx.bool_val(false);
+    for (int i = 0; i < n - m; ++i) {
+        expr part = slv.ctx.bool_val(true);
+        for (int j = 0; j < m; ++j) {
+            part = part && B[2][i + j];
+            part = part && (O[2][i + j] == 0);
+        }
+        res = res || part;
+    }
+    return res;
+}

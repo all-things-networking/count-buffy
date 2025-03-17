@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+project(DFA)
+file(GLOB SRC_FILES src/*.cpp)
+file(GLOB HPP_FILES src/*.hpp)
+add_executable(DFA main.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(DFA PRIVATE /usr/local/include)
+target_link_directories(DFA PRIVATE /usr/local/lib)
+target_link_libraries(DFA PRIVATE z3)
+
