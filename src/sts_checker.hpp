@@ -17,7 +17,7 @@ public:
     evv B;
     evv S;
     evv O;
-    evv L;
+    evv C;
     int n;
     int k;
     int c;
@@ -54,7 +54,7 @@ public:
 
     virtual expr query(int m) = 0;
 
-    void print(model m);
+    void print(model m) const;
 };
 
 

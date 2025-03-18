@@ -1,7 +1,3 @@
-//
-// Created by Amir Hossein Seyhani on 3/17/25.
-//
-
 #include "sts_checker.hpp"
 #include "lib.hpp"
 
@@ -13,12 +9,12 @@ STSChecker::STSChecker(const int n, const int k, const int c, const int me, cons
     B = slv.bool_vectors(k, n, "B");
     S = slv.bool_vectors(k, n, "S");
     O = slv.int_vectors(k, n, "O");
-    L = slv.int_vectors(k, n, "L");
+    C = slv.int_vectors(k, n, "C");
     slv.add_bound(I, 0, me);
     slv.add_bound(E, 0, me);
     slv.add_bound(D, 0, me);
     slv.add_bound(O, 0, md);
-    slv.add_bound(L, 0, c);
+    slv.add_bound(C, 0, c);
 }
 
 model STSChecker::check_wl_sat() {
@@ -51,11 +47,11 @@ void STSChecker::check_wl_not_qry_unsat() {
 void STSChecker::bl_size(int j) {
     const auto Ej = E[j];
     const auto Bj = B[j];
-    const auto Lj = L[j];
+    const auto Cj = C[j];
     const auto Oj = O[j];
-    slv.add(Lj[0] == 0, format("S[{}][0] == 0", j));
+    slv.add(Cj[0] == 0, format("S[{}][0] == 0", j));
     for (int i = 1; i < n; ++i) {
-        expr e = (implies(!Bj[i], (Lj[i] == slv.ctx.int_val(0))) & (Lj[i] == (Lj[i - 1] + Ej[i] - Oj[i])));
+        expr e = (implies(!Bj[i], (Cj[i] == slv.ctx.int_val(0))) & (Cj[i] == (Cj[i - 1] + Ej[i] - Oj[i])));
         slv.add(e, format("S[{}][{}] == constr", j, i));
     }
 }
@@ -63,10 +59,10 @@ void STSChecker::bl_size(int j) {
 void STSChecker::enqs(int j) {
     const auto Ej = E[j];
     const auto Bj = B[j];
-    const auto Lj = L[j];
+    const auto Cj = C[j];
     for (int i = 1; i < n; ++i) {
-        expr lt_cap = ((c - Lj[i - 1]) >= Ej[i]);
-        expr blogged = (((Ej[i] > 0) || (Lj[i - 1] > 0)) == Bj[i]);
+        expr lt_cap = ((c - Cj[i - 1]) >= Ej[i]);
+        expr blogged = (((Ej[i] > 0) || (Cj[i - 1] > 0)) == Bj[i]);
         expr e = blogged && lt_cap;
         slv.add(e, format("Enqs[{}][{}] = constr", j, i));
     }
@@ -77,9 +73,9 @@ void STSChecker::drops(int j) {
     const auto Dj = D[j];
     const auto Ej = E[j];
     const auto Bj = B[j];
-    const auto Lj = L[j];
+    const auto Cj = C[j];
     for (int i = 1; i < n; ++i) {
-        auto e = (ite(Bj[i], implies(Dj[i] > 0, (Lj[i - 1] + Ej[i]) == c), Dj[i] == 0));
+        auto e = (ite(Bj[i], implies(Dj[i] > 0, (Cj[i - 1] + Ej[i]) == c), Dj[i] == 0));
         slv.add(e, format("Drops[{}][{}] = constr", j, i));
     }
 }
@@ -113,7 +109,7 @@ void STSChecker::trs() {
     }
 }
 
-void STSChecker::print(model m) {
+void STSChecker::print(model m) const {
     cout << "I:" << endl;
     ::print(I, m);
     cout << "E:" << endl;
@@ -124,8 +120,8 @@ void STSChecker::print(model m) {
     ::print(B, m);
     cout << "S:" << endl;
     ::print(S, m);
-    cout << "L:" << endl;
-    ::print(S, m);
+    cout << "C:" << endl;
+    ::print(C, m);
     cout << "O:" << endl;
     ::print(O, m);
 }
