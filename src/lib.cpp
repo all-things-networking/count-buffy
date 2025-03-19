@@ -4,88 +4,116 @@
 
 #include "lib.hpp"
 
-ev &get_buf_vec_at_i(evv const &V, int i) {
-    int k = V.size();
-    vector<expr> *v = new vector<expr>[k];
+evv &get_buf_vec_at_i(evvv const &vvv, int i) {
+    int k = vvv.size();
+    auto v = new vector<vector<expr> >();
     for (int j = 0; j < k; ++j) {
-        v->push_back(V[j][i]);
+        v->push_back(vvv[j][i]);
     }
     return *v;
 }
 
-
-vector<int> eval(const ev &v, const model &m) {
-    auto *result = new vector<int>[v.size()];
-    for (const auto &e: v)
-        result->push_back(m.eval(e));
-    return *result;
+ev &get_buf_vec_at_i(evv const &vv, int i) {
+    int k = vv.size();
+    auto v = new vector<expr>();
+    for (int j = 0; j < k; ++j) {
+        v->push_back(vv[j][i]);
+    }
+    return *v;
 }
 
-
-vector<vector<int> > eval(const evv &vv, const model &m) {
-    auto *result = new vector<vector<int> >[vv.size()];
-    for (const auto &v: vv)
-        result->push_back(eval(v, m));
-    return *result;
-}
-
-
-ostream &operator<<(ostream &os, const vector<int> &v) {
-    for (const auto &i: v)
-        os << i << " ";
-    os << endl;
-    return os;
-}
-
-ostream &operator<<(ostream &os, const vector<vector<int> > &vv) {
-    for (const auto &v: vv)
-        os << v << endl;
-    return os;
-}
-
-void print(const evv &vv, const model &m) {
-    for (const auto &v: vv) {
+stringstream str(const ev &v, const model &m) {
+    stringstream ss;
+    if (v.size() <= 1) {
+        ss << m.eval(v[0]);
+    } else {
+        ss << "<";
         for (const auto &e: v) {
-            // int x = (int) m.eval(e);
-            // int x = m.eval(e);
             auto x = m.eval(e);
-            cout << x << ", ";
-
-            // if (x.get_sort().is_bool()) {
-            //     if (x.bool_value()) {
-            //         cout << 1 << ",";
-            //     } else {
-            //         cout << 0 << ",";
-            //     }
-            //     cout << x << ",";
-            // } else {
-            //     cout << x << ", ";
-            // }
+            ss << x << ",";
         }
-        cout << endl;
+        ss << ">";
     }
-    cout << endl;
+    return ss;
 }
 
-void print(const ev &v, const model &m) {
-    for (const auto &e: v) {
-        // int x = (int) m.eval(e);
-        // int x = m.eval(e);
-        auto x = m.eval(e);
-        cout << x << ", ";
-
-        // if (x.get_sort().is_bool()) {
-        //     if (x.bool_value()) {
-        //         cout << 1 << ",";
-        //     } else {
-        //         cout << 0 << ",";
-        //     }
-        //     cout << x << ",";
-        // } else {
-        //     cout << x << ", ";
-        // }
-    }
-    cout << endl;
+stringstream str(const evv &v, const model &m, string sep) {
+    stringstream ss;
+    for (const auto &e: v)
+        ss << str(e, m).str() << sep;
+    return ss;
 }
 
+stringstream str(const evvv &vvv, const model &m) {
+    stringstream ss;
+    for (const auto &vv: vvv) {
+        ss << str(vv, m, ", ").str() << endl;
+    }
+    ss << endl;
+    return ss;
+}
 
+expr sum(const ev &v) {
+    return sum(v, v.size());
+}
+
+expr sum(const ev &v, const int limit) {
+    expr s = v[0];
+    for (int i = 1; i < limit; ++i) {
+        s = s + v[i];
+    }
+    return s;
+}
+
+expr sum(const evv &vv) {
+    return sum(vv, vv.size());
+}
+
+expr sum(const evv &vv, const int limit) {
+    expr s = sum(vv[0]);
+    for (int i = 1; i < limit; ++i) {
+        s = s + sum(vv[i]);
+    }
+    return s;
+}
+
+expr operator==(const ev &v, const int n) {
+    return sum(v) == n;
+}
+
+ev operator+(const ev &l, const ev &r) {
+    ev result;
+    for (int i = 0; i < l.size(); ++i) {
+        result.push_back(l[i] + r[i]);
+    }
+    return result;
+}
+
+ev operator-(const ev &l, const ev &r) {
+    ev result;
+    for (int i = 0; i < l.size(); ++i) {
+        result.push_back(l[i] - r[i]);
+    }
+    return result;
+}
+
+expr operator==(const ev &l, const ev &r) {
+    expr result = (l[0] == r[0]);
+    for (int i = 1; i < l.size(); ++i) {
+        result = result && (l[i] == r[i]);
+    }
+    return result;
+}
+
+expr operator<=(const ev &l, const int n) {
+    return sum(l) <= n;
+}
+
+expr operator>(const ev &l, const int n) {
+    return sum(l) > n;
+}
+
+vector<int> &bar() {
+    const auto x = new vector<int>(42);
+    return *x;
+}

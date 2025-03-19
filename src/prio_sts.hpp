@@ -8,15 +8,15 @@
 
 class PrioSTS final : public STSChecker {
 public:
-    PrioSTS(int n, int k, int c, int me, int md);
+    PrioSTS(int n, int m, int k, int c, int me, int md);
 
     expr workload() override;
 
-    expr out(const ev &bv, const ev &sv, const ev &ov) override;
+    expr out(const ev &bv, const ev &sv, const evv &ov) override;
 
     expr trs(ev const &b, ev const &s, ev const &bp, ev const &sp) override;
 
-    expr query(int m) override;
+    expr query(int p) override;
 
     expr init(const ev &b0, const ev &s0) override;
 };
