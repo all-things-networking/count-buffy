@@ -10,19 +10,15 @@
 
 class RRChecker final : public STSChecker {
 public:
-    RRChecker(const int n, const int k, const int c, const int me, const int md)
-        : STSChecker(n, k, c, me, md) {
+    RRChecker(const int n, const int m, const int k, const int c, const int me, const int md)
+        : STSChecker(n, m, k, c, me, md) {
     }
 
     expr workload() override;
 
-    expr out(const ev &bv, const ev &sv, const ev &ov) override;
+    expr out(const ev &bv, const ev &sv, const evv &ov) override;
 
     expr trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
-
-    expr sum(const ev &v);
-
-    expr sum(const ev &v, int limit);
 
     expr query(int m) override;
 

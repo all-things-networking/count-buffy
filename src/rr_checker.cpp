@@ -3,34 +3,35 @@
 //
 
 #include "rr_checker.hpp"
+#include "lib.hpp"
 
 expr RRChecker::workload() {
     expr base_wl = slv.ctx.bool_val(true);
     int period = 5;
-    int recur = n / period;
+    int recur = timesteps / period;
     int rate = period - 1;
-    for (int j = 0; j < k; ++j) {
-        for (int i = 1; i <= recur; ++i) {
-            base_wl = base_wl && (sum(I[j], i * period) >= rate);
+    for (int i = 0; i < num_bufs; ++i) {
+        for (int j = 1; j <= recur; ++j) {
+            base_wl = base_wl && (sum(I[i], j * period) >= rate);
         }
     }
     base_wl = base_wl && (sum(I[1]) >= sum(I[2]));
     expr wl = slv.ctx.bool_val(true);
-    for (int j = 0; j < k; ++j) {
-        if (j == 2) {
-            for (int i = 0; i < period; ++i) {
-                wl = wl & (I[j][i] > 0);
+    for (int i = 0; i < num_bufs; ++i) {
+        if (i == 2) {
+            for (int j = 0; j < period; ++j) {
+                wl = wl & (I[i][j] > 0);
             }
         } else {
-            wl = wl & (sum(I[j], period - 1) == 0);
+            wl = wl & (sum(I[i], period - 1) == 0);
         }
     }
     return base_wl && wl;
 }
 
-expr RRChecker::out(const ev &bv, const ev &sv, const ev &ov) {
+expr RRChecker::out(const ev &bv, const ev &sv, const evv &ov) {
     expr res = slv.ctx.bool_val(true);
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < num_bufs; ++i) {
         res = res && ite(bv[i] && sv[i], ov[i] == 1, ov[i] == 0);
     }
     return res;
@@ -38,7 +39,7 @@ expr RRChecker::out(const ev &bv, const ev &sv, const ev &ov) {
 
 expr RRChecker::init(const ev &b0, const ev &s0) {
     expr res = slv.ctx.bool_val(true);
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < num_bufs; ++i) {
         if (i == 0)
             res = res && s0[i];
         else
@@ -49,15 +50,15 @@ expr RRChecker::init(const ev &b0, const ev &s0) {
 
 
 expr RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
-    assert(b.size() == k);
-    assert(s.size() == k);
+    assert(b.size() == num_bufs);
+    assert(s.size() == num_bufs);
 
     expr next_turn = slv.ctx.bool_val(true);
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < num_bufs; ++i) {
         expr not_until = slv.ctx.bool_val(true);
         expr first_backlog = slv.ctx.bool_val(true);
-        for (int l = 1; l <= k; ++l) {
-            const int j = (i + l) % k;
+        for (int l = 1; l <= num_bufs; ++l) {
+            const int j = (i + l) % num_bufs;
             first_backlog = first_backlog && ite(not_until && bp[j], sp[j], !sp[j]);
             not_until = not_until && !bp[j];
         }
@@ -65,25 +66,10 @@ expr RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
     }
 
     expr max_deq = slv.ctx.bool_val(true);
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < num_bufs; ++i) {
         max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
     }
     return next_turn && max_deq;
-}
-
-expr RRChecker::sum(const ev &v) {
-    expr res = slv.ctx.int_val(0);
-    for (const auto &e: v)
-        res = res + e;
-    return res;
-}
-
-expr RRChecker::sum(const ev &v, int limit) {
-    expr res = slv.ctx.int_val(0);
-    for (int i = 0; i < limit; ++i) {
-        res = res + v[i];
-    }
-    return res;
 }
 
 expr RRChecker::query(int m) {
