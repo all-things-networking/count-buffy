@@ -10,8 +10,8 @@
 
 class RRChecker final : public STSChecker {
 public:
-    RRChecker(const int n, const int m, const int k, const int c, const int me, const int md)
-        : STSChecker(n, m, k, c, me, md) {
+    RRChecker(const string &var_prefix, const int n, const int m, const int k, const int c, const int me, const int md)
+        : STSChecker(var_prefix, n, m, k, c, me, md) {
     }
 
     expr workload() override;

@@ -11,6 +11,7 @@ public:
     virtual ~STSChecker() = default;
 
     SmtSolver slv;
+    string var_prefix;
     evvv I;
     evvv E;
     evvv D;
@@ -25,7 +26,7 @@ public:
     int me;
     int md;
 
-    STSChecker(int n, int m, int k, int c, int me, int md);
+    STSChecker(string var_prefix, int n, int m, int k, int c, int me, int md);
 
     model check_wl_sat();
 

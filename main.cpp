@@ -23,10 +23,10 @@ int main(const int argc, const char *argv[]) {
     string name = argv[5];
     STSChecker *sts;
     if (name == "prio") {
-        sts = new PrioSTS(n, m, k, c, MAX_ENQ, MAX_DEQ);
+        sts = new PrioSTS("prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
         cout << "PRIO" << endl;
     } else if (name == "rr") {
-        sts = new RRChecker(n, m, k, c, MAX_ENQ, MAX_DEQ);
+        sts = new RRChecker("rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
         cout << "RR" << endl;
     }
     auto mod = sts->check_wl_sat();

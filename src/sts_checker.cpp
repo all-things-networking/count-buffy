@@ -1,16 +1,19 @@
 #include "sts_checker.hpp"
+
+#include <utility>
 #include "lib.hpp"
 
-STSChecker::STSChecker(const int n, const int m, const int k, const int c, const int me, const int md): num_bufs(n), timesteps(m),
-    pkt_types(k), c(c), me(me),
-    md(md) {
-    I = slv.ivvv(n, m, k, "I");
-    E = slv.ivvv(n, m, k, "E");
-    D = slv.ivvv(n, m, k, "D");
-    B = slv.bvv(n, m, "B");
-    S = slv.bvv(n, m, "S");
-    O = slv.ivvv(n, m, k, "O");
-    C = slv.ivvv(n, m, k, "C");
+STSChecker::STSChecker(string var_prefix, const int n, const int m, const int k, const int c, const int me,
+                       const int md): var_prefix(move(var_prefix)), num_bufs(n),
+                                      timesteps(m), pkt_types(k), c(c), me(me),
+                                      md(md) {
+    I = slv.ivvv(n, m, k, format("I_{}", var_prefix));
+    E = slv.ivvv(n, m, k, format("E_{}", var_prefix));
+    D = slv.ivvv(n, m, k, format("D_{}", var_prefix));
+    B = slv.bvv(n, m, format("B_{}", var_prefix));
+    S = slv.bvv(n, m, format("S_{}", var_prefix));
+    O = slv.ivvv(n, m, k, format("O_{}", var_prefix));
+    C = slv.ivvv(n, m, k, format("C_{}", var_prefix));
     slv.add_bound(I, 0, me);
     slv.add_bound(E, 0, me);
     slv.add_bound(D, 0, me);

@@ -1,6 +1,7 @@
 #include "prio_sts.hpp"
 
-PrioSTS::PrioSTS(int n, int m, int k, int c, int me, int md): STSChecker(n, m, k, c, me, md) {
+PrioSTS::PrioSTS(const string &var_prefix, int n, int m, int k, int c, int me, int md): STSChecker(
+    var_prefix, n, m, k, c, me, md) {
 }
 
 expr PrioSTS::workload() {
