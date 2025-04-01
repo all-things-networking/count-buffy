@@ -3,8 +3,9 @@
 #include <utility>
 #include "lib.hpp"
 
-STSChecker::STSChecker(string var_prefix, const int n, const int m, const int k, const int c, const int me,
-                       const int md): var_prefix(move(var_prefix)), num_bufs(n),
+STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int m, const int k, const int c,
+                       const int me,
+                       const int md): slv(slv), var_prefix(move(var_prefix)), num_bufs(n),
                                       timesteps(m), pkt_types(k), c(c), me(me),
                                       md(md) {
     I = slv.ivvv(n, m, k, format("I_{}", var_prefix));

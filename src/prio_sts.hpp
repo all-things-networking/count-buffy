@@ -8,7 +8,7 @@
 
 class PrioSTS final : public STSChecker {
 public:
-    PrioSTS(const string &var_prefix,int n, int m, int k, int c, int me, int md);
+    PrioSTS(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 
     expr workload() override;
 

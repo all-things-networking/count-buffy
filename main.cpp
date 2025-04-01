@@ -22,11 +22,12 @@ int main(const int argc, const char *argv[]) {
     int c = atoi(argv[4]);
     string name = argv[5];
     STSChecker *sts;
+    SmtSolver slv;
     if (name == "prio") {
-        sts = new PrioSTS("prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
+        sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
         cout << "PRIO" << endl;
     } else if (name == "rr") {
-        sts = new RRChecker("rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
+        sts = new RRChecker(slv, "rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
         cout << "RR" << endl;
     }
     auto mod = sts->check_wl_sat();
