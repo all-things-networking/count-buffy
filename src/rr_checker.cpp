@@ -29,7 +29,7 @@ expr RRChecker::workload() {
     return base_wl && wl;
 }
 
-expr RRChecker::out(const ev &bv, const ev &sv, const evv &ov) {
+expr RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         res = res && ite(bv[i] && sv[i], ov[i] == 1, ov[i] == 0);

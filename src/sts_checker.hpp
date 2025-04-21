@@ -12,13 +12,13 @@ public:
 
     SmtSolver &slv;
     string var_prefix;
-    evvv I;
-    evvv E;
-    evvv D;
-    evv B;
-    evv S;
-    evvv O;
-    evvv C;
+    ev3 I;
+    ev3 E;
+    ev3 D;
+    ev2 B;
+    ev2 S;
+    ev3 O;
+    ev3 C;
     int num_bufs;
     int timesteps;
     int pkt_types;
@@ -31,6 +31,8 @@ public:
     model check_wl_sat();
 
     void check_wl_not_qry_unsat();
+
+    void add_constrs();
 
     void bl_size(int i);
 
@@ -46,7 +48,7 @@ public:
 
     virtual expr workload() = 0;
 
-    virtual expr out(const ev &bv, const ev &sv, const evv &ov) = 0;
+    virtual expr out(const ev &bv, const ev &sv, const ev2 &ov) = 0;
 
     virtual expr trs(ev const &b, ev const &s, ev const &bp, ev const &sp) = 0;
 

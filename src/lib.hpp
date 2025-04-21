@@ -15,16 +15,17 @@ using namespace std;
 using namespace z3;
 
 typedef vector<expr> ev;
-typedef vector<vector<expr> > evv;
-typedef vector<evv> evvv;
+typedef vector<ev> ev2;
+typedef vector<ev2> ev3;
+typedef vector<ev3> ev4;
 
-evv &get_buf_vec_at_i(evvv const &vvv, int i);
+ev2 &get_buf_vec_at_i(ev3 const &vvv, int i);
 
-ev &get_buf_vec_at_i(evv const &vv, int i);
+ev &get_buf_vec_at_i(ev2 const &vv, int i);
 
-vector<int> eval(const evv &v, const model &m);
+vector<int> eval(const ev2 &v, const model &m);
 
-vector<vector<int> > eval(const evvv &vv, const model &m);
+vector<vector<int> > eval(const ev3 &vv, const model &m);
 
 ostream &operator<<(ostream &os, const vector<int> &v);
 
@@ -32,17 +33,17 @@ ostream &operator<<(ostream &os, const vector<vector<int> > &vv);
 
 stringstream str(const ev &v, const model &m);
 
-stringstream str(const evv &vv, const model &m, string sep);
+stringstream str(const ev2 &vv, const model &m, string sep);
 
-stringstream str(const evvv &vvv, const model &m);
+stringstream str(const ev3 &vvv, const model &m);
 
 expr sum(const ev &v);
 
 expr sum(const ev &v, int limit);
 
-expr sum(const evv &vv);
+expr sum(const ev2 &vv);
 
-expr sum(const evv &vv, int limit);
+expr sum(const ev2 &vv, int limit);
 
 expr operator==(const ev &v, int n);
 

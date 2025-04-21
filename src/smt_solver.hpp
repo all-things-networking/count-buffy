@@ -24,19 +24,19 @@ class SmtSolver {
 
     ev &bv(int k, const string &name);
 
-    evv &bvv(int m, int k, const string &name);
+    ev2 &bvv(int m, int k, const string &name);
 
-    evvv &bvvv(int n, int m, int k, const string &name);
+    ev3 &bvvv(int n, int m, int k, const string &name);
 
     ev &iv(int k, const string &name);
 
-    evv &ivv(int m, int k, const string &name);
+    ev2 &ivv(int m, int k, const string &name);
 
-    evvv &ivvv(int n,int m, int k, const string &name);
+    ev3 &ivvv(int n,int m, int k, const string &name);
 
     void add(const expr &e, const string &name);
 
-    void add_bound(const evvv &vv, int lower, int upper);
+    void add_bound(const ev3 &vv, int lower, int upper);
 
     model check_sat();
 

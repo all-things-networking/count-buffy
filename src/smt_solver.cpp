@@ -21,7 +21,7 @@ ev &SmtSolver::bv(const int k, const string &name) {
     return *result;
 }
 
-evv &SmtSolver::bvv(const int m, const int k, const string &name) {
+ev2 &SmtSolver::bvv(const int m, const int k, const string &name) {
     auto *result = new vector<ev>[m];
     for (int i = 0; i < m; i++) {
         string vname = name;
@@ -32,8 +32,8 @@ evv &SmtSolver::bvv(const int m, const int k, const string &name) {
     return *result;
 }
 
-evvv &SmtSolver::bvvv(const int n, const int m, const int k, const string &name) {
-    auto *result = new vector<evv>[n];
+ev3 &SmtSolver::bvvv(const int n, const int m, const int k, const string &name) {
+    auto *result = new vector<ev2>[n];
     for (int i = 0; i < m; i++) {
         string vname = name;
         vname += to_string(i);
@@ -54,7 +54,7 @@ ev &SmtSolver::iv(const int k, const string &name) {
     return *result;
 }
 
-evv &SmtSolver::ivv(const int m, const int k, const string &name) {
+ev2 &SmtSolver::ivv(const int m, const int k, const string &name) {
     const auto result = new vector<ev>[m];
     for (int i = 0; i < m; i++) {
         string vname = name;
@@ -65,8 +65,8 @@ evv &SmtSolver::ivv(const int m, const int k, const string &name) {
     return *result;
 }
 
-evvv &SmtSolver::ivvv(const int n, const int m, const int k, const string &name) {
-    const auto result = new vector<evv>[k];
+ev3 &SmtSolver::ivvv(const int n, const int m, const int k, const string &name) {
+    const auto result = new vector<ev2>[k];
     for (int i = 0; i < n; i++) {
         string vname = name;
         vname += "_" + to_string(i);
@@ -101,7 +101,7 @@ void SmtSolver::check_unsat() {
     }
 }
 
-void SmtSolver::add_bound(const evvv &vvv, const int lower, const int upper) {
+void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
     for (const auto &vv: vvv) {
         for (const auto &v: vv) {
             for (const auto &e: v) {

@@ -4,7 +4,7 @@
 
 #include "lib.hpp"
 
-evv &get_buf_vec_at_i(evvv const &vvv, int i) {
+ev2 &get_buf_vec_at_i(ev3 const &vvv, int i) {
     int k = vvv.size();
     auto v = new vector<vector<expr> >();
     for (int j = 0; j < k; ++j) {
@@ -13,7 +13,7 @@ evv &get_buf_vec_at_i(evvv const &vvv, int i) {
     return *v;
 }
 
-ev &get_buf_vec_at_i(evv const &vv, int i) {
+ev &get_buf_vec_at_i(ev2 const &vv, int i) {
     int k = vv.size();
     auto v = new vector<expr>();
     for (int j = 0; j < k; ++j) {
@@ -37,14 +37,14 @@ stringstream str(const ev &v, const model &m) {
     return ss;
 }
 
-stringstream str(const evv &v, const model &m, string sep) {
+stringstream str(const ev2 &v, const model &m, string sep) {
     stringstream ss;
     for (const auto &e: v)
         ss << str(e, m).str() << sep;
     return ss;
 }
 
-stringstream str(const evvv &vvv, const model &m) {
+stringstream str(const ev3 &vvv, const model &m) {
     stringstream ss;
     for (const auto &vv: vvv) {
         ss << str(vv, m, ", ").str() << endl;
@@ -65,11 +65,11 @@ expr sum(const ev &v, const int limit) {
     return s;
 }
 
-expr sum(const evv &vv) {
+expr sum(const ev2 &vv) {
     return sum(vv, vv.size());
 }
 
-expr sum(const evv &vv, const int limit) {
+expr sum(const ev2 &vv, const int limit) {
     expr s = sum(vv[0]);
     for (int i = 1; i < limit; ++i) {
         s = s + sum(vv[i]);

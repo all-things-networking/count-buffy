@@ -13,7 +13,7 @@ expr PrioSTS::workload() {
     return res;
 }
 
-expr PrioSTS::out(const ev &bv, const ev &sv, const evv &ov) {
+expr PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     expr not_until = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {

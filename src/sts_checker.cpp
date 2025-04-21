@@ -1,7 +1,14 @@
 #include "sts_checker.hpp"
 
-#include <utility>
 #include "lib.hpp"
+
+void STSChecker::add_constrs() {
+    slv.add(out(), "Out");
+    trs();
+    for (int i = 0; i < num_bufs; ++i) {
+        inputs(i);
+    }
+}
 
 STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int m, const int k, const int c,
                        const int me,
@@ -21,6 +28,7 @@ STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int
     slv.add_bound(O, 0, md);
     slv.add_bound(C, 0, c);
 }
+
 
 model STSChecker::check_wl_sat() {
     slv.s.push();

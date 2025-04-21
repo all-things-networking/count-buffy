@@ -12,7 +12,7 @@ public:
 
     expr workload() override;
 
-    expr out(const ev &bv, const ev &sv, const evv &ov) override;
+    expr out(const ev &bv, const ev &sv, const ev2 &ov) override;
 
     expr trs(ev const &b, ev const &s, ev const &bp, ev const &sp) override;
 
