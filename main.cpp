@@ -3,15 +3,34 @@
 #include"z3++.h"
 #include "src/prio_sts.hpp"
 #include "src/rr_checker.hpp"
+#include "src/trivial_sts.hpp"
 
 using namespace std;
 using namespace z3;
 
-constexpr int MAX_ENQ = 4;
+constexpr int MAX_ENQ = 10;
 constexpr int MAX_DEQ = 1;
 
 constexpr int INP_CALC = 3;
 
+void bar(const vector<int> &v) {
+}
+
+expr constr(SmtSolver &slv, const ev2 &ev, const vector<int> &v) {
+    assert(ev.size() == v.size());
+    auto res = slv.ctx.bool_val(true);
+    for (int i = 0; i < ev.size(); ++i)
+        res = res & (ev[i] == v[i]);
+    return res;
+}
+
+expr constr(SmtSolver &slv, const ev2 &ev, const vector<vector<int> > &v) {
+    assert(ev.size() == v.size());
+    auto res = slv.ctx.bool_val(true);
+    for (int i = 0; i < ev.size(); ++i)
+        res = res & (ev[i] == v[i]);
+    return res;
+}
 
 int main(const int argc, const char *argv[]) {
     if (argc < 5)
@@ -23,6 +42,43 @@ int main(const int argc, const char *argv[]) {
     string name = argv[5];
     STSChecker *sts;
     SmtSolver slv;
+    // sts = new TrivialSts(slv, "trv", 1, 12, 2, 4, MAX_ENQ, MAX_DEQ);
+    // auto e = sts->base_constrs();
+    // e = e & constr(slv, sts->E[0], {
+    //                    {0, 0},
+    //                    {2, 0},
+    //                    {0, 2},
+    //                    {0, 0},
+    //                    {2, 0},
+    //                    {0, 0},
+    //                    {1, 0},
+    //                    {0, 0},
+    //                    {1, 0},
+    //                    {0, 0},
+    //                    {0, 0},
+    //                    {0, 0}
+    //                });
+    //
+    //
+    // e = e & constr(slv, sts->D[0], {
+    //                    {0, 0},
+    //                    {0, 0},
+    //                    {0, 0},
+    //                    {2, 0},
+    //                    {0, 0},
+    //                    {2, 0},
+    //                    {0, 0},
+    //                    {1, 0},
+    //                    {0, 0},
+    //                    {1, 0},
+    //                    {0, 0},
+    //                    {0, 0}
+    //                });
+    // e = e & constr(slv, sts->E[0], {4, 0, 0, 0});
+
+    // auto mdl = sts->check_sat(e);
+    // sts->print(mdl);
+
     if (name == "prio") {
         sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
         cout << "PRIO" << endl;
@@ -31,7 +87,7 @@ int main(const int argc, const char *argv[]) {
         cout << "RR" << endl;
     }
     auto mod = sts->check_wl_sat();
-    // sts->print(mod);
+    sts->print(mod);
     sts->check_wl_not_qry_unsat();
     return 0;
 }

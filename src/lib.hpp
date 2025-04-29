@@ -53,9 +53,12 @@ ev operator-(const ev &l, const ev &r);
 
 expr operator==(const ev &l, const ev &r);
 
-expr operator<=(const ev &l, const int n);
+expr operator<=(const ev &l, int n);
 
-expr operator>(const ev &l, const int n);
+expr operator<=(const ev &l, const ev &r);
 
+expr operator>(const ev &l, int n);
+
+expr operator==(const ev &v, const vector<int> &n);
 
 #endif //LIB_HPP

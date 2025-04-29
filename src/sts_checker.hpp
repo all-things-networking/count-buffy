@@ -19,6 +19,9 @@ public:
     ev2 S;
     ev3 O;
     ev3 C;
+    ev3 wnd_enq;
+    ev3 wnd_enq_nxt;
+    ev3 wnd_out;
     int num_bufs;
     int timesteps;
     int pkt_types;
@@ -34,15 +37,19 @@ public:
 
     void add_constrs();
 
-    void bl_size(int i);
+    expr base_constrs();
 
-    void enqs(int i);
+    expr bl_size(int i) const;
 
-    void drops(int i);
+    expr enqs(int i) const;
 
-    void enq_deq_sum(int i);
+    expr drops(int i);
 
-    void inputs(int i);
+    expr enq_deq_sum(int i);
+
+    expr inputs(int i);
+
+    void winds(int i);
 
     expr out();
 
@@ -54,9 +61,11 @@ public:
 
     virtual expr init(ev const &b0, ev const &s0) = 0;
 
-    void trs();
+    expr trs();
 
     virtual expr query(int m) = 0;
+
+    model check_sat(const expr &e) const;
 
     void print(model m) const;
 };

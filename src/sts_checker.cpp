@@ -4,10 +4,18 @@
 
 void STSChecker::add_constrs() {
     slv.add(out(), "Out");
-    trs();
+    slv.add(trs(), "Trs");
     for (int i = 0; i < num_bufs; ++i) {
         inputs(i);
     }
+}
+
+expr STSChecker::base_constrs() {
+    auto res = slv.ctx.bool_val(true);
+    for (int i = 0; i < num_bufs; ++i) {
+        res = res && inputs(i);
+    }
+    return res;
 }
 
 STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int m, const int k, const int c,
@@ -35,9 +43,9 @@ model STSChecker::check_wl_sat() {
     slv.add(workload(), "Workload");
     slv.add(query(5), "Query");
     slv.add(out(), "Out");
-    trs();
+    slv.add(trs(), "Trs");
     for (int i = 0; i < num_bufs; ++i) {
-        inputs(i);
+        slv.add(inputs(i), format("Inputs[{}]", i));
     }
     auto m = slv.check_sat();
     slv.s.pop();
@@ -49,80 +57,117 @@ void STSChecker::check_wl_not_qry_unsat() {
     slv.add(workload(), "Workload");
     slv.add(!query(5), "Query");
     slv.add(out(), "Out");
-    trs();
+    slv.add(trs(), "Trs");
     for (int i = 0; i < num_bufs; ++i) {
-        inputs(i);
+        slv.add(inputs(i), format("Inputs[{}]", i));
     }
     slv.check_unsat();
     slv.s.pop();
 }
 
-void STSChecker::bl_size(int i) {
+expr STSChecker::bl_size(const int i) const {
     const auto Ei = E[i];
     const auto Bi = B[i];
     const auto Ci = C[i];
     const auto Oi = O[i];
-    slv.add(Ci[0] == 0, format("S[{}][0] == 0", i));
+    auto res = Ci[0] == 0;
     for (int j = 1; j < timesteps; ++j) {
         expr e = (implies(!Bi[j], (Ci[j] == 0)) & (Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j])));
-        slv.add(e, format("S[{}][{}] == constr", i, j));
+        res = res & e;
     }
+    return res;
 }
 
-void STSChecker::enqs(int i) {
+expr STSChecker::enqs(const int i) const {
     const auto Ei = E[i];
     const auto Bi = B[i];
     const auto Ci = C[i];
+    auto res = (Ei[0] <= c) & (Bi[0] == (Ei[0] > 0));
     for (int j = 1; j < timesteps; ++j) {
         expr lt_cap = ((Ei[j] + Ci[j - 1]) <= c);
         expr blogged = (((Ei[j] + Ci[j - 1]) > 0) == Bi[j]);
         expr e = blogged && lt_cap;
-        slv.add(e, format("Enqs[{}][{}] = constr", i, j));
+        res = res & e;
     }
+    return res;
 }
 
 
-void STSChecker::drops(int i) {
+expr STSChecker::drops(int i) {
     const auto Di = D[i];
     const auto Ei = E[i];
     const auto Bi = B[i];
     const auto Ci = C[i];
+    auto res = ite(Bi[0], implies(Di[0] > 0, (Ei[0]) == c), Di[0] == 0);
     for (int j = 1; j < timesteps; ++j) {
         auto e = (ite(Bi[j], implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == c), Di[j] == 0));
-        slv.add(e, format("Drops[{}][{}] = constr", i, j));
+        res = res & e;
     }
+    return res;
 }
 
-void STSChecker::enq_deq_sum(int i) {
+expr STSChecker::enq_deq_sum(int i) {
     const auto Ii = I[i];
     const auto Ei = E[i];
     const auto Di = D[i];
-    for (int j = 0; j < timesteps; ++j) {
+    auto res = (Ii[0] == (Ei[0] + Di[0]));
+    for (int j = 1; j < timesteps; ++j) {
         auto expr = (Ii[j] == (Ei[j] + Di[j]));
         slv.add(expr, format("Inp[{}][{}] = constr", i, j));
     }
+    return res;
 }
 
-void STSChecker::inputs(const int i) {
-    bl_size(i);
-    enqs(i);
-    drops(i);
-    enq_deq_sum(i);
+expr STSChecker::inputs(const int i) {
+    auto res = bl_size(i);
+    res = res & enqs(i);
+    res = res & drops(i);
+    res = res & enq_deq_sum(i);
+    return res;
 }
 
-void STSChecker::trs() {
+void STSChecker::winds(int i) {
+    auto res = wnd_enq[i][0] == E[i][0];
+    res = res & wnd_out[i][0] == 0;
+    res = res & wnd_enq_nxt[i][0] == 0;
+    for (int j = 1; j < timesteps; ++j) {
+        res = res & (wnd_out[i][j] <= wnd_enq[i][j]);
+        res = res & (wnd_out[i][j] == wnd_out[i][j - 1] + O[i][j]);
+        auto overflow = (wnd_enq[i][j - 1] + E[i][j]) > c;
+        res = res & (implies(~overflow, wnd_enq[i][j] == wnd_enq[i][j - 1] + E[i][j]));
+        auto pred = (wnd_enq[i][j - 1] + wnd_enq_nxt[i][j] == wnd_enq[i][j - 1] + E[i][j])
+                    & (wnd_enq[i][j - 1] <= wnd_enq[i][j])
+                    & (wnd_enq[i][j] == c);
+        res = res & (implies(overflow & wnd_enq_nxt[i][j] == 0, pred));
+        res = res & implies(wnd_enq_nxt[i][j - 1] > 0,
+                            wnd_enq_nxt[i][j] == wnd_enq_nxt[i][j - 1] + E[i][j] & wnd_enq[i][j] == wnd_enq[i][j - 1]);
+        res = res & implies(wnd_out[i][j - 1] == wnd_enq[i][j - 1],
+                            wnd_out[i][j] == 0 & wnd_enq[i][j] == wnd_enq_nxt[i][j] & wnd_enq_nxt[i][j] == 0);
+    }
+    slv.add(res, format("Winds[{}][0] == constr", i));
+}
+
+expr STSChecker::trs() {
     get_buf_vec_at_i(B, 0);
     ev const &b0 = get_buf_vec_at_i(B, 0);
     ev const &s0 = get_buf_vec_at_i(S, 0);
-    slv.add(init(b0, s0), "Init");
+    auto res = init(b0, s0);
     for (int i = 0; i < timesteps - 1; ++i) {
         ev const &b = get_buf_vec_at_i(B, i);
         ev const &bp = get_buf_vec_at_i(B, i + 1);
         ev const &s = get_buf_vec_at_i(S, i);
         ev const &sp = get_buf_vec_at_i(S, i + 1);
-        auto expr = trs(b, s, bp, sp);
-        slv.add(expr, format("Trs({},{})", i, i + 1));
+        res = res & trs(b, s, bp, sp);
     }
+    return res;
+}
+
+model STSChecker::check_sat(const expr &e) const {
+    slv.s.push();
+    slv.add(e, "Constraints");
+    auto m = slv.check_sat();
+    slv.s.pop();
+    return m;
 }
 
 void STSChecker::print(model m) const {

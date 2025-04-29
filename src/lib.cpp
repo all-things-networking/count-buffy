@@ -81,6 +81,14 @@ expr operator==(const ev &v, const int n) {
     return sum(v) == n;
 }
 
+expr operator==(const ev &v, const vector<int> &n) {
+    expr result = (v[0] == n[0]);
+    for (int i = 1; i < v.size(); ++i) {
+        result = result && (v[i] == n[i]);
+    }
+    return result;
+}
+
 ev operator+(const ev &l, const ev &r) {
     ev result;
     for (int i = 0; i < l.size(); ++i) {
@@ -107,6 +115,14 @@ expr operator==(const ev &l, const ev &r) {
 
 expr operator<=(const ev &l, const int n) {
     return sum(l) <= n;
+}
+
+expr operator<=(const ev &l, const ev &r) {
+    expr result = (l[0] <= r[0]);
+    for (int i = 1; i < l.size(); ++i) {
+        result = result && (l[i] <= r[i]);
+    }
+    return result;
 }
 
 expr operator>(const ev &l, const int n) {
