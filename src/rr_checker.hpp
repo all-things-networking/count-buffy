@@ -15,15 +15,15 @@ public:
         : STSChecker(slv, var_prefix, n, m, k, c, me, md) {
     }
 
-    expr workload() override;
+    vector<NamedExp> workload() override;
 
-    expr out(const ev &bv, const ev &sv, const ev2 &ov) override;
+    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
 
-    expr trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
+    vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
 
-    expr query(int m) override;
+    vector<NamedExp> query(int m) override;
 
-    expr init(ev const &b0, ev const &s0) override;
+    vector<NamedExp> init(ev const &b0, ev const &s0) override;
 };
 
 

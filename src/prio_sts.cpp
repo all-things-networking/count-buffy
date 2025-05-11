@@ -4,37 +4,45 @@ PrioSTS::PrioSTS(SmtSolver &slv, const string &var_prefix, int n, int m, int k, 
     var_prefix, n, m, k, c, me, md) {
 }
 
-expr PrioSTS::workload() {
-    expr res = slv.ctx.bool_val(true);
-    for (int i = 0; i < timesteps; ++i) {
-        res = res && (I[0][i] + I[1][i]) > 0;
-        res = res && (I[2][i] > 0);
+vector<NamedExp> PrioSTS::workload() {
+    vector<NamedExp> res;
+    for (int i = 0; i < timesteps - 1; ++i)
+        res.emplace_back((E[0][i] + E[1][i]) > 0, format("wl_s(0,1)[{}]", i));
+
+    expr b2_constr = E[2][0] > 0;
+    for (int i = 0; i < timesteps - 5; ++i) {
+        b2_constr = b2_constr || E[2][0] > 0;
     }
+    res.emplace_back(b2_constr, "wl_2[0]");
     return res;
 }
 
-expr PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
+    vector<NamedExp> rv;
     expr res = slv.ctx.bool_val(true);
     expr not_until = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         res = res && ite(not_until && bv[i], ov[i] == 1, ov[i] == 0);
         not_until = not_until && (!bv[i]);
+        rv.emplace_back(res, format("out[{}]", i));
     }
-    return res;
+    return rv;
 }
 
-expr PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
+vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
+    vector<NamedExp> rv;
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         for (int l = i + 1; l < num_bufs; ++l) {
             res = res && (implies(b[i], implies(b[l], bp[l])));
+            rv.emplace_back(res, format("trs[{}][{}]", i, l));
         }
     }
-    return res;
+    return rv;
 }
 
 
-expr PrioSTS::query(const int p) {
+vector<NamedExp> PrioSTS::query(const int p) {
     expr res = slv.ctx.bool_val(false);
     for (int i = 0; i < timesteps - p; ++i) {
         expr part = slv.ctx.bool_val(true);
@@ -44,9 +52,9 @@ expr PrioSTS::query(const int p) {
         }
         res = res || part;
     }
-    return res;
+    return {NamedExp(res, "query")};
 }
 
-expr PrioSTS::init(const ev &b0, const ev &s0) {
-    return slv.ctx.bool_val(true);
+vector<NamedExp> PrioSTS::init(const ev &b0, const ev &s0) {
+    return {NamedExp(slv.ctx.bool_val(true), "init")};
 }

@@ -79,15 +79,68 @@ int main(const int argc, const char *argv[]) {
     // auto mdl = sts->check_sat(e);
     // sts->print(mdl);
 
-    if (name == "prio") {
-        sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
-        cout << "PRIO" << endl;
-    } else if (name == "rr") {
-        sts = new RRChecker(slv, "rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
-        cout << "RR" << endl;
-    }
-    auto mod = sts->check_wl_sat();
-    sts->print(mod);
-    sts->check_wl_not_qry_unsat();
+    // if (name == "prio") {
+    //     sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
+    //     cout << "PRIO" << endl;
+    // } else if (name == "rr") {
+    //     sts = new RRChecker(slv, "rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
+    //     cout << "RR" << endl;
+    // }
+    sts = new TrivialSts(slv, "trv", 12);
+    auto nes = sts->base_constrs();
+    expr e = constr(slv, sts->E[0], {
+                        {0, 0},
+                        {2, 0},
+                        {0, 2},
+                        {0, 0},
+                        {2, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0}
+                    });
+    nes.emplace_back(e, "e");
+    // expr o = constr(slv, sts->O[0], {
+                        // {0, 0},
+                        // {0, 0},
+                        // {2, 0},
+                        // {0, 2},
+                        // {0, 0},
+                        // {2, 0},
+                        // {0, 0},
+                        // {1, 0},
+                        // {0, 0},
+                        // {1, 0},
+                        // {1, 0},
+                        // {0, 0}
+                    // });
+
+    expr o = constr(slv, sts->O[0], {
+    {0, 0},
+    {0, 0},
+    {0, 0},
+    {2, 0},
+    {0, 0},
+    {2, 0},
+    {0, 0},
+    {1, 0},
+    {0, 0},
+    {1, 0},
+    {1, 2},
+    {0, 0}
+    });
+    nes.emplace_back(o, "o");
+
+    // expr e = constr(slv, sts->E[0], {{2, 2}, {0, 0}, {2, 0}, {0, 0}, {0, 0}, {0, 0}});
+    // nes.emplace_back(e, "e");
+    // expr o = constr(slv, sts->O[0], {{0, 0}, {2, 0}, {0, 0}, {0, 2}, {2, 0}, {0, 0}});
+    // nes.emplace_back(o, "o");
+    auto mdl = sts->check_sat(nes);
+    // auto mod = sts->check_wl_sat();
+    sts->print(mdl);
+    // sts->check_wl_not_qry_unsat();
     return 0;
 }

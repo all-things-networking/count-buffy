@@ -1,21 +1,29 @@
 #include "trivial_sts.hpp"
+#include "lib.hpp"
 
-expr TrivialSts::init(const ev &b0, const ev &s0) {
-    return slv.ctx.bool_val(true);
+
+vector<NamedExp> TrivialSts::workload() {
+    expr base_wl = slv.ctx.bool_val(true);
+    return {NamedExp(base_wl, "workload")};
 }
 
-expr TrivialSts::query(const int p) {
-    return slv.ctx.bool_val(true);
+vector<NamedExp> TrivialSts::out(const ev &bv, const ev &sv, const ev2 &ov) {
+    expr res = slv.ctx.bool_val(true);
+    return {NamedExp(res, "out")};
 }
 
-expr TrivialSts::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
-    return slv.ctx.bool_val(true);
+vector<NamedExp> TrivialSts::init(const ev &b0, const ev &s0) {
+    expr res = slv.ctx.bool_val(true);
+    return {NamedExp(res, "init")};
 }
 
-expr TrivialSts::out(const ev &bv, const ev &sv, const ev2 &ov) {
-    return slv.ctx.bool_val(true);
+
+vector<NamedExp> TrivialSts::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
+    expr res = slv.ctx.bool_val(true);
+    return {NamedExp(res, "trs")};
 }
 
-expr TrivialSts::workload() {
-    return slv.ctx.bool_val(true);
+vector<NamedExp> TrivialSts::query(int m) {
+    expr res = slv.ctx.bool_val(true);
+    return {NamedExp(res, "query")};
 }

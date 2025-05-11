@@ -10,13 +10,14 @@
 #include<vector>
 #include"z3++.h"
 #include "lib.hpp"
+#include "named_expr.hpp"
 
 using namespace std;
 using namespace z3;
 
 
 class SmtSolver {
-    public:
+public:
     context ctx;
     solver s;
 
@@ -32,9 +33,13 @@ class SmtSolver {
 
     ev2 &ivv(int m, int k, const string &name);
 
-    ev3 &ivvv(int n,int m, int k, const string &name);
+    ev3 &ivvv(int n, int m, int k, const string &name);
 
     void add(const expr &e, const string &name);
+
+    void add(const NamedExp &ne);
+
+    void add(const vector<NamedExp> &nes);
 
     void add_bound(const ev3 &vv, int lower, int upper);
 

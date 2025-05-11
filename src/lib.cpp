@@ -4,6 +4,8 @@
 
 #include "lib.hpp"
 
+#include "named_expr.hpp"
+
 ev2 &get_buf_vec_at_i(ev3 const &vvv, int i) {
     int k = vvv.size();
     auto v = new vector<vector<expr> >();
@@ -113,6 +115,10 @@ expr operator==(const ev &l, const ev &r) {
     return result;
 }
 
+expr operator<(const ev &l, const int n) {
+    return sum(l) < n;
+}
+
 expr operator<=(const ev &l, const int n) {
     return sum(l) <= n;
 }
@@ -132,4 +138,12 @@ expr operator>(const ev &l, const int n) {
 vector<int> &bar() {
     const auto x = new vector<int>(42);
     return *x;
+}
+
+void extend(vector<NamedExp> &source, const vector<NamedExp> &extra, const string &suffix) {
+    for (const auto &item: extra) {
+        NamedExp copy = item;
+        copy.name = copy.name + suffix;
+        source.push_back(move(copy));
+    }
 }

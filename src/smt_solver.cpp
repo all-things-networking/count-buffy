@@ -76,9 +76,20 @@ ev3 &SmtSolver::ivvv(const int n, const int m, const int k, const string &name) 
     return *result;
 }
 
-void SmtSolver::add(const expr &e, const string &name) {
-    s.add(e, name.c_str());
+void SmtSolver::add(const NamedExp &ne) {
+    try {
+        s.add(ne.e, ne.name.c_str());
+    } catch (z3::exception &e) {
+        cout << "Error: " << e.msg() << " " << ne.name << endl;
+        throw;
+    }
 }
+
+void SmtSolver::add(const vector<NamedExp> &nes) {
+    for (const auto &ne: nes)
+        add(ne);
+}
+
 
 model SmtSolver::check_sat() {
     switch (s.check()) {

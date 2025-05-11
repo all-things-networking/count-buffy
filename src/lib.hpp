@@ -9,6 +9,8 @@
 #include <iostream>
 #include <sstream>
 #include<vector>
+
+#include "named_expr.hpp"
 #include"z3++.h"
 
 using namespace std;
@@ -53,6 +55,8 @@ ev operator-(const ev &l, const ev &r);
 
 expr operator==(const ev &l, const ev &r);
 
+expr operator<(const ev &l, const int n);
+
 expr operator<=(const ev &l, int n);
 
 expr operator<=(const ev &l, const ev &r);
@@ -60,5 +64,12 @@ expr operator<=(const ev &l, const ev &r);
 expr operator>(const ev &l, int n);
 
 expr operator==(const ev &v, const vector<int> &n);
+
+template<typename T>
+void extend(vector<T> &source, const vector<T> &extra) {
+    source.insert(source.end(), extra.begin(), extra.end());
+}
+
+void extend(vector<NamedExp> &source, const vector<NamedExp> &extra, const string &suffix);
 
 #endif //LIB_HPP

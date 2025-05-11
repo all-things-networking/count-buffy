@@ -1,11 +1,7 @@
-//
-// Created by Amir Hossein Seyhani on 3/17/25.
-//
-
 #include "rr_checker.hpp"
 #include "lib.hpp"
 
-expr RRChecker::workload() {
+vector<NamedExp> RRChecker::workload() {
     expr base_wl = slv.ctx.bool_val(true);
     int period = 5;
     int recur = timesteps / period;
@@ -26,18 +22,18 @@ expr RRChecker::workload() {
             wl = wl & (sum(I[i], period - 1) == 0);
         }
     }
-    return base_wl && wl;
+    return {NamedExp(base_wl && wl, "workload")};
 }
 
-expr RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         res = res && ite(bv[i] && sv[i], ov[i] == 1, ov[i] == 0);
     }
-    return res;
+    return {NamedExp(res, "out")};
 }
 
-expr RRChecker::init(const ev &b0, const ev &s0) {
+vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         if (i == 0)
@@ -45,11 +41,11 @@ expr RRChecker::init(const ev &b0, const ev &s0) {
         else
             res = res && !s0[i];
     }
-    return res;
+    return {NamedExp(res, "init")};
 }
 
 
-expr RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
+vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
     assert(b.size() == num_bufs);
     assert(s.size() == num_bufs);
 
@@ -69,11 +65,11 @@ expr RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
     for (int i = 0; i < num_bufs; ++i) {
         max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
     }
-    return next_turn && max_deq;
+    return {NamedExp(next_turn && max_deq, "trs")};
 }
 
-expr RRChecker::query(int m) {
+vector<NamedExp> RRChecker::query(int m) {
     expr res = slv.ctx.bool_val(true);
     res = (sum(O[2]) - sum(O[1])) >= 3;
-    return res;
+    return {NamedExp(res, "query")};
 }

@@ -1,26 +1,28 @@
 //
-// Created by Amir Hossein Seyhani on 4/22/25.
+// Created by Amir Hossein Seyhani on 5/5/25.
 //
-#ifndef TRIVIAL_HPP
-#define TRIVIAL_HPP
 
+#ifndef TRIVIAL_STS_HPP
+#define TRIVIAL_STS_HPP
 #include "sts_checker.hpp"
 
-class TrivialSts : public STSChecker {
+
+class TrivialSts final : public STSChecker {
 public:
-    TrivialSts(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md): STSChecker(
-        slv, var_prefix, n, m, k, c, me, md) {
+    TrivialSts(SmtSolver &slv, const string &var_prefix, const int m)
+        : STSChecker(slv, var_prefix, 1, m, 2, 4, 4, 4) {
     }
 
-    expr workload() override;
+    vector<NamedExp> workload() override;
 
-    expr out(const ev &bv, const ev &sv, const ev2 &ov) override;
+    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
 
-    expr trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
+    vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
 
-    expr init(const ev &b0, const ev &s0) override;
+    vector<NamedExp> query(int m) override;
 
-    expr query(int m) override;
+    vector<NamedExp> init(ev const &b0, ev const &s0) override;
 };
 
-#endif //TRIVIAL_HPP
+
+#endif //TRIVIAL_STS_HPP
