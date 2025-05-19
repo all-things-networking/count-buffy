@@ -14,6 +14,10 @@ public:
     vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp) override;
 
     vector<NamedExp> init(ev const &b0, ev const &s0) override;
+
+    vector<NamedExp> query(int m) override;
+
+    vector<NamedExp> workload() override;
 };
 
 

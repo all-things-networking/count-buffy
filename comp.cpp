@@ -16,77 +16,125 @@ const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 2;
 const int C = 10;
 
-expr query(SmtSolver &slv, ev3 &out) {
-    expr res = slv.ctx.bool_val(true);
+vector<NamedExp> query(SmtSolver &slv, ev3 &out) {
+    vector<NamedExp> res;
     ev2 ov = out[0];
     ev s = ov[0];
     for (int i = 1; i < ov.size(); ++i) {
         s = s + ov[i];
     }
-    res = res & ((s[1] - s[0]) >= 3);
+    return {{(s[1] - s[0]) >= 3, "Query"}};
+}
+
+vector<NamedExp> wl(const ev4 &ins) {
+    vector<NamedExp> res;
+    for (int l = 0; l < ins.size(); ++l) {
+        for (int i = 0; i < RR_IN_BUFS; ++i) {
+            for (int t = 0; t < ins[0][i].size(); ++t) {
+                if (l == 0) {
+                    res.emplace_back(ins[l][i][t] >= 1, format("sum(wl[{}][{}][{}]) >= 1", l, i, t));
+                } else {
+                    if (i == 0) {
+                        res.emplace_back(ins[l][i][t] == 1, format("sum(wl[{}][{}][{}]) == 0", l, i, t));
+                    } else {
+                        res.emplace_back(ins[l][i][t] >= 1, format("sum(wl[{}][{}][{}]) >= 1", l, i, t));
+                    }
+                }
+            }
+        }
+    }
     return res;
 }
 
-expr wl(SmtSolver &slv, ev4 &ins) {
-    expr res = slv.ctx.bool_val(true);
-
-    int num_rrs = ins.size();
-    int num_in_bufs = ins[0].size();
-    int timesteps = ins[0][0].size();
-
-    for (int k = 0; k < num_in_bufs; ++k) {
-        for (int i = 0; i < timesteps; ++i) {
-            auto s = ins[0][0][i];
-            for (int j = 1; j < num_rrs; ++j) {
-                s = s + ins[j][0][i];
-            }
-            for (int kp = 0; kp < num_in_bufs; ++kp) {
-                if (k == kp)
-                    res = res & (s[kp] >= i);
-                else
-                    res = res & (s[kp] == 0);
-            }
+vector<NamedExp> base_wl(const ev4 &ins) {
+    vector<NamedExp> res;
+    const int num_rrs = ins.size();
+    const int total_time = ins[0][0].size();
+    for (int l = 0; l < num_rrs; ++l) {
+        for (int t = 0; t < total_time; ++t) {
+            res.emplace_back(ins[l][0][t][0] > 0, format("I[{}][{}][{}][{}] > 0", l, 0, t, 0));
+            res.emplace_back(ins[l][0][t][1] == 0, format("I[{}][{}][{}][{}] == 0", l, 0, t, 1));
+            res.emplace_back(ins[l][1][t][0] == 0, format("I[{}][{}][{}][{}] == 0", l, 1, t, 0));
+            // res.emplace_back(ins[l][1][t][1] > 0, format("I[{}][{}][{}][{}] > 0", l, 1, t, 1));
+            if (l == 0)
+                res.emplace_back(ins[l][1][t][1] > 0, format("I[{}][{}][{}][{}] > 0", l, 1, t, 1));
+            else
+                res.emplace_back(ins[l][1][t][1] == 0, format("I[{}][{}][{}][{}] == 0", l, 1, t, 1));
         }
     }
 
-    for (int i = 0; i < ins.size(); ++i) {
+    // const int num_rrs = ins.size();
+    // const int total_time = ins[0][0].size();
+    // for (int i = 0; i < RR_IN_BUFS; ++i) {
+    //     for (int t = 0; t < total_time; ++t) {
+    //         auto s = ins[0][i][t];
+    //         for (int l = 1; l < num_rrs; ++l)
+    //             s = s + ins[l][i][t];
+    //         for (int k = 0; k < PKT_TYPES; ++k) {
+    //             if (i == k)
+    //                 res.emplace_back(s[k] >= 1, format("sum(base_wl[*][{}][{}][{}]) >= 1", i, t, k));
+    //             else
+    //                 res.emplace_back(s[k] == 0, format("sum(base_wl[*][{}][{}][{}]) == 0", i, t, k));
+    //         }
+    //     }
+    // }
+    return res;
+}
+
+class Composed {
+    STSChecker *rr1;
+    STSChecker *rr2;
+    STSChecker *rr3;
+    STSChecker *rr4;
+    STSChecker *merger;
+    SmtSolver slv;
+
+public:
+    Composed() {
+        rr1 = new RRChecker(slv, "rr1", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr2 = new RRChecker(slv, "rr2", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr3 = new RRChecker(slv, "rr3", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr4 = new RRChecker(slv, "rr4", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        merger = new Merger(slv, "mg", 4, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
     }
-}
 
-expr base_wl(SmtSolver &slv, ev3 &v3, set<int> ids) {
-}
+    model run() {
+        slv.s.push();
+        vector<STSChecker *> rrs = {rr1, rr2, rr3, rr4};
+        for (int i = 0; i < rrs.size(); ++i) {
+            auto constrs = rrs[i]->base_constrs();
+            slv.add(constrs);
+            slv.add({
+                rrs[i]->O[0] + rrs[i]->O[1] == merger->I[i], format("mg.I[{}] == rr{}.O[0] + rr{}.O[1])", i, i, i)
+            });
+        }
+        slv.add(merger->base_constrs());
+        // slv.add({merger->I[0][0] > 0, "bar"});
+        // slv.add({rr1->I[0][0][0] > 1, "baz"});
+        auto ins = {rr1->I, rr2->I, rr3->I, rr4->I};
 
-expr base_wl(SmtSolver &slv, ev4 &ins) {
-    expr res = slv.ctx.bool_val(true);
+        auto base_wl_constrs = base_wl(ins);
+        slv.add(base_wl_constrs);
+        // slv.add(query(slv, rr1->O));
+        // slv.add(wl(ins));
 
-    int num_rrs = ins.size();
-    int num_in_bufs = ins[0].size();
-    int timesteps = ins[0][0].size();
+        auto m = slv.check_sat();
+        slv.s.pop();
+        return m;
+    }
 
-    for (int k = 0; k < num_in_bufs; ++k) {
-        for (int i = 0; i < timesteps; ++i) {
-            auto s = ins[0][0][i];
-            for (int j = 1; j < num_rrs; ++j) {
-                s = s + ins[j][0][i];
-            }
-            for (int kp = 0; kp < num_in_bufs; ++kp) {
-                if (k == kp)
-                    res = res & (s[kp] >= i);
-                else
-                    res = res & (s[kp] == 0);
-            }
+    void print(model m) {
+        for (auto rr: {rr1, rr2, rr3, rr4}) {
+            cout << rr->var_prefix << endl;
+            cout << "E:" << endl << str(rr1->E, m).str();
+            cout << "O:" << endl << str(rr1->O, m).str();
+            cout << "---------------" << endl;
         }
     }
-
-    for (int i = 0; i < ins.size(); ++i) {
-    }
-}
+};
 
 int main(const int argc, const char *argv[]) {
-    SmtSolver slv;
-    STSChecker *rr1 = new RRChecker(slv, "rr1", N, RR_IN_BUFS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-    STSChecker *rr2 = new RRChecker(slv, "rr2", N, RR_IN_BUFS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-    STSChecker *rr3 = new RRChecker(slv, "rr3", N, RR_IN_BUFS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-    STSChecker *rr4 = new RRChecker(slv, "rr4", N, RR_IN_BUFS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-    // STSChecker *merger = new Merger(slv, "mg", N, RR_IN_BUFS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
+    Composed c;
+    auto m = c.run();
+    c.print(m);
 }

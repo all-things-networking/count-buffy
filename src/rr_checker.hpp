@@ -10,7 +10,7 @@
 
 class RRChecker final : public STSChecker {
 public:
-    RRChecker(SmtSolver &slv, const string &var_prefix, const int n, const int m, const int k, const int c,
+    RRChecker(SmtSolver &slv, const string& var_prefix, const int n, const int m, const int k, const int c,
               const int me, const int md)
         : STSChecker(slv, var_prefix, n, m, k, c, me, md) {
     }

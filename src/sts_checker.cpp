@@ -2,6 +2,8 @@
 
 #include "lib.hpp"
 
+# define FLUSH false
+
 void STSChecker::add_constrs() {
     // slv.add(out(), "Out");
     // slv.add(trs(), "Trs");
@@ -16,10 +18,20 @@ vector<NamedExp> STSChecker::base_constrs() {
         auto ie = inputs(i);
         res.insert(res.end(), ie.begin(), ie.end());
     }
-    return res;
+    auto trs_constrs = trs();
+    res.insert(res.end(), trs_constrs.begin(), trs_constrs.end());
+    auto out_constrs = out();
+    res.insert(res.end(), out_constrs.begin(), out_constrs.end());
+
+    vector<NamedExp> unique_constrs;
+    unique_constrs.reserve(res.size());
+    for (auto &ne: res) {
+        unique_constrs.push_back(ne.prefix(this->var_prefix));
+    }
+    return unique_constrs;
 }
 
-STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int m, const int k, const int c,
+STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, const int m, const int k, const int c,
                        const int me,
                        const int md): slv(slv), var_prefix(move(var_prefix)), num_bufs(n),
                                       timesteps(m), pkt_types(k), c(c), me(me),
@@ -55,13 +67,13 @@ STSChecker::STSChecker(SmtSolver &slv, string var_prefix, const int n, const int
 model STSChecker::check_wl_sat() {
     slv.s.push();
     slv.add(workload());
-    // slv.add(query(5));
-    // slv.add(out());
-    // slv.add(trs());
-    // for (int i = 0; i < num_bufs; ++i) {
-    // auto nes = inputs(i);
-    // slv.add(nes);
-    // }
+    slv.add(query(5));
+    slv.add(out());
+    slv.add(trs());
+    for (int i = 0; i < num_bufs; ++i) {
+        auto nes = inputs(i);
+        slv.add(nes);
+    }
     auto m = slv.check_sat();
     slv.s.pop();
     return m;
@@ -69,13 +81,13 @@ model STSChecker::check_wl_sat() {
 
 void STSChecker::check_wl_not_qry_unsat() {
     slv.s.push();
-    // slv.add(workload(), "Workload");
-    // slv.add(!query(5), "Query");
-    // slv.add(out(), "Out");
-    // slv.add(trs(), "Trs");
-    // for (int i = 0; i < num_bufs; ++i) {
-    // slv.add(inputs(i), format("Inputs[{}]", i));
-    // }
+    slv.add(workload());
+    slv.add(merge(query(5), "Query").negate());
+    slv.add(out());
+    slv.add(trs());
+    for (int i = 0; i < num_bufs; ++i) {
+        slv.add(inputs(i));
+    }
     slv.check_unsat();
     slv.s.pop();
 }
@@ -94,8 +106,10 @@ vector<NamedExp> STSChecker::bl_size(const int i) const {
         ne = NamedExp(Bi[j] == (Ci[j - 1] + Ei[j] > 0), format("B[{}]@{} (backlog consistency)", i, j));
         res.push_back(ne);
     }
-    ne = NamedExp((!Bi[timesteps - 1]), format("B[{}]@T", i));
-    res.push_back(ne);
+    if constexpr (FLUSH) {
+        ne = NamedExp((!Bi[timesteps - 1]), format("B[{}]@T", i));
+        res.push_back(ne);
+    }
     return res;
 }
 

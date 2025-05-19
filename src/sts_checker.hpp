@@ -33,7 +33,7 @@ public:
     int me;
     int md;
 
-    STSChecker(SmtSolver &slv, string var_prefix, int n, int m, int k, int c, int me, int md);
+    STSChecker(SmtSolver &slv, const string& var_prefix, int n, int m, int k, int c, int me, int md);
 
     model check_wl_sat();
 
@@ -65,9 +65,9 @@ public:
 
     virtual vector<NamedExp> init(ev const &b0, ev const &s0) = 0;
 
-    vector<NamedExp> trs();
-
     virtual vector<NamedExp> query(int m) = 0;
+
+    vector<NamedExp> trs();
 
     model check_sat(const vector<NamedExp> &v) const;
 

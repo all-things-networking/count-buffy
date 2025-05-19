@@ -123,6 +123,29 @@ expr operator<=(const ev &l, const int n) {
     return sum(l) <= n;
 }
 
+ev2 operator+(const ev2 &l, const ev2 &r) {
+    ev2 result;
+    for (int i = 0; i < l.size(); ++i) {
+        result.push_back(l[i] + r[i]);
+    }
+    return result;
+}
+
+NamedExp merge(const vector<NamedExp> &nes, const string &name) {
+    auto expr = nes[0].e;
+    for (int i = 1; i < nes.size(); ++i)
+        expr = expr && nes[i].e;
+    return {expr, name};
+}
+
+expr operator==(const ev2 &l, const ev2 &r) {
+    auto res = l[0] == r[0];
+    for (int i = 1; i < l.size(); ++i) {
+        res = res && (l[i] == r[i]);
+    }
+    return res;
+}
+
 expr operator<=(const ev &l, const ev &r) {
     expr result = (l[0] <= r[0]);
     for (int i = 1; i < l.size(); ++i) {
@@ -133,6 +156,10 @@ expr operator<=(const ev &l, const ev &r) {
 
 expr operator>(const ev &l, const int n) {
     return sum(l) > n;
+}
+
+expr operator>=(const ev &l, const int n) {
+    return sum(l) >= n;
 }
 
 vector<int> &bar() {

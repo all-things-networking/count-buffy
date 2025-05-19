@@ -51,9 +51,13 @@ expr operator==(const ev &v, int n);
 
 ev operator+(const ev &l, const ev &r);
 
+ev2 operator+(const ev2 &l, const ev2 &r);
+
 ev operator-(const ev &l, const ev &r);
 
 expr operator==(const ev &l, const ev &r);
+
+expr operator==(const ev2 &l, const ev2 &r);
 
 expr operator<(const ev &l, const int n);
 
@@ -63,7 +67,11 @@ expr operator<=(const ev &l, const ev &r);
 
 expr operator>(const ev &l, int n);
 
+expr operator>=(const ev &l, int n);
+
 expr operator==(const ev &v, const vector<int> &n);
+
+NamedExp merge(const vector<NamedExp> &nes, const string &name);
 
 template<typename T>
 void extend(vector<T> &source, const vector<T> &extra) {

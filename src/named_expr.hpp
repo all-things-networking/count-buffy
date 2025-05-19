@@ -18,6 +18,10 @@ public:
 
     NamedExp(expr e, string name): e(std::move(e)), name(move(name)) {
     }
+
+    NamedExp prefix(const string &prefix);
+
+    NamedExp negate();
 };
 
 
