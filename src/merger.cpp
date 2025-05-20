@@ -7,8 +7,8 @@
 
 vector<NamedExp> Merger::out(const ev &bv, const ev &sv, const ev2 &ov) {
     vector<NamedExp> res;
-    // for (int i = 0; i < num_bufs; ++i)
-        // res.emplace_back(implies(bv[i], ov[i] == 1), format("out[{}]", i));
+    for (int i = 0; i < num_bufs; ++i)
+        res.emplace_back(implies(bv[i], ov[i] == 1), format("out[{}]", i));
     return res;
 }
 

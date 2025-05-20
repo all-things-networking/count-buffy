@@ -11,19 +11,17 @@ using namespace z3;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-const int N = 10;
+const int TIME_STEPS = 10;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 2;
 const int C = 10;
 
-vector<NamedExp> query(SmtSolver &slv, ev3 &out) {
+vector<NamedExp> query(SmtSolver &slv, ev2 &out) {
     vector<NamedExp> res;
-    ev2 ov = out[0];
-    ev s = ov[0];
-    for (int i = 1; i < ov.size(); ++i) {
-        s = s + ov[i];
-    }
-    return {{(s[1] - s[0]) >= 3, "Query"}};
+    ev s = out[0];
+    for (int i = 1; i < out.size(); ++i)
+        s = s + out[i];
+    return {{(s[0] - s[1]) >= 3, "Query"}};
 }
 
 vector<NamedExp> wl(const ev4 &ins) {
@@ -88,18 +86,21 @@ class Composed {
     STSChecker *rr4;
     STSChecker *merger;
     SmtSolver slv;
+    ev2 O;
 
 public:
     Composed() {
-        rr1 = new RRChecker(slv, "rr1", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-        rr2 = new RRChecker(slv, "rr2", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-        rr3 = new RRChecker(slv, "rr3", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-        rr4 = new RRChecker(slv, "rr4", RR_IN_BUFS, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-        merger = new Merger(slv, "mg", 4, N, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
+        rr1 = new RRChecker(slv, "rr1", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr2 = new RRChecker(slv, "rr2", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr3 = new RRChecker(slv, "rr3", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        rr4 = new RRChecker(slv, "rr4", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
+        merger = new Merger(slv, "mg", 4, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
+        O = merger->O[0] + merger->O[1] + merger->O[2] + merger->O[3];
     }
 
     model run() {
         slv.s.push();
+
         vector<STSChecker *> rrs = {rr1, rr2, rr3, rr4};
         for (int i = 0; i < rrs.size(); ++i) {
             auto constrs = rrs[i]->base_constrs();
@@ -115,10 +116,12 @@ public:
 
         auto base_wl_constrs = base_wl(ins);
         slv.add(base_wl_constrs);
-        // slv.add(query(slv, rr1->O));
-        // slv.add(wl(ins));
-
+        // slv.add({rr1->E[0][0] == 2, "x"});
+        // slv.add({rr2->E[0][0] == 3, "y"});
+        slv.add(query(slv, O));
+        // slv.add(merge(query(slv, O), "not query").negate());
         auto m = slv.check_sat();
+        // slv.add(wl(ins));
         slv.s.pop();
         return m;
     }
@@ -126,10 +129,14 @@ public:
     void print(model m) {
         for (auto rr: {rr1, rr2, rr3, rr4}) {
             cout << rr->var_prefix << endl;
-            cout << "E:" << endl << str(rr1->E, m).str();
-            cout << "O:" << endl << str(rr1->O, m).str();
+            cout << "E:" << endl << str(rr->E, m).str();
+            cout << "O:" << endl << str(rr->O, m).str();
             cout << "---------------" << endl;
         }
+        cout << merger->var_prefix << endl;
+        cout << "E:" << endl << str(merger->E, m).str();
+        cout << "O:" << endl << str(O, m, ",").str();
+        cout << "---------------" << endl;
     }
 };
 

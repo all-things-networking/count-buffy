@@ -61,6 +61,8 @@ expr operator==(const ev2 &l, const ev2 &r);
 
 expr operator<(const ev &l, const int n);
 
+expr operator<(const ev &l, const ev &r);
+
 expr operator<=(const ev &l, int n);
 
 expr operator<=(const ev &l, const ev &r);

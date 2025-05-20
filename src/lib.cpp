@@ -146,6 +146,14 @@ expr operator==(const ev2 &l, const ev2 &r) {
     return res;
 }
 
+expr operator<(const ev &l, const ev &r) {
+    expr result = (l[0] < r[0]);
+    for (int i = 1; i < l.size(); ++i) {
+        result = result && (l[i] < r[i]);
+    }
+    return result;
+}
+
 expr operator<=(const ev &l, const ev &r) {
     expr result = (l[0] <= r[0]);
     for (int i = 1; i < l.size(); ++i) {

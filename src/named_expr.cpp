@@ -5,7 +5,7 @@
 #include "named_expr.hpp"
 
 NamedExp NamedExp::prefix(const string &prefix) {
-    return {e, prefix + name};
+    return {e, prefix + "_" + name};
 }
 
 NamedExp NamedExp::negate() {
