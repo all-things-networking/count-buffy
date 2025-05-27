@@ -33,7 +33,7 @@ public:
     int me;
     int md;
 
-    STSChecker(SmtSolver &slv, const string& var_prefix, int n, int m, int k, int c, int me, int md);
+    STSChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 
     model check_wl_sat();
 
@@ -67,9 +67,17 @@ public:
 
     virtual vector<NamedExp> query(int m) = 0;
 
+    vector<NamedExp> to_uniqe(vector<NamedExp> &v) const;
+
+    vector<NamedExp> scheduler_constrs();
+
+    vector<NamedExp> input_constrs(int i);
+
     vector<NamedExp> trs();
 
     model check_sat(const vector<NamedExp> &v) const;
+
+    void check_unsat(const vector<NamedExp> &v) const;
 
     void print(model m) const;
 };

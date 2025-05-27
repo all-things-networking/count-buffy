@@ -4,9 +4,11 @@
 
 #include "smt_solver.hpp"
 
+#include <set>
+
 SmtSolver::SmtSolver(): s(ctx) {
     params p(ctx);
-    p.set("random_seed", 100u);
+    p.set("random_seed", 200u);
     s.set(p);
 }
 
@@ -94,8 +96,12 @@ void SmtSolver::add(const vector<NamedExp> &nes) {
 model SmtSolver::check_sat() {
     switch (s.check()) {
         case sat: cout << "Done!\n";
+            cout << s.statistics() << endl;
+            cout << "Num constrs: " << s.assertions().size() << endl;
             return s.get_model();
         default:
+            cout << s.statistics() << endl;
+            cout << "Num constrs: " << s.assertions().size() << endl;
             cout << "UNSAT Core:" << endl;
             cout << s.unsat_core() << endl;
             throw runtime_error("Model is not SAT!");
@@ -112,6 +118,7 @@ void SmtSolver::check_unsat() {
     }
 }
 
+
 void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
     for (const auto &vv: vvv) {
         for (const auto &v: vv) {
@@ -120,4 +127,21 @@ void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
             }
         }
     }
+}
+
+string SmtSolver::stats_str() {
+    stringstream ss;
+
+    ss << "z3 statistics: " << endl;
+    stats sts = s.statistics();
+    for (unsigned int i = 0; i < sts.size(); i++) {
+        ss << sts.key(i) << ": ";
+        if (sts.is_uint(i)) {
+            ss << sts.uint_value(i) << endl;
+        } else if (sts.is_double(i)) {
+            ss << sts.double_value(i) << endl;
+        }
+    }
+
+    return ss.str();
 }

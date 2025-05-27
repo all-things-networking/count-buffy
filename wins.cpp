@@ -32,60 +32,9 @@ expr constr(SmtSolver &slv, const ev2 &ev, const vector<vector<int> > &v) {
     return res;
 }
 
-int main(const int argc, const char *argv[]) {
-    if (argc < 5)
-        return 1;
-    int n = atoi(argv[1]);
-    int m = atoi(argv[2]);
-    int k = atoi(argv[3]);
-    int c = atoi(argv[4]);
-    string name = argv[5];
+void do_unsat() {
     STSChecker *sts;
     SmtSolver slv;
-    // sts = new TrivialSts(slv, "trv", 1, 12, 2, 4, MAX_ENQ, MAX_DEQ);
-    // auto e = sts->base_constrs();
-    // e = e & constr(slv, sts->E[0], {
-    //                    {0, 0},
-    //                    {2, 0},
-    //                    {0, 2},
-    //                    {0, 0},
-    //                    {2, 0},
-    //                    {0, 0},
-    //                    {1, 0},
-    //                    {0, 0},
-    //                    {1, 0},
-    //                    {0, 0},
-    //                    {0, 0},
-    //                    {0, 0}
-    //                });
-    //
-    //
-    // e = e & constr(slv, sts->D[0], {
-    //                    {0, 0},
-    //                    {0, 0},
-    //                    {0, 0},
-    //                    {2, 0},
-    //                    {0, 0},
-    //                    {2, 0},
-    //                    {0, 0},
-    //                    {1, 0},
-    //                    {0, 0},
-    //                    {1, 0},
-    //                    {0, 0},
-    //                    {0, 0}
-    //                });
-    // e = e & constr(slv, sts->E[0], {4, 0, 0, 0});
-
-    // auto mdl = sts->check_sat(e);
-    // sts->print(mdl);
-
-    // if (name == "prio") {
-    //     sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
-    //     cout << "PRIO" << endl;
-    // } else if (name == "rr") {
-    //     sts = new RRChecker(slv, "rr", n, m, k, c, MAX_ENQ, MAX_DEQ);
-    //     cout << "RR" << endl;
-    // }
     sts = new TrivialSts(slv, "trv", 12);
     auto nes = sts->base_constrs();
     expr e = constr(slv, sts->E[0], {
@@ -103,44 +52,67 @@ int main(const int argc, const char *argv[]) {
                         {0, 0}
                     });
     nes.emplace_back(e, "e");
-    // expr o = constr(slv, sts->O[0], {
-                        // {0, 0},
-                        // {0, 0},
-                        // {2, 0},
-                        // {0, 2},
-                        // {0, 0},
-                        // {2, 0},
-                        // {0, 0},
-                        // {1, 0},
-                        // {0, 0},
-                        // {1, 0},
-                        // {1, 0},
-                        // {0, 0}
-                    // });
 
     expr o = constr(slv, sts->O[0], {
-    {0, 0},
-    {0, 0},
-    {0, 0},
-    {2, 0},
-    {0, 0},
-    {2, 0},
-    {0, 0},
-    {1, 0},
-    {0, 0},
-    {1, 0},
-    {1, 2},
-    {0, 0}
-    });
+                        {0, 0},
+                        {0, 0},
+                        {0, 0},
+                        {2, 0},
+                        {0, 0},
+                        {2, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {1, 2},
+                        {0, 0}
+                    });
+    nes.emplace_back(o, "o");
+    sts->check_unsat(nes);
+}
+
+void do_sat() {
+    STSChecker *sts;
+    SmtSolver slv;
+    sts = new TrivialSts(slv, "trv", 12);
+    auto nes = sts->base_constrs();
+    expr e = constr(slv, sts->E[0], {
+                        {0, 0},
+                        {2, 0},
+                        {0, 2},
+                        {0, 0},
+                        {2, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0}
+                    });
+    nes.emplace_back(e, "e");
+    expr o = constr(slv, sts->O[0], {
+                        {0, 0},
+                        {0, 0},
+                        {2, 0},
+                        {0, 2},
+                        {0, 0},
+                        {2, 0},
+                        {0, 0},
+                        {1, 0},
+                        {0, 0},
+                        {1, 0},
+                        {1, 0},
+                        {0, 0}
+                    });
+
     nes.emplace_back(o, "o");
 
-    // expr e = constr(slv, sts->E[0], {{2, 2}, {0, 0}, {2, 0}, {0, 0}, {0, 0}, {0, 0}});
-    // nes.emplace_back(e, "e");
-    // expr o = constr(slv, sts->O[0], {{0, 0}, {2, 0}, {0, 0}, {0, 2}, {2, 0}, {0, 0}});
-    // nes.emplace_back(o, "o");
     auto mdl = sts->check_sat(nes);
-    // auto mod = sts->check_wl_sat();
     sts->print(mdl);
-    // sts->check_wl_not_qry_unsat();
-    return 0;
+}
+
+int main(const int argc, const char *argv[]) {
+    do_sat();
+    do_unsat();
 }

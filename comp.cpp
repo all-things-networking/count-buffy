@@ -96,6 +96,7 @@ public:
         rr4 = new RRChecker(slv, "rr4", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
         merger = new Merger(slv, "mg", 4, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
         O = merger->O[0] + merger->O[1] + merger->O[2] + merger->O[3];
+        slv.add_bound({O}, 0, MAX_ENQ);
     }
 
     model run() {
@@ -104,6 +105,7 @@ public:
         vector<STSChecker *> rrs = {rr1, rr2, rr3, rr4};
         for (int i = 0; i < rrs.size(); ++i) {
             auto constrs = rrs[i]->base_constrs();
+            // auto constrs = rrs[i]->scheduler_constrs();
             slv.add(constrs);
             slv.add({
                 rrs[i]->O[0] + rrs[i]->O[1] == merger->I[i], format("mg.I[{}] == rr{}.O[0] + rr{}.O[1])", i, i, i)
@@ -122,6 +124,7 @@ public:
         // slv.add(merge(query(slv, O), "not query").negate());
         auto m = slv.check_sat();
         // slv.add(wl(ins));
+        // auto m = slv.check_sat();
         slv.s.pop();
         return m;
     }
@@ -140,8 +143,21 @@ public:
     }
 };
 
+// Compare time with fperf
+// stats: num variables
+// Rename max_enq to max_inp
+// Add slides for classifier stuff
+// Separate type streams and buffers
+
 int main(const int argc, const char *argv[]) {
     Composed c;
+    SmtSolver slv;
+    // auto x = slv.ctx.bool_const("x");
+    // auto y = slv.ctx.bool_const("y");
+    // slv.add({x && y, "x && y"});
+    // slv.add({x || y, "x || y"});
+    // slv.check_sat();
+    // cout << slv.stats_str() << endl;
     auto m = c.run();
-    c.print(m);
+    // c.print(m);
 }

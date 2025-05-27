@@ -46,6 +46,8 @@ public:
     model check_sat();
 
     void check_unsat();
+
+    string stats_str();
 };
 
 #endif //SMT_SOLVER_HPP

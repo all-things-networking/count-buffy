@@ -28,9 +28,10 @@ vector<NamedExp> RRChecker::workload() {
 vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
+        // [5]
         res = res && ite(bv[i] && sv[i], ov[i] == 1, ov[i] == 0);
     }
-    return {NamedExp(res, "out")};
+    return {NamedExp(res, "[3]: out")};
 }
 
 vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
@@ -41,7 +42,7 @@ vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
         else
             res = res && !s0[i];
     }
-    return {NamedExp(res, "init")};
+    return {NamedExp(res, "[1]: init")};
 }
 
 
@@ -65,7 +66,7 @@ vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
     for (int i = 0; i < num_bufs; ++i) {
         max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
     }
-    return {NamedExp(next_turn && max_deq, "trs")};
+    return {NamedExp(next_turn && max_deq, "[2]: trs")};
 }
 
 vector<NamedExp> RRChecker::query(int m) {
