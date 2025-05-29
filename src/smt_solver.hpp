@@ -35,6 +35,8 @@ public:
 
     ev3 &ivvv(int n, int m, int k, const string &name);
 
+    ev const_vec(int size, int val);
+
     void add(const expr &e, const string &name);
 
     void add(const NamedExp &ne);
@@ -42,6 +44,8 @@ public:
     void add(const vector<NamedExp> &nes);
 
     void add_bound(const ev3 &vv, int lower, int upper);
+
+    pair<ev, ev> capped(const ev &v, int cap);
 
     model check_sat();
 

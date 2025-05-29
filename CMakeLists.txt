@@ -20,3 +20,8 @@ target_include_directories(Wins PRIVATE /usr/local/include)
 target_link_directories(Wins PRIVATE /usr/local/lib)
 target_link_libraries(Wins PRIVATE z3)
 
+add_executable(Debug debug.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(Debug PRIVATE /usr/local/include)
+target_link_directories(Debug PRIVATE /usr/local/lib)
+target_link_libraries(Debug PRIVATE z3)
+

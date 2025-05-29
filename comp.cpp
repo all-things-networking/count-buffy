@@ -11,7 +11,7 @@ using namespace z3;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-const int TIME_STEPS = 10;
+const int TIME_STEPS = 20;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 2;
 const int C = 10;

@@ -69,6 +69,8 @@ void do_unsat() {
                     });
     nes.emplace_back(o, "o");
     sts->check_unsat(nes);
+    // auto m = sts->check_sat(nes);
+    // sts->print(m);
 }
 
 void do_sat() {

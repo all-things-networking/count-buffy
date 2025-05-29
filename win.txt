@@ -1,0 +1,28 @@
+Done!
+(:added-eqs                   254087
+ :arith-eq-adapter            2790
+ :arith-bound-propagations-lp 15057
+ :arith-conflicts             2024
+ :arith-diseq                 38601
+ :arith-fixed-eqs             77336
+ :arith-lower                 158981
+ :arith-make-feasible         79211
+ :arith-max-columns           6130
+ :arith-max-rows              3485
+ :arith-offset-eqs            15106
+ :arith-upper                 148976
+ :conflicts                   2587
+ :decisions                   76730
+ :final-checks                1
+ :max-memory                  116.35
+ :memory                      116.33
+ :minimized-lits              803
+ :mk-bool-var                 20958
+ :mk-clause                   26981
+ :num-allocs                  684321
+ :num-checks                  1
+ :propagations                546162
+ :restarts                    21
+ :rlimit-count                7650027
+ :time                        5.03)
+Num constrs: 4433

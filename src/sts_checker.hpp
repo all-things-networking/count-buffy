@@ -22,10 +22,10 @@ public:
     ev3 wnd_enq;
     ev3 wnd_enq_nxt;
     ev3 wnd_out;
-    ev3 tmp_wnd_enq;
-    ev3 tmp_wnd_enq_nxt;
-    ev3 tmp_wnd_out;
-    ev2 match;
+    // ev3 tmp_wnd_enq;
+    // ev3 tmp_wnd_enq_nxt;
+    // ev3 tmp_wnd_out;
+    // ev2 match;
     int num_bufs;
     int timesteps;
     int pkt_types;

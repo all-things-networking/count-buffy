@@ -78,6 +78,18 @@ ev3 &SmtSolver::ivvv(const int n, const int m, const int k, const string &name) 
     return *result;
 }
 
+ev SmtSolver::const_vec(int size, int val) {
+    ev result;
+    for (int i = 0; i < size; ++i) {
+        result.push_back(ctx.int_val(val));
+    }
+    return result;
+}
+
+void SmtSolver::add(const expr &e, const string &name) {
+    add({e, name});
+}
+
 void SmtSolver::add(const NamedExp &ne) {
     try {
         s.add(ne.e, ne.name.c_str());
@@ -127,6 +139,20 @@ void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
             }
         }
     }
+}
+
+pair<ev, ev> SmtSolver::capped(const ev &v, int cap) {
+    auto s = ctx.int_val(0);
+    auto C = ctx.int_val(cap);
+    ev capped;
+    ev slack;
+    for (int i = 0; i < v.size(); ++i) {
+        auto val = ite(s + v[i] <= C, v[i], ite(s == C, ctx.int_val(0), C - s));
+        slack.push_back(v[i] - val);
+        capped.push_back(val);
+        s = s + val;
+    }
+    return {capped, slack};
 }
 
 string SmtSolver::stats_str() {

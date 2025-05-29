@@ -47,10 +47,10 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     wnd_enq = slv.ivvv(n, m, k, format("WndEnq_{}", var_prefix));
     wnd_enq_nxt = slv.ivvv(n, m, k, format("WndEnqNxt_{}", var_prefix));
     wnd_out = slv.ivvv(n, m, k, format("WndOut_{}", var_prefix));
-    tmp_wnd_enq = slv.ivvv(n, m, k, format("TmpWndEnq_{}", var_prefix));
-    tmp_wnd_enq_nxt = slv.ivvv(n, m, k, format("TmpWndEnqNxt_{}", var_prefix));
-    tmp_wnd_out = slv.ivvv(n, m, k, format("TmpWndOut_{}", var_prefix));
-    match = slv.bvv(n, m, format("Match_{}", var_prefix));
+    // tmp_wnd_enq = slv.ivvv(n, m, k, format("TmpWndEnq_{}", var_prefix));
+    // tmp_wnd_enq_nxt = slv.ivvv(n, m, k, format("TmpWndEnqNxt_{}", var_prefix));
+    // tmp_wnd_out = slv.ivvv(n, m, k, format("TmpWndOut_{}", var_prefix));
+    // match = slv.bvv(n, m, format("Match_{}", var_prefix));
     slv.add_bound(I, 0, me);
     slv.add_bound(E, 0, me);
     slv.add_bound(D, 0, me);
@@ -59,9 +59,9 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     slv.add_bound(wnd_enq, 0, c);
     slv.add_bound(wnd_enq_nxt, 0, c);
     slv.add_bound(wnd_out, 0, c);
-    slv.add_bound(tmp_wnd_enq, 0, c);
-    slv.add_bound(tmp_wnd_enq_nxt, 0, c);
-    slv.add_bound(tmp_wnd_out, 0, c);
+    // slv.add_bound(tmp_wnd_enq, 0, c);
+    // slv.add_bound(tmp_wnd_enq_nxt, 0, c);
+    // slv.add_bound(tmp_wnd_out, 0, c);
 }
 
 
@@ -180,6 +180,51 @@ std::vector<NamedExp> STSChecker::enq_deq_sum(int i) {
     return res;
 }
 
+//
+// vector<NamedExp> STSChecker::winds(int i) {
+//     vector<NamedExp> nes;
+//     // [14]
+//     nes.emplace_back(wnd_enq[i][0] == E[i][0], format("WndEnq[{}]@{}", i, 0));
+//     nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
+//     nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
+//     for (int j = 1; j < timesteps; ++j) {
+//         auto te = tmp_wnd_enq[i][j];
+//         auto tn = tmp_wnd_enq_nxt[i][j];
+//         // auto to = tmp_wnd_out[i][j];
+//         // auto m = match[i][j];
+//
+//
+//         // [15]
+//         auto total_sum = wnd_enq[i][j - 1] + wnd_enq_nxt[i][j - 1] + E[i][j];
+//         // auto te = ite(total_sum <= c, total_sum, c);
+//
+//
+//         nes.emplace_back((te + tn) == total_sum,
+//                          format("Update te + tn[{}]@{}", i, j));
+//         // [16], [17], [18], [19]
+//         nes.emplace_back((!(te < c && tn > 0)) && (te <= c) && (tn <= c) && (wnd_enq[i][j - 1] <= te),
+//                          format("Overflow mechanism[{}]@{}", i, j));
+//         // [20]
+//         // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
+//
+//         auto to = wnd_out[i][j - 1] + O[i][j];
+//         // [21]
+//         // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
+//         auto m = te <= to;
+//         // [22]
+//         nes.emplace_back(
+//             ite(m, wnd_enq[i][j] == tn, ite(total_sum <= c, wnd_enq[i][j] == total_sum, wnd_enq[i][j] == total_sum)),
+//             format("Update WE[{}]@{}", i, j));
+//         // [23]
+//         nes.emplace_back(ite(m, wnd_enq_nxt[i][j] == 0, wnd_enq_nxt[i][j] == tn), format("Update WN[{}]@{}", i, j));
+//         // [24]
+//         nes.emplace_back(ite(m, wnd_out[i][j] == to - te, wnd_out[i][j] == to), format("Update WO[{}]@{}", i, j));
+//         // [25]
+//         nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j], format("WndOut <= WndEnq[{}]@{}", i, j));
+//     }
+//     return nes;
+// }
+//
 
 vector<NamedExp> STSChecker::inputs(const int i) {
     vector<NamedExp> res;
@@ -187,7 +232,7 @@ vector<NamedExp> STSChecker::inputs(const int i) {
     extend(res, enqs(i));
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
-    extend(res, winds(i));
+    // extend(res, winds(i));
     return res;
 }
 
@@ -198,29 +243,34 @@ vector<NamedExp> STSChecker::winds(int i) {
     nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
     nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
     for (int j = 1; j < timesteps; ++j) {
-        auto te = tmp_wnd_enq[i][j];
-        auto tn = tmp_wnd_enq_nxt[i][j];
-        auto to = tmp_wnd_out[i][j];
-        auto m = match[i][j];
-
-        // [15]
-        nes.emplace_back((te + tn) == (wnd_enq[i][j - 1] + wnd_enq_nxt[i][j - 1] + E[i][j]),
-                         format("Update te + tn[{}]@{}", i, j));
-        // [16], [17], [18], [19]
-        nes.emplace_back((!(te < c && tn > 0)) && (te <= c) && (tn <= c) && (wnd_enq[i][j - 1] <= te),
-                         format("Overflow mechanism[{}]@{}", i, j));
-        // [20]
-        nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
-        // [21]
-        nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
-        // [22]
-        nes.emplace_back(ite(m, wnd_enq[i][j] == tn, wnd_enq[i][j] == te), format("Update WE[{}]@{}", i, j));
-        // [23]
-        nes.emplace_back(ite(m, wnd_enq_nxt[i][j] == 0, wnd_enq_nxt[i][j] == tn), format("Update WN[{}]@{}", i, j));
-        // [24]
-        nes.emplace_back(ite(m, wnd_out[i][j] == to - te, wnd_out[i][j] == to), format("Update WO[{}]@{}", i, j));
-        // [25]
+        auto res = slv.capped(wnd_enq[i][j - 1] + E[i][j], c);
+        auto se = res.first;
+        auto sn = res.second;
+        auto to = wnd_out[i][j - 1] + O[i][j];
+        auto m = se <= to;
+        auto constr = ite(m,
+                          wnd_enq[i][j] == wnd_enq_nxt[i][j] + sn
+                          && wnd_enq_nxt[i][j] == slv.const_vec(pkt_types, 0)
+                          && wnd_out[i][j] == to - se
+                          ,
+                          wnd_enq[i][j] == se
+                          && wnd_enq_nxt[i][j] == wnd_enq_nxt[i][j - 1] + sn
+                          && wnd_out[i][j] == to
+        );
+        // nes.emplace_back({constr, })
+        nes.emplace_back(constr, format("win constr[{}]@{}", i, j));
         nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j], format("WndOut <= WndEnq[{}]@{}", i, j));
+        // ite( m, wn == 0, wn == wn + )
+        // auto tn = total_sum - te;
+        // nes.emplace_back((te + tn) == total_sum,
+        //                  format("Update te + tn[{}]@{}", i, j));
+        // nes.emplace_back((!(te < c && tn > 0)) && (te <= c) && (tn <= c) && (wnd_enq[i][j - 1] <= te),
+        //                  format("Overflow mechanism[{}]@{}", i, j));
+        // nes.emplace_back(
+        //     ite(m, wnd_enq[i][j] == tn, ite(total_sum <= c, wnd_enq[i][j] == total_sum, wnd_enq[i][j] == total_sum)),
+        //     format("Update WE[{}]@{}", i, j));
+        // nes.emplace_back(ite(m, wnd_enq_nxt[i][j] == 0, wnd_enq_nxt[i][j] == tn), format("Update WN[{}]@{}", i, j));
+        // nes.emplace_back(ite(m, wnd_out[i][j] == to - te, wnd_out[i][j] == to), format("Update WO[{}]@{}", i, j));
     }
     return nes;
 }
@@ -289,12 +339,12 @@ void STSChecker::print(model m) const {
     cout << str(O, m).str();
     cout << "WO:" << endl;
     cout << str(wnd_out, m).str();
-    cout << "TE:" << endl;
-    cout << str(tmp_wnd_enq, m).str();
-    cout << "TN:" << endl;
-    cout << str(tmp_wnd_enq_nxt, m).str();
-    cout << "TO:" << endl;
-    cout << str(tmp_wnd_out, m).str();
+    // cout << "TE:" << endl;
+    // cout << str(tmp_wnd_enq, m).str();
+    // cout << "TN:" << endl;
+    // cout << str(tmp_wnd_enq_nxt, m).str();
+    // cout << "TO:" << endl;
+    // cout << str(tmp_wnd_out, m).str();
     cout << "C:" << endl;
     cout << str(C, m).str();
     cout << "D:" << endl;
