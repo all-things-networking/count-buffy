@@ -11,10 +11,10 @@ using namespace z3;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-const int TIME_STEPS = 20;
+const int TIME_STEPS = 10;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 2;
-const int C = 10;
+const int C = 1000;
 
 vector<NamedExp> query(SmtSolver &slv, ev2 &out) {
     vector<NamedExp> res;
@@ -120,11 +120,12 @@ public:
         slv.add(base_wl_constrs);
         // slv.add({rr1->E[0][0] == 2, "x"});
         // slv.add({rr2->E[0][0] == 3, "y"});
-        slv.add(query(slv, O));
-        // slv.add(merge(query(slv, O), "not query").negate());
-        auto m = slv.check_sat();
+        // slv.add(query(slv, O));
+        slv.add(merge(query(slv, O), "not query").negate());
+        // auto m = slv.check_unsat();
+        // slv.check_unsat();
         // slv.add(wl(ins));
-        // auto m = slv.check_sat();
+        auto m = slv.check_sat();
         slv.s.pop();
         return m;
     }

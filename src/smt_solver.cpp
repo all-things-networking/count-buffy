@@ -8,7 +8,7 @@
 
 SmtSolver::SmtSolver(): s(ctx) {
     params p(ctx);
-    p.set("random_seed", 200u);
+    p.set("random_seed", 300u);
     s.set(p);
 }
 
@@ -115,7 +115,7 @@ model SmtSolver::check_sat() {
             cout << s.statistics() << endl;
             cout << "Num constrs: " << s.assertions().size() << endl;
             cout << "UNSAT Core:" << endl;
-            cout << s.unsat_core() << endl;
+            // cout << s.unsat_core() << endl;
             throw runtime_error("Model is not SAT!");
     }
 }

@@ -6,9 +6,9 @@
 #define STS_CHECKER_HPP
 #include "smt_solver.hpp"
 
-class STSChecker {
+class STSCheckerNew {
 public:
-    virtual ~STSChecker() = default;
+    virtual ~STSCheckerNew() = default;
 
     SmtSolver &slv;
     string var_prefix;
@@ -22,10 +22,10 @@ public:
     ev3 wnd_enq;
     ev3 wnd_enq_nxt;
     ev3 wnd_out;
-    ev3 tmp_wnd_enq;
-    ev3 tmp_wnd_enq_nxt;
-    ev3 tmp_wnd_out;
-    ev2 match;
+    // ev3 tmp_wnd_enq;
+    // ev3 tmp_wnd_enq_nxt;
+    // ev3 tmp_wnd_out;
+    // ev2 match;
     int num_bufs;
     int timesteps;
     int pkt_types;
@@ -33,7 +33,7 @@ public:
     int me;
     int md;
 
-    STSChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
+    STSCheckerNew(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 
     model check_wl_sat();
 
