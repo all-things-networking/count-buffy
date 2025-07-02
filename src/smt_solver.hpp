@@ -23,6 +23,8 @@ public:
 
     SmtSolver();
 
+    SmtSolver(unsigned int random_seed);
+
     ev &bv(int k, const string &name);
 
     ev2 &bvv(int m, int k, const string &name);

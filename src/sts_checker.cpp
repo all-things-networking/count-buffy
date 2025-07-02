@@ -256,9 +256,13 @@ vector<NamedExp> STSChecker::winds(int i) {
     nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
     nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
     for (int j = 1; j < timesteps; ++j) {
-        auto res = slv.capped(wnd_enq[i][j - 1] + E[i][j], c);
-        auto se = res.first;
-        auto sn = res.second;
+        // auto res = slv.capped(wnd_enq[i][j - 1] + E[i][j], c);
+        // auto se = res.first;
+        // auto sn = res.second;
+        auto se = tmp_wnd_enq[i][j];
+        auto sn = tmp_wnd_enq_nxt[i][j];
+        nes.emplace_back(wnd_enq[i][j - 1] + E[i][j] == se + sn, format("win tmps [{}]@{}", i, j));
+
         // auto se = slv.const_vec(pkt_types, 1);
         // auto sn = slv.const_vec(pkt_types, 0);
         auto to = wnd_out[i][j - 1] + O[i][j];
