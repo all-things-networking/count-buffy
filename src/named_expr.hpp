@@ -16,7 +16,7 @@ public:
     expr e;
     string name;
 
-    NamedExp(expr e, string name): e(std::move(e)), name(move(name)) {
+    NamedExp(expr e, string name): e(std::move(e)), name(std::move(name)) {
     }
 
     NamedExp prefix(const string &prefix);

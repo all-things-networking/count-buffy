@@ -75,6 +75,8 @@ expr operator==(const ev &v, const vector<int> &n);
 
 NamedExp merge(const vector<NamedExp> &nes, const string &name);
 
+NamedExp merge(const vector<expr> &nes, const string &name);
+
 template<typename T>
 void extend(vector<T> &source, const vector<T> &extra) {
     source.insert(source.end(), extra.begin(), extra.end());

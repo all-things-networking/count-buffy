@@ -138,6 +138,14 @@ NamedExp merge(const vector<NamedExp> &nes, const string &name) {
     return {expr, name};
 }
 
+NamedExp merge(const vector<expr> &nes, const string &name) {
+    auto expr = nes[0];
+    for (int i = 1; i < nes.size(); ++i)
+        expr = expr && nes[i];
+    return {expr, name};
+}
+
+
 expr operator==(const ev2 &l, const ev2 &r) {
     auto res = l[0] == r[0];
     for (int i = 1; i < l.size(); ++i) {

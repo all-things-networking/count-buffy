@@ -14,11 +14,14 @@ target_link_libraries(Intr PRIVATE z3)
 target_link_libraries(Intr PRIVATE antlr4-runtime)
 
 add_executable(Single main.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(Single PRIVATE /usr/local/include/antlr4-runtime)
 target_include_directories(Single PRIVATE /usr/local/include)
 target_link_directories(Single PRIVATE /usr/local/lib)
 target_link_libraries(Single PRIVATE z3)
+target_link_libraries(Single PRIVATE antlr4-runtime)
 
 add_executable(Comp comp.cpp ${SRC_FILES} ${HPP_FILES})
+
 target_include_directories(Comp PRIVATE /usr/local/include)
 target_link_directories(Comp PRIVATE /usr/local/lib)
 target_link_libraries(Comp PRIVATE z3)
@@ -34,7 +37,9 @@ target_link_directories(Debug PRIVATE /usr/local/lib)
 target_link_libraries(Debug PRIVATE z3)
 
 add_executable(Loom loom.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(Loom PRIVATE /usr/local/include/antlr4-runtime)
 target_include_directories(Loom PRIVATE /usr/local/include)
 target_link_directories(Loom PRIVATE /usr/local/lib)
 target_link_libraries(Loom PRIVATE z3)
+target_link_libraries(Loom PRIVATE antlr4-runtime)
 

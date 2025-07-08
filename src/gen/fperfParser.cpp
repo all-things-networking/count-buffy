@@ -2,7 +2,6 @@
 // Generated from fperf.g4 by ANTLR 4.13.2
 
 
-#include "fperfListener.h"
 #include "fperfVisitor.h"
 
 #include "fperfParser.h"
@@ -56,34 +55,35 @@ void fperfParserInitialize() {
       "con", "lhs", "m", "q", "rhs", "interval", "set", "comp_op"
     },
     std::vector<std::string>{
-      "", "':'", "'('", "', t)'", "'SUM_[q in'", "']'", "'(q, t)'", "'cenq'", 
-      "'t'", "'['", "','", "'{'", "'}'", "'>='", "'<='", "'>'", "'<'", "'=='", 
-      "'!='"
+      "", "':'", "'('", "', t)'", "'SUM_[q in'", "']'", "'(q ,t)'", "'cenq'", 
+      "'cdeq'", "'ecmp'", "'t'", "'['", "','", "'{'", "'}'", "'>='", "'<='", 
+      "'>'", "'<'", "'=='", "'!='"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-      "", "", "ID", "INT", "WS"
+      "", "", "", "", "ID", "INT", "WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,21,66,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+  	4,1,23,70,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
   	7,7,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  	1,3,1,34,8,1,1,2,1,2,1,3,1,3,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,5,1,6,1,6,
-  	1,6,1,6,5,6,52,8,6,10,6,12,6,55,9,6,3,6,57,8,6,1,6,3,6,60,8,6,1,6,1,6,
-  	1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,2,2,0,8,8,20,20,1,0,13,18,61,0,
-  	16,1,0,0,0,2,33,1,0,0,0,4,35,1,0,0,0,6,37,1,0,0,0,8,39,1,0,0,0,10,41,
-  	1,0,0,0,12,47,1,0,0,0,14,63,1,0,0,0,16,17,3,10,5,0,17,18,5,1,0,0,18,19,
-  	3,2,1,0,19,20,3,14,7,0,20,21,3,8,4,0,21,1,1,0,0,0,22,23,3,4,2,0,23,24,
-  	5,2,0,0,24,25,3,6,3,0,25,26,5,3,0,0,26,34,1,0,0,0,27,28,5,4,0,0,28,29,
-  	3,12,6,0,29,30,5,5,0,0,30,31,3,4,2,0,31,32,5,6,0,0,32,34,1,0,0,0,33,22,
-  	1,0,0,0,33,27,1,0,0,0,34,3,1,0,0,0,35,36,5,7,0,0,36,5,1,0,0,0,37,38,5,
-  	20,0,0,38,7,1,0,0,0,39,40,7,0,0,0,40,9,1,0,0,0,41,42,5,9,0,0,42,43,5,
-  	20,0,0,43,44,5,10,0,0,44,45,5,20,0,0,45,46,5,5,0,0,46,11,1,0,0,0,47,56,
-  	5,11,0,0,48,53,5,20,0,0,49,50,5,10,0,0,50,52,5,20,0,0,51,49,1,0,0,0,52,
-  	55,1,0,0,0,53,51,1,0,0,0,53,54,1,0,0,0,54,57,1,0,0,0,55,53,1,0,0,0,56,
-  	48,1,0,0,0,56,57,1,0,0,0,57,59,1,0,0,0,58,60,5,10,0,0,59,58,1,0,0,0,59,
-  	60,1,0,0,0,60,61,1,0,0,0,61,62,5,12,0,0,62,13,1,0,0,0,63,64,7,1,0,0,64,
-  	15,1,0,0,0,4,33,53,56,59
+  	1,3,1,34,8,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,1,4,3,4,44,8,4,1,5,1,5,1,5,1,
+  	5,1,5,1,5,1,6,1,6,1,6,1,6,5,6,56,8,6,10,6,12,6,59,9,6,3,6,61,8,6,1,6,
+  	3,6,64,8,6,1,6,1,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,2,1,0,7,9,1,
+  	0,15,20,67,0,16,1,0,0,0,2,33,1,0,0,0,4,35,1,0,0,0,6,37,1,0,0,0,8,43,1,
+  	0,0,0,10,45,1,0,0,0,12,51,1,0,0,0,14,67,1,0,0,0,16,17,3,10,5,0,17,18,
+  	5,1,0,0,18,19,3,2,1,0,19,20,3,14,7,0,20,21,3,8,4,0,21,1,1,0,0,0,22,23,
+  	3,4,2,0,23,24,5,2,0,0,24,25,3,6,3,0,25,26,5,3,0,0,26,34,1,0,0,0,27,28,
+  	5,4,0,0,28,29,3,12,6,0,29,30,5,5,0,0,30,31,3,4,2,0,31,32,5,6,0,0,32,34,
+  	1,0,0,0,33,22,1,0,0,0,33,27,1,0,0,0,34,3,1,0,0,0,35,36,7,0,0,0,36,5,1,
+  	0,0,0,37,38,5,22,0,0,38,7,1,0,0,0,39,44,5,22,0,0,40,44,5,10,0,0,41,42,
+  	5,22,0,0,42,44,5,10,0,0,43,39,1,0,0,0,43,40,1,0,0,0,43,41,1,0,0,0,44,
+  	9,1,0,0,0,45,46,5,11,0,0,46,47,5,22,0,0,47,48,5,12,0,0,48,49,5,22,0,0,
+  	49,50,5,5,0,0,50,11,1,0,0,0,51,60,5,13,0,0,52,57,5,22,0,0,53,54,5,12,
+  	0,0,54,56,5,22,0,0,55,53,1,0,0,0,56,59,1,0,0,0,57,55,1,0,0,0,57,58,1,
+  	0,0,0,58,61,1,0,0,0,59,57,1,0,0,0,60,52,1,0,0,0,60,61,1,0,0,0,61,63,1,
+  	0,0,0,62,64,5,12,0,0,63,62,1,0,0,0,63,64,1,0,0,0,64,65,1,0,0,0,65,66,
+  	5,14,0,0,66,13,1,0,0,0,67,68,7,1,0,0,68,15,1,0,0,0,5,33,43,57,60,63
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -159,18 +159,6 @@ size_t fperfParser::ConContext::getRuleIndex() const {
   return fperfParser::RuleCon;
 }
 
-void fperfParser::ConContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterCon(this);
-}
-
-void fperfParser::ConContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitCon(this);
-}
-
 
 std::any fperfParser::ConContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -236,18 +224,6 @@ size_t fperfParser::LhsContext::getRuleIndex() const {
   return fperfParser::RuleLhs;
 }
 
-void fperfParser::LhsContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterLhs(this);
-}
-
-void fperfParser::LhsContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitLhs(this);
-}
-
 
 std::any fperfParser::LhsContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -271,7 +247,9 @@ fperfParser::LhsContext* fperfParser::lhs() {
     setState(33);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case fperfParser::T__6: {
+      case fperfParser::T__6:
+      case fperfParser::T__7:
+      case fperfParser::T__8: {
         enterOuterAlt(_localctx, 1);
         setState(22);
         m();
@@ -324,18 +302,6 @@ size_t fperfParser::MContext::getRuleIndex() const {
   return fperfParser::RuleM;
 }
 
-void fperfParser::MContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterM(this);
-}
-
-void fperfParser::MContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitM(this);
-}
-
 
 std::any fperfParser::MContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -347,6 +313,7 @@ std::any fperfParser::MContext::accept(tree::ParseTreeVisitor *visitor) {
 fperfParser::MContext* fperfParser::m() {
   MContext *_localctx = _tracker.createInstance<MContext>(_ctx, getState());
   enterRule(_localctx, 4, fperfParser::RuleM);
+  size_t _la = 0;
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -358,7 +325,15 @@ fperfParser::MContext* fperfParser::m() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(35);
-    match(fperfParser::T__6);
+    _la = _input->LA(1);
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 896) != 0))) {
+    _errHandler->recoverInline(this);
+    }
+    else {
+      _errHandler->reportMatch(this);
+      consume();
+    }
    
   }
   catch (RecognitionException &e) {
@@ -383,18 +358,6 @@ tree::TerminalNode* fperfParser::QContext::INT() {
 
 size_t fperfParser::QContext::getRuleIndex() const {
   return fperfParser::RuleQ;
-}
-
-void fperfParser::QContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterQ(this);
-}
-
-void fperfParser::QContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitQ(this);
 }
 
 
@@ -446,18 +409,6 @@ size_t fperfParser::RhsContext::getRuleIndex() const {
   return fperfParser::RuleRhs;
 }
 
-void fperfParser::RhsContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterRhs(this);
-}
-
-void fperfParser::RhsContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitRhs(this);
-}
-
 
 std::any fperfParser::RhsContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -469,7 +420,6 @@ std::any fperfParser::RhsContext::accept(tree::ParseTreeVisitor *visitor) {
 fperfParser::RhsContext* fperfParser::rhs() {
   RhsContext *_localctx = _tracker.createInstance<RhsContext>(_ctx, getState());
   enterRule(_localctx, 8, fperfParser::RuleRhs);
-  size_t _la = 0;
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -479,17 +429,34 @@ fperfParser::RhsContext* fperfParser::rhs() {
     exitRule();
   });
   try {
-    enterOuterAlt(_localctx, 1);
-    setState(39);
-    _la = _input->LA(1);
-    if (!(_la == fperfParser::T__7
-
-    || _la == fperfParser::INT)) {
-    _errHandler->recoverInline(this);
+    setState(43);
+    _errHandler->sync(this);
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx)) {
+    case 1: {
+      enterOuterAlt(_localctx, 1);
+      setState(39);
+      match(fperfParser::INT);
+      break;
     }
-    else {
-      _errHandler->reportMatch(this);
-      consume();
+
+    case 2: {
+      enterOuterAlt(_localctx, 2);
+      setState(40);
+      match(fperfParser::T__9);
+      break;
+    }
+
+    case 3: {
+      enterOuterAlt(_localctx, 3);
+      setState(41);
+      match(fperfParser::INT);
+      setState(42);
+      match(fperfParser::T__9);
+      break;
+    }
+
+    default:
+      break;
     }
    
   }
@@ -521,18 +488,6 @@ size_t fperfParser::IntervalContext::getRuleIndex() const {
   return fperfParser::RuleInterval;
 }
 
-void fperfParser::IntervalContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterInterval(this);
-}
-
-void fperfParser::IntervalContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitInterval(this);
-}
-
 
 std::any fperfParser::IntervalContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -554,15 +509,15 @@ fperfParser::IntervalContext* fperfParser::interval() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(41);
-    match(fperfParser::T__8);
-    setState(42);
-    match(fperfParser::INT);
-    setState(43);
-    match(fperfParser::T__9);
-    setState(44);
-    match(fperfParser::INT);
     setState(45);
+    match(fperfParser::T__10);
+    setState(46);
+    match(fperfParser::INT);
+    setState(47);
+    match(fperfParser::T__11);
+    setState(48);
+    match(fperfParser::INT);
+    setState(49);
     match(fperfParser::T__4);
    
   }
@@ -594,18 +549,6 @@ size_t fperfParser::SetContext::getRuleIndex() const {
   return fperfParser::RuleSet;
 }
 
-void fperfParser::SetContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterSet(this);
-}
-
-void fperfParser::SetContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitSet(this);
-}
-
 
 std::any fperfParser::SetContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
@@ -629,40 +572,40 @@ fperfParser::SetContext* fperfParser::set() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(47);
-    match(fperfParser::T__10);
-    setState(56);
+    setState(51);
+    match(fperfParser::T__12);
+    setState(60);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == fperfParser::INT) {
-      setState(48);
+      setState(52);
       match(fperfParser::INT);
-      setState(53);
+      setState(57);
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 2, _ctx);
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
-          setState(49);
-          match(fperfParser::T__9);
-          setState(50);
+          setState(53);
+          match(fperfParser::T__11);
+          setState(54);
           match(fperfParser::INT); 
         }
-        setState(55);
+        setState(59);
         _errHandler->sync(this);
-        alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx);
+        alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 2, _ctx);
       }
     }
-    setState(59);
+    setState(63);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == fperfParser::T__9) {
-      setState(58);
-      match(fperfParser::T__9);
+    if (_la == fperfParser::T__11) {
+      setState(62);
+      match(fperfParser::T__11);
     }
-    setState(61);
-    match(fperfParser::T__11);
+    setState(65);
+    match(fperfParser::T__13);
    
   }
   catch (RecognitionException &e) {
@@ -683,18 +626,6 @@ fperfParser::Comp_opContext::Comp_opContext(ParserRuleContext *parent, size_t in
 
 size_t fperfParser::Comp_opContext::getRuleIndex() const {
   return fperfParser::RuleComp_op;
-}
-
-void fperfParser::Comp_opContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterComp_op(this);
-}
-
-void fperfParser::Comp_opContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<fperfListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitComp_op(this);
 }
 
 
@@ -719,10 +650,10 @@ fperfParser::Comp_opContext* fperfParser::comp_op() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(63);
+    setState(67);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 516096) != 0))) {
+      ((1ULL << _la) & 2064384) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
