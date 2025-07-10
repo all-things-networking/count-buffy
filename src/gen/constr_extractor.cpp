@@ -35,12 +35,6 @@ ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
 
 any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
     auto result = visitChildren(ctx);
-    cout << begin << endl;
-    cout << end << endl;
-    cout << metric << endl;
-    cout << tmp_ids.size() << endl;
-    cout << rhs << endl;
-    cout << rhs_linear << endl;
     constrs.clear();
     if (metric != "cenq")
         return result;
@@ -60,7 +54,7 @@ any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
             e = binop(cenq, op, slv.ctx.int_val(rhs));
         }
         constrs.push_back(e);
-        cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
+        // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
     }
     return result;
 }

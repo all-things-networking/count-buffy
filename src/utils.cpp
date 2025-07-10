@@ -26,7 +26,9 @@ vector<vector<string> > read_wl_file() {
                 current.clear();
             }
         } else {
-            current.push_back(line);
+            if (!line.empty() && line.find_first_not_of(" \t\r\n") != string::npos) {
+                current.push_back(line);
+            }
         }
     }
 
