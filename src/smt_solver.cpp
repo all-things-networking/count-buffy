@@ -4,6 +4,7 @@
 
 #include "smt_solver.hpp"
 
+#include <fstream>
 #include <set>
 
 SmtSolver::SmtSolver(): s(ctx) {
@@ -112,29 +113,29 @@ void SmtSolver::add(const vector<NamedExp> &nes) {
 
 
 model SmtSolver::check_sat() {
+    // ofstream out("stats.log", ios::app);
     switch (s.check()) {
-        case sat: cout << "Done!\n";
-            cout << s.statistics() << endl;
-            cout << "Num constrs: " << s.assertions().size() << endl;
+        case sat:
+            // cout << "Done!\n";
+            // cout << s.statistics() << endl;
             return s.get_model();
         default:
-            cout << s.statistics() << endl;
-            cout << "Num constrs: " << s.assertions().size() << endl;
-            cout << "UNSAT Core:" << endl;
-        // cout << s.unsat_core() << endl;
-            throw runtime_error("Model is not SAT!");
+            // cout << s.statistics() << endl;
+        cout << s.unsat_core() << endl;
+        throw runtime_error("Model is not SAT!");
     }
 }
 
 
 void SmtSolver::check_unsat() {
     switch (s.check()) {
-        case unsat: cout << "Done!\n";
+        case unsat:
+            // cout << "Done!\n";
             break;
         default:
             throw runtime_error("Model is SAT!");
     }
-    cout << s.statistics() << endl;
+    // cout << s.statistics() << endl;
 }
 
 

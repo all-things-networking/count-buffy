@@ -12,7 +12,7 @@ using namespace antlr4;
 int main(int argc, const char *argv[]) {
     SmtSolver slv;
     fperfVisitor *visitor = new ConstrExtractor(slv, 12, 10);
-    vector<vector<string> > wls = read_wl_file();
+    vector<vector<string> > wls = read_wl_file("bar");
     for (auto wl: wls) {
         for (auto line: wl) {
             if (line.find_first_not_of(" \t\r\n") == std::string::npos)

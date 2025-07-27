@@ -25,6 +25,19 @@ vector<NamedExp> RRChecker::workload() {
     return {NamedExp(base_wl && wl, "workload")};
 }
 
+vector<NamedExp> RRChecker::base_wl() {
+    expr base_wl = slv.ctx.bool_val(true);
+    int period = 5;
+    int recur = timesteps / period;
+    int rate = period - 1;
+    for (int i = 0; i < num_bufs; ++i) {
+        for (int j = 1; j <= recur; ++j) {
+            base_wl = base_wl && (sum(I[i], j * period) >= rate);
+        }
+    }
+    return {NamedExp(base_wl, "base_wl")};
+}
+
 vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
@@ -36,11 +49,10 @@ vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
 
 vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
     expr res = slv.ctx.bool_val(true);
+    expr not_prevs = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
-        if (i == 0)
-            res = res && s0[i];
-        else
-            res = res && !s0[i];
+        res = res && ite(not_prevs && b0[i], s0[i], !s0[i]);
+        not_prevs = not_prevs && !b0[i];
     }
     return {NamedExp(res, "[1]: init")};
 }
@@ -71,6 +83,8 @@ vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
 
 vector<NamedExp> RRChecker::query(int m) {
     expr res = slv.ctx.bool_val(true);
-    res = (sum(O[2]) - sum(O[1])) >= 3;
+    for (int i = m; i < timesteps; ++i) {
+        res = res && (sum(O[2], i) - sum(O[1], i) >= 3);
+    }
     return {NamedExp(res, "query")};
 }

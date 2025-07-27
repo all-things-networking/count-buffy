@@ -6,6 +6,6 @@
 #define UTILS_HPP
 #include <vector>
 
-std::vector<std::vector<std::string>> read_wl_file();
+std::vector<std::vector<std::string>> read_wl_file(std::string file_path);
 
 #endif //UTILS_HPP

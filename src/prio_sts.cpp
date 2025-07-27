@@ -46,7 +46,7 @@ vector<NamedExp> PrioSTS::query(const int p) {
     expr res = slv.ctx.bool_val(false);
     for (int i = 0; i < timesteps - p; ++i) {
         expr part = slv.ctx.bool_val(true);
-        for (int j = 0; j < p; ++j) {
+        for (int j = 0; j < p + 1; ++j) {
             part = part && B[2][i + j];
             part = part && (O[2][i + j] == 0);
         }

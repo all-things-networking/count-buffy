@@ -2,12 +2,11 @@ set -euo pipefail
 
 BUILD_DIR="cmake-build-debug"
 
+echo > $1
+LOG_FILE=$(realpath "$1")
+
 cd $BUILD_DIR
-make -j6
-for ((j=100; j<=500; j = j + 100)); do
-  for ((i=10; i<=150; i = i + 5)); do
-    gtime -f "$i,%e" -o "loom.$j.txt" -a ./Loom $i $j
-  #  (time ./build/fperf 10) 2>&1 | grep cpu | awk '{print $9}'
-  #  echo "$i done"
-  done
+
+for ((i=10; i<=550; i = i + 50)); do
+  ./Single 4 7 1 $i >> "$LOG_FILE"
 done

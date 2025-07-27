@@ -47,6 +47,8 @@ expr sum(const ev2 &vv);
 
 expr sum(const ev2 &vv, int limit);
 
+expr sum(const ev2 &vv, int from, int limit);
+
 expr operator==(const ev &v, int n);
 
 ev operator+(const ev &l, const ev &r);

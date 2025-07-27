@@ -16,7 +16,7 @@ using namespace std;
 using namespace z3;
 using namespace antlr4;
 
-constexpr int MAX_ENQ = 10;
+constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
 constexpr int INP_CALC = 3;
@@ -47,23 +47,58 @@ int main(const int argc, const char *argv[]) {
     int m = atoi(argv[2]);
     int k = atoi(argv[3]);
     int c = atoi(argv[4]);
-    string name = argv[5];
-    STSChecker *sts;
+    string model = "rr";
     SmtSolver slv;
-    sts = new PrioSTS(slv, "prio", n, m, k, c, MAX_ENQ, MAX_DEQ);
-
-    vector<vector<string> > wls = read_wl_file();
-    for (auto wl: wls) {
+    // PrioSTS *sts;
+    // sts = new PrioSTS(slv, model, n, m, k, c, MAX_ENQ, MAX_DEQ);
+    RRChecker *sts;
+    sts = new RRChecker(slv, model, n, m, k, c, MAX_ENQ, MAX_DEQ);
+    string wl_file_path = format("../wls/{}.{}.txt", model, c);
+    vector<vector<string> > wls = read_wl_file(wl_file_path);
+    string out_file_path = format("../logs/{}.{}.txt", model, c);
+    ofstream out(out_file_path, ios::out);
+    out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
+    for (int i = 0; i < wls.size(); ++i) {
+        cout << "WL: " << i + 1 << "/" << wls.size() << endl;
         WorkloadParser parser(sts->I, slv, n, m);
+        auto wl = wls[i];
         slv.s.push();
         slv.add(sts->base_constrs());
+        slv.add(sts->base_wl());
+        // slv.add(sts->base_wl());
         slv.add(merge(sts->query(5), "Query").negate());
+        // slv.add(merge(sts->query(5), "Query"));
+        // auto e = sts->B[2][2] && sts->B[2][3] && sts->B[2][4] && sts->B[2][5] && sts->B[2][6];
+        // e = e && sts->O[2][2] == 0 && sts->O[2][3] == 0 && sts->O[2][4] == 0 && sts->O[2][5] == 0 && sts->O[2][6] == 0;
+        // slv.add(e, "tmp");
+        string res_stat = wl[0];
+        wl.erase(wl.begin());
         parser.parse(wl);
-        auto mod = slv.check_sat();
+
+        auto start_t = chrono::high_resolution_clock::now();
+        if (res_stat == "SAT")
+            slv.check_sat();
+        else if (res_stat == "UNSAT")
+            slv.check_unsat();
+        auto end_t = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
+        out << "prio, " << c << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
         slv.s.pop();
+        continue;
+        auto mod = slv.check_sat();
+        cout << "Done: " << i << endl;
         cout << "IT:" << endl;
         cout << str(sts->I, mod).str();
+        cout << "I:" << endl;
+        cout << str(sts->I, mod).str();
+        cout << "E:" << endl;
+        cout << str(sts->E, mod).str();
+        cout << "B:" << endl;
+        cout << str(sts->B, mod, "\n").str();
+        cout << "O:" << endl;
+        cout << str(sts->O, mod).str();
     }
+    out.close();
 
     return 0;
 }

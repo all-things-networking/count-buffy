@@ -79,6 +79,14 @@ expr sum(const ev2 &vv, const int limit) {
     return s;
 }
 
+expr sum(const ev2 &vv, const int from, const int limit) {
+    assert(from <= limit);
+    expr s = sum(vv[from]);
+    for (int i = from + 1; i < limit; ++i)
+        s = s + sum(vv[i]);
+    return s;
+}
+
 expr operator==(const ev &v, const int n) {
     return sum(v) == n;
 }

@@ -29,6 +29,7 @@ class ConstrExtractor : public fperfBaseVisitor {
     std::string op;
     int rhs;
     bool rhs_linear;
+    ev2 cenqs;
 
 public:
     vector<expr> constrs;

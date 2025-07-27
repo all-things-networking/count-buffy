@@ -121,7 +121,7 @@ public:
         // slv.add({rr1->E[0][0] == 2, "x"});
         // slv.add({rr2->E[0][0] == 3, "y"});
         // slv.add(query(slv, O));
-        slv.add(merge(query(slv, O), "not query").negate());
+        // slv.add(merge(query(slv, O), "not query").negate());
         // auto m = slv.check_unsat();
         // slv.check_unsat();
         // slv.add(wl(ins));

@@ -10,8 +10,8 @@
 
 using namespace std;
 
-vector<vector<string> > read_wl_file() {
-    ifstream file("../wl.txt");
+vector<vector<string> > read_wl_file(string file_path) {
+    ifstream file(file_path);
     if (!file) {
         cerr << "Error: could not open file" << endl;
     }
@@ -25,6 +25,11 @@ vector<vector<string> > read_wl_file() {
                 sections.push_back(current);
                 current.clear();
             }
+
+            if (line.rfind("UNSAT") != -1)
+                current.emplace_back("UNSAT");
+            else
+                current.emplace_back("SAT");
         } else {
             if (!line.empty() && line.find_first_not_of(" \t\r\n") != string::npos) {
                 current.push_back(line);

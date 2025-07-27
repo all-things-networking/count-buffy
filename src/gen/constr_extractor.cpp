@@ -30,6 +30,16 @@ using namespace std;
 
 ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
     IT = slv.ivv(n, m, "Workload");
+    for (int i = 0; i < IT.size(); ++i) {
+        vector<expr> cenqs_i;
+        expr cenq = IT[i][0];
+        cenqs_i.push_back(cenq);
+        for (int j = 1; j < IT[i].size(); ++j) {
+            cenq = cenq + IT[i][j];
+            cenqs_i.push_back(cenq);
+        }
+        cenqs.push_back(cenqs_i);
+    }
 }
 
 
@@ -39,19 +49,18 @@ any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
     if (metric != "cenq")
         return result;
 
-    expr cenq = slv.ctx.int_val(0);
+
     assert(begin > 0);
     for (int t = begin; t <= end; ++t) {
         int t_index = t - 1;
         expr s = slv.ctx.int_val(0);
         for (auto i: tmp_ids)
-            s = s + IT[i][t_index];
-        cenq = cenq + s;
+            s = s + cenqs[i][t_index];
         expr e = slv.ctx.bool_val(true);
         if (rhs_linear) {
-            e = binop(cenq, op, slv.ctx.int_val(rhs * t));
+            e = binop(s, op, slv.ctx.int_val(rhs * t));
         } else {
-            e = binop(cenq, op, slv.ctx.int_val(rhs));
+            e = binop(s, op, slv.ctx.int_val(rhs));
         }
         constrs.push_back(e);
         // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;

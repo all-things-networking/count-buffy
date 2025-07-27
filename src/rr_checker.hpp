@@ -17,6 +17,8 @@ public:
 
     vector<NamedExp> workload() override;
 
+    vector<NamedExp> base_wl();
+
     vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
 
     vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;

@@ -6,6 +6,8 @@
 #include "src/rr_checker.hpp"
 #include "src/merger.hpp"
 #include "src/prio_sts.hpp"
+#include "src/utils.hpp"
+#include "src/gen/wl_parser.hpp"
 
 using namespace std;
 using namespace z3;
@@ -13,7 +15,7 @@ using namespace z3;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-const int TIME_STEPS = 10;
+const int TIME_STEPS = 1;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 3;
 
@@ -22,19 +24,48 @@ vector<NamedExp> query(SmtSolver &slv, ev2 &out) {
     ev s = out[0];
     for (int i = 1; i < out.size(); ++i)
         s = s + out[i];
-    return {{(s[2] - s[0] - s[1]) >= 3, "Query"}};
+    return {{(s[1] + s[2] - s[0]) > 3, "Query"}};
 }
 
 vector<NamedExp> wl(const ev3 &ins) {
     vector<NamedExp> res;
     for (int i = 0; i < ins.size(); ++i) {
         for (int t = 0; t < ins[i].size(); ++t) {
-            res.emplace_back(sum(ins[i][t]) == ins[i][t][i % 3],
-                             format("sum(wl[{}][{}]) == wl[{}][{}][{}]", i, t, i, t, i % 3));
-            if (i == 3 || i == 8)
-                res.emplace_back(ins[i][t] >= 1, format("sum(wl[{}][{}]) >= 1", i, t));
+            if (i % 3 == 1 || i == 9)
+                res.emplace_back(sum(ins[i], t) >= t + 1, format("sum(wl[{}][{}]) >= 1", i, t));
             else
-                res.emplace_back(ins[i][t] == 0, format("sum(wl[{}][{}]) == 0", i, t));
+                res.emplace_back(sum(ins[i][t]) == 0, format("sum(wl[{}][{}]) == 0", i, t));
+        }
+    }
+    return res;
+}
+
+vector<NamedExp> base_wl(const ev3 &ins) {
+    vector<NamedExp> res;
+    for (int t = 0; t < ins[0].size(); ++t) {
+        for (int i = 0; i < ins.size(); ++i) {
+            for (int k = 0; k < ins[0][0].size(); ++k) {
+                if (i % 3 != k)
+                    res.emplace_back(ins[i][t][k] == 0, format("I[{}][{}][{}] == 0", i, t, k));
+            }
+        }
+    }
+
+    expr t1 = sum(ins[0][0]) + sum(ins[3][0]) + sum(ins[6][0]) + sum(ins[9][0]);
+    expr t2 = sum(ins[1][0]) + sum(ins[4][0]) + sum(ins[7][0]) + sum(ins[10][0]);
+    res.emplace_back(t1 >= 1, format("I[t1][{}] >= t", 0));
+    res.emplace_back(t2 >= 1, format("I[t2][{}] >= t", 0));
+    for (int t = 1; t < ins[0].size(); ++t) {
+        t1 = t1 + sum(ins[0][t]) + sum(ins[3][t]) + sum(ins[6][t]) + sum(ins[9][t]);
+        t2 = t2 + sum(ins[1][t]) + sum(ins[4][t]) + sum(ins[7][t]) + sum(ins[10][t]);
+        res.emplace_back(t1 >= t + 1, format("I[t1][{}] >= t", t));
+        res.emplace_back(t2 >= t + 1, format("I[t2][{}] >= t", t));
+    }
+
+    for (int t = 0; t < ins[0].size(); ++t) {
+        for (int i = 0; i < ins.size(); ++i) {
+            if (i % 3 == 2)
+                res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
         }
     }
     return res;
@@ -72,12 +103,6 @@ public:
         classifier->I[0] = merger->O[0] + merger->O[1] + merger->O[2] + merger->O[3];
         prio = new PrioSTS(slv, "prio", 2, TIME_STEPS, PKT_TYPES, buffer_size, MAX_DEQ, MAX_DEQ);
         this->buffer_size = buffer_size;
-        // prio->I[1] = classifier->I[1];
-    }
-
-    void run() {
-        slv.s.push();
-        vector rrs = {rr1, rr2, rr3, rr4};
         for (int i = 0; i < rrs.size(); ++i) {
             auto constrs = rrs[i]->base_constrs();
             slv.add(constrs);
@@ -85,19 +110,51 @@ public:
         }
         slv.add(merger->base_constrs());
         slv.add(classifier->constrs());
-        slv.add(prio->I[1] == classifier->O[0], format("class to prio {}", 1));
-        slv.add(prio->I[0] == classifier->O[1], format("class to prio {}", 0));
+        prio->I[0] = classifier->O[0];
+        prio->I[1] = classifier->O[1];
         slv.add(prio->base_constrs());
-        auto base_wl_constrs = wl(I);
-        slv.add(base_wl_constrs);
-        // slv.add(query(slv, prio->O[0]));
-        slv.add(merge(query(slv, prio->O[0]), "not query").negate());
-        // slv.add(query(slv, prio->O[0]));
-        // auto m = slv.check_sat();
-        // print(m);
-        // slv.s.pop();
-        slv.check_unsat();
-        cout << "Buffer Size: " << buffer_size << endl;
+    }
+
+    void run() {
+        auto bwl = base_wl(I);
+        slv.add(bwl);
+        auto O = prio->O[0] + prio->O[1];
+        auto mwl = wl(I);
+        slv.add(mwl);
+        // slv.add(merge(query(slv, O), "not query").negate());
+        // slv.add(merge(query(slv, O), "query"));
+
+        auto m = slv.check_sat();
+        print(m);
+        return;
+        vector<vector<string> > wls = read_wl_file("../wls/loom.txt");
+        int count = 0;
+        for (auto wl: wls) {
+            // cout << wl.size() << endl;
+            // if (count >= 1)
+            // break;
+
+            WorkloadParser parser(I, slv, I.size(), I[0].size());
+            string res_stat = wl[0];
+            wl.erase(wl.begin());
+            try {
+                cout << "------------------------------------" << endl;
+                cout << ++count << "/" << wls.size() << endl;
+                slv.s.push();
+                parser.parse(wl);
+                if (res_stat == "SAT")
+                    slv.check_sat();
+                else if (res_stat == "UNSAT")
+                    slv.check_unsat();
+                // cout << "IT:" << endl;
+                // cout << str(I, mod).str();
+                slv.s.pop();
+            } catch (std::exception &e) {
+                cout << "################################### INCOMPATIBLE RESULT ##########################" << endl;
+                cout << res_stat << endl;
+                slv.s.pop();
+            }
+        }
     }
 
     void print(model m) {
