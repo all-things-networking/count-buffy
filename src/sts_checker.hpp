@@ -35,12 +35,6 @@ public:
 
     STSChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 
-    model check_wl_sat();
-
-    void check_wl_not_qry_unsat();
-
-    void add_constrs();
-
     vector<NamedExp> base_constrs();
 
     vector<NamedExp> bl_size(int i) const;
@@ -68,8 +62,6 @@ public:
     virtual vector<NamedExp> init(ev const &b0, ev const &s0) = 0;
 
     virtual vector<NamedExp> query(int m) = 0;
-
-    vector<NamedExp> to_uniqe(vector<NamedExp> &v) const;
 
     vector<NamedExp> scheduler_constrs();
 

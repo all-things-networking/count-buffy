@@ -64,9 +64,9 @@ int main(const int argc, const char *argv[]) {
         auto wl = wls[i];
         slv.s.push();
         slv.add(sts->base_constrs());
-        slv.add(sts->base_wl());
         // slv.add(sts->base_wl());
-        slv.add(merge(sts->query(5), "Query").negate());
+        // slv.add(sts->base_wl());
+        // slv.add(merge(sts->query(5), "Query").negate());
         // slv.add(merge(sts->query(5), "Query"));
         // auto e = sts->B[2][2] && sts->B[2][3] && sts->B[2][4] && sts->B[2][5] && sts->B[2][6];
         // e = e && sts->O[2][2] == 0 && sts->O[2][3] == 0 && sts->O[2][4] == 0 && sts->O[2][5] == 0 && sts->O[2][6] == 0;
@@ -76,27 +76,27 @@ int main(const int argc, const char *argv[]) {
         parser.parse(wl);
 
         auto start_t = chrono::high_resolution_clock::now();
-        if (res_stat == "SAT")
-            slv.check_sat();
-        else if (res_stat == "UNSAT")
-            slv.check_unsat();
-        auto end_t = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-        out << "prio, " << c << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
-        slv.s.pop();
-        continue;
         auto mod = slv.check_sat();
         cout << "Done: " << i << endl;
-        cout << "IT:" << endl;
-        cout << str(sts->I, mod).str();
         cout << "I:" << endl;
         cout << str(sts->I, mod).str();
         cout << "E:" << endl;
         cout << str(sts->E, mod).str();
         cout << "B:" << endl;
         cout << str(sts->B, mod, "\n").str();
+        cout << "S:" << endl;
+        cout << str(sts->S, mod, "\n").str();
         cout << "O:" << endl;
         cout << str(sts->O, mod).str();
+        // if (res_stat == "SAT")
+        // slv.check_sat();
+        // else if (res_stat == "UNSAT")
+        // slv.check_unsat();
+        auto end_t = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
+        out << "prio, " << c << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
+        slv.s.pop();
+        continue;
     }
     out.close();
 

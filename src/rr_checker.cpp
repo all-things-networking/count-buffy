@@ -42,19 +42,20 @@ vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         // [5]
-        res = res && ite(bv[i] && sv[i], ov[i] == 1, ov[i] == 0);
+        res = res && ite(bv[i] && sv[0] == i, ov[i] == 1, ov[i] == 0);
     }
-    return {NamedExp(res, "[3]: out")};
+    return {NamedExp(res)};
 }
 
 vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
     expr res = slv.ctx.bool_val(true);
     expr not_prevs = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
-        res = res && ite(not_prevs && b0[i], s0[i], !s0[i]);
+        res = res && implies(not_prevs && b0[i], s0[0] == i);
         not_prevs = not_prevs && !b0[i];
     }
-    return {NamedExp(res, "[1]: init")};
+    res = res && (implies(not_prevs, s0[0] == 0));
+    return {NamedExp(res)};
 }
 
 
@@ -62,23 +63,34 @@ vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
     assert(b.size() == num_bufs);
     assert(s.size() == num_bufs);
 
+    const expr &state = sp[0];
+
     expr next_turn = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         expr not_until = slv.ctx.bool_val(true);
-        expr first_backlog = slv.ctx.bool_val(true);
-        for (int l = 1; l <= num_bufs; ++l) {
-            const int j = (i + l) % num_bufs;
-            first_backlog = first_backlog && ite(not_until && bp[j], sp[j], !sp[j]);
-            not_until = not_until && !bp[j];
+        expr next_backlogged = slv.ctx.bool_val(true);
+        for (int j = 1; j < num_bufs; ++j) {
+            const int l = (i + j) % num_bufs;
+            next_backlogged = next_backlogged && implies(not_until && bp[l], state == l);
+            not_until = not_until && !bp[l];
         }
-        next_turn = next_turn && implies(s[i], first_backlog);
+        next_backlogged = next_backlogged && implies(not_until, sp[0] == i);
+        next_turn = next_turn && implies(s[0] == i, next_backlogged);
+        // expr not_until = slv.ctx.bool_val(true);
+        // expr first_backlog = slv.ctx.bool_val(true);
+        // for (int l = 1; l <= num_bufs; ++l) {
+        // const int j = (i + l) % num_bufs;
+        // first_backlog = first_backlog && ite(not_until && bp[j], sp[j], !sp[j]);
+        // not_until = not_until && !bp[j];
+        // }
+        // next_turn = next_turn && implies(s[i], first_backlog);
     }
 
     expr max_deq = slv.ctx.bool_val(true);
-    for (int i = 0; i < num_bufs; ++i) {
-        max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
-    }
-    return {NamedExp(next_turn && max_deq, "[2]: trs")};
+    // for (int i = 0; i < num_bufs; ++i) {
+    // max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
+    // }
+    return {NamedExp(next_turn && max_deq)};
 }
 
 vector<NamedExp> RRChecker::query(int m) {
@@ -86,5 +98,5 @@ vector<NamedExp> RRChecker::query(int m) {
     for (int i = m; i < timesteps; ++i) {
         res = res && (sum(O[2], i) - sum(O[1], i) >= 3);
     }
-    return {NamedExp(res, "query")};
+    return {NamedExp(res)};
 }

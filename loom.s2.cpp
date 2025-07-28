@@ -39,7 +39,7 @@ vector<NamedExp> wl(const ev3 &ins) {
     return res;
 }
 
-vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
+vector<NamedExp> base_wl(const ev3 &ins) {
     vector<NamedExp> res;
     for (int t = 0; t < ins[0].size(); ++t) {
         for (int i = 0; i < ins.size(); ++i) {
@@ -49,41 +49,24 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
             }
         }
     }
-    for (int t = 0; t < ins[0].size(); ++t) {
-        expr s0 = slv.ctx.int_val(0);
-        expr s1 = slv.ctx.int_val(0);
-        for (int i = 0; i < ins.size(); ++i) {
-            if (i % 3 == 0) {
-                s0 = s0 + sum(ins[i], t);
-            } else {
-                s1 = s1 + sum(ins[i], t);
-            }
-        }
-        // res.emplace_back(s0 >= t + 1, format("I[s0][{}] >= t", t));
-        res.emplace_back(s0 >= t + 1);
-        res.emplace_back(s1 >= t + 1, format("I[s1][{}] >= t", t));
+
+    expr t1 = sum(ins[0][0]) + sum(ins[3][0]) + sum(ins[6][0]) + sum(ins[9][0]);
+    expr t2 = sum(ins[1][0]) + sum(ins[4][0]) + sum(ins[7][0]) + sum(ins[10][0]);
+    res.emplace_back(t1 >= 1, format("I[t1][{}] >= t", 0));
+    res.emplace_back(t2 >= 1, format("I[t2][{}] >= t", 0));
+    for (int t = 1; t < ins[0].size(); ++t) {
+        t1 = t1 + sum(ins[0][t]) + sum(ins[3][t]) + sum(ins[6][t]) + sum(ins[9][t]);
+        t2 = t2 + sum(ins[1][t]) + sum(ins[4][t]) + sum(ins[7][t]) + sum(ins[10][t]);
+        res.emplace_back(t1 >= t + 1, format("I[t1][{}] >= t", t));
+        res.emplace_back(t2 >= t + 1, format("I[t2][{}] >= t", t));
     }
 
-    return res;
-
-
-    // expr t1 = sum(ins[0][0]) + sum(ins[3][0]) + sum(ins[6][0]) + sum(ins[9][0]);
-    // expr t2 = sum(ins[1][0]) + sum(ins[4][0]) + sum(ins[7][0]) + sum(ins[10][0]);
-    // res.emplace_back(t1 >= 1, format("I[t1][{}] >= t", 0));
-    // res.emplace_back(t2 >= 1, format("I[t2][{}] >= t", 0));
-    // for (int t = 1; t < ins[0].size(); ++t) {
-    // t1 = t1 + sum(ins[0][t]) + sum(ins[3][t]) + sum(ins[6][t]) + sum(ins[9][t]);
-    // t2 = t2 + sum(ins[1][t]) + sum(ins[4][t]) + sum(ins[7][t]) + sum(ins[10][t]);
-    // res.emplace_back(t1 >= t + 1, format("I[t1][{}] >= t", t));
-    // res.emplace_back(t2 >= t + 1, format("I[t2][{}] >= t", t));
-    // }
-
-    // for (int t = 0; t < ins[0].size(); ++t) {
-    // for (int i = 0; i < ins.size(); ++i) {
-    // if (i % 3 == 2)
-    // res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
-    // }
-    // }
+    for (int t = 0; t < ins[0].size(); ++t) {
+        for (int i = 0; i < ins.size(); ++i) {
+            if (i % 3 == 2)
+                res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
+        }
+    }
     return res;
 }
 
@@ -134,28 +117,23 @@ public:
     }
 
     void run() {
-        auto bwl = base_wl(slv, I);
-        slv.add(bwl);
+        auto bwl = base_wl(I);
+        slv.add(merge(bwl, "base_wl"));
         auto O = prio->O[0] + prio->O[1];
 
-        vector<vector<string> > wls = read_wl_file("../wls/loom.mem.txt");
-        for (int i = 0; i < wls.size(); ++i) {
-            auto wl = wls[i];
-            slv.s.push();
-            WorkloadParser parser(I, slv, I.size(), I[0].size());
-            string res_stat = wl[0];
-            wl.erase(wl.begin());
-            parser.parse(wl);
+        vector<vector<string> > wls = read_wl_file("../wls/loom.txt");
+        WorkloadParser parser(I, slv, I.size(), I[0].size());
+        auto wl = wls[0];
+        string res_stat = wl[0];
+        wl.erase(wl.begin());
+        parser.parse(wl);
+        // auto mwl = wl(I);
+        // slv.add(merge(mwl, "wl"));
+        slv.add(merge(query(slv, O), "not query").negate());
+        // slv.add(merge(query(slv, O), "query"));
 
-            slv.add(merge(query(slv, O), "not query").negate());
-            // slv.add(merge(query(slv, O), "query"));
-            if (res_stat == "SAT")
-                slv.check_sat();
-            else if (res_stat == "UNSAT")
-                slv.check_unsat();
-            slv.s.pop();
-            cout << "WL " << i  << " Done!" << endl;
-        }
+        auto m = slv.check_sat();
+        print(m);
     }
 
     void print(model m) {

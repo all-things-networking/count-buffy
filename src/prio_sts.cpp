@@ -7,13 +7,13 @@ PrioSTS::PrioSTS(SmtSolver &slv, const string &var_prefix, int n, int m, int k, 
 vector<NamedExp> PrioSTS::workload() {
     vector<NamedExp> res;
     for (int i = 0; i < timesteps - 1; ++i)
-        res.emplace_back((E[0][i] + E[1][i]) > 0, format("wl_s(0,1)[{}]", i));
+        res.emplace_back((E[0][i] + E[1][i]) > 0);
 
     expr b2_constr = E[2][0] > 0;
     for (int i = 0; i < timesteps - 5; ++i) {
         b2_constr = b2_constr || E[2][0] > 0;
     }
-    res.emplace_back(b2_constr, "wl_2[0]");
+    res.emplace_back(b2_constr);
     return res;
 }
 
@@ -24,7 +24,7 @@ vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
     for (int i = 0; i < num_bufs; ++i) {
         res = res && ite(not_until && bv[i], ov[i] == 1, ov[i] == 0);
         not_until = not_until && (!bv[i]);
-        rv.emplace_back(res, format("out[{}]", i));
+        rv.emplace_back(res);
     }
     return rv;
 }
@@ -35,7 +35,7 @@ vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &
     for (int i = 0; i < num_bufs; ++i) {
         for (int l = i + 1; l < num_bufs; ++l) {
             res = res && (implies(b[i], implies(b[l], bp[l])));
-            rv.emplace_back(res, format("trs[{}][{}]", i, l));
+            rv.emplace_back(res);
         }
     }
     return rv;
@@ -52,9 +52,9 @@ vector<NamedExp> PrioSTS::query(const int p) {
         }
         res = res || part;
     }
-    return {NamedExp(res, "query")};
+    return {res};
 }
 
 vector<NamedExp> PrioSTS::init(const ev &b0, const ev &s0) {
-    return {NamedExp(slv.ctx.bool_val(true), "init")};
+    return {slv.ctx.bool_val(true)};
 }

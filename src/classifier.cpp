@@ -12,15 +12,17 @@ Classifier::Classifier(SmtSolver &slv, const string &var_prefix, int m, int k, i
     slv.add_bound(O, 0, 100);
 }
 
-vector<NamedExp> Classifier::constrs() {
+vector<NamedExp> Classifier::set_out() {
     vector<NamedExp> nes;
+    // 0,1 -> 1
+    // 2 -> 0
     for (int j = 0; j < timesteps; ++j) {
-        O[0][j][0] = I[0][j][0];
-        O[0][j][1] = I[0][j][1];;
-        O[0][j][2] = slv.ctx.int_val(0);
-        O[1][j][0] = slv.ctx.int_val(0);
-        O[1][j][1] = slv.ctx.int_val(0);
-        O[1][j][2] = I[0][j][2];
+        O[1][j][0] = I[0][j][0];
+        O[1][j][1] = I[0][j][1];
+        O[1][j][2] = slv.ctx.int_val(0);
+        O[0][j][0] = slv.ctx.int_val(0);
+        O[0][j][1] = slv.ctx.int_val(0);
+        O[0][j][2] = I[0][j][2];
     }
     return nes;
 }

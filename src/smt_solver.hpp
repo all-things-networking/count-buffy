@@ -39,7 +39,7 @@ public:
 
     ev const_vec(int size, int val);
 
-    void add(const expr &e, const string &name);
+    void add(const expr &e, const string &prefix);
 
     void add(const NamedExp &ne);
 

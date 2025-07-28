@@ -138,24 +138,19 @@ public:
         slv.add(bwl);
         auto O = prio->O[0] + prio->O[1];
 
-        vector<vector<string> > wls = read_wl_file("../wls/loom.mem.txt");
-        for (int i = 0; i < wls.size(); ++i) {
-            auto wl = wls[i];
-            slv.s.push();
-            WorkloadParser parser(I, slv, I.size(), I[0].size());
-            string res_stat = wl[0];
-            wl.erase(wl.begin());
-            parser.parse(wl);
+        vector<vector<string> > wls = read_wl_file("../wls/loom.txt");
+        WorkloadParser parser(I, slv, I.size(), I[0].size());
+        auto wl = wls[0];
+        string res_stat = wl[0];
+        wl.erase(wl.begin());
+        parser.parse(wl);
+        // auto mwl = wl(I);
+        // slv.add(merge(mwl, "wl"));
+        slv.add(merge(query(slv, O), "not query").negate());
+        // slv.add(merge(query(slv, O), "query"));
 
-            slv.add(merge(query(slv, O), "not query").negate());
-            // slv.add(merge(query(slv, O), "query"));
-            if (res_stat == "SAT")
-                slv.check_sat();
-            else if (res_stat == "UNSAT")
-                slv.check_unsat();
-            slv.s.pop();
-            cout << "WL " << i  << " Done!" << endl;
-        }
+        auto m = slv.check_sat();
+        print(m);
     }
 
     void print(model m) {

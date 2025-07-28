@@ -4,12 +4,17 @@
 
 # define FLUSH false
 
-void STSChecker::add_constrs() {
-    // slv.add(out(), "Out");
-    // slv.add(trs(), "Trs");
-    // for (int i = 0; i < num_bufs; ++i) {
-    // inputs(i);
-    // }
+const int MAX_I = 10;
+
+vector<NamedExp> STSChecker::inputs(const int i) {
+    vector<NamedExp> res;
+    extend(res, bl_size(i));
+    extend(res, enqs(i));
+    extend(res, drops(i));
+    extend(res, enq_deq_sum(i));
+    // extend(res, winds_old(i));
+    extend(res, winds(i));
+    return res;
 }
 
 vector<NamedExp> STSChecker::base_constrs() {
@@ -23,13 +28,7 @@ vector<NamedExp> STSChecker::base_constrs() {
     res.insert(res.end(), trs_constrs.begin(), trs_constrs.end());
     auto out_constrs = out();
     res.insert(res.end(), out_constrs.begin(), out_constrs.end());
-
-    vector<NamedExp> unique_constrs;
-    unique_constrs.reserve(res.size());
-    for (auto &ne: res) {
-        unique_constrs.push_back(ne.prefix(this->var_prefix));
-    }
-    return unique_constrs;
+    return res;
 }
 
 STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, const int m, const int k, const int c,
@@ -41,7 +40,7 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     E = slv.ivvv(n, m, k, format("E_{}", var_prefix));
     D = slv.ivvv(n, m, k, format("D_{}", var_prefix));
     B = slv.bvv(n, m, format("B_{}", var_prefix));
-    S = slv.bvv(n, m, format("S_{}", var_prefix));
+    S = slv.ivv(n, m, format("S_{}", var_prefix));
     O = slv.ivvv(n, m, k, format("O_{}", var_prefix));
     C = slv.ivvv(n, m, k, format("C_{}", var_prefix));
     wnd_enq = slv.ivvv(n, m, k, format("WndEnq_{}", var_prefix));
@@ -51,7 +50,7 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     tmp_wnd_enq_nxt = slv.ivvv(n, m, k, format("TmpWndEnqNxt_{}", var_prefix));
     tmp_wnd_out = slv.ivvv(n, m, k, format("TmpWndOut_{}", var_prefix));
     match = slv.bvv(n, m, format("Match_{}", var_prefix));
-    slv.add_bound(I, 0, me);
+    slv.add_bound(I, 0, MAX_I);
     slv.add_bound(E, 0, me);
     slv.add_bound(D, 0, me);
     slv.add_bound(O, 0, md);
@@ -64,35 +63,6 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     slv.add_bound(tmp_wnd_out, 0, c);
 }
 
-
-model STSChecker::check_wl_sat() {
-    slv.s.push();
-    slv.add(workload());
-    slv.add(query(5));
-    slv.add(out());
-    slv.add(trs());
-    for (int i = 0; i < num_bufs; ++i) {
-        auto nes = inputs(i);
-        slv.add(nes);
-    }
-    auto m = slv.check_sat();
-    slv.s.pop();
-    return m;
-}
-
-void STSChecker::check_wl_not_qry_unsat() {
-    slv.s.push();
-    slv.add(workload());
-    slv.add(merge(query(5), "Query").negate());
-    slv.add(out());
-    slv.add(trs());
-    for (int i = 0; i < num_bufs; ++i) {
-        slv.add(inputs(i));
-    }
-    slv.check_unsat();
-    slv.s.pop();
-}
-
 vector<NamedExp> STSChecker::bl_size(const int i) const {
     const auto Ei = E[i];
     const auto Bi = B[i];
@@ -100,18 +70,18 @@ vector<NamedExp> STSChecker::bl_size(const int i) const {
     const auto Oi = O[i];
     vector<NamedExp> res;
     // [6]
-    auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0], format("C[{}]@{}", i, 0));
+    auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0]);
     res.push_back(ne);
     for (int j = 1; j < timesteps; ++j) {
         // [7]
-        ne = NamedExp(Bi[j] == (Ci[j - 1] + Ei[j] > 0), format("B[{}]@{} (backlog consistency)", i, j));
+        ne = NamedExp(Bi[j] == (Ci[j - 1] + Ei[j] > 0));
         res.push_back(ne);
         // [8]
-        ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]), format("C[{}]@{} (update)", i, j));
+        ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]));
         res.push_back(ne);
     }
     if constexpr (FLUSH) {
-        ne = NamedExp((!Bi[timesteps - 1]), format("B[{}]@T", i));
+        ne = NamedExp((!Bi[timesteps - 1]));
         res.push_back(ne);
     }
     return res;
@@ -126,13 +96,13 @@ std::vector<NamedExp> STSChecker::enqs(const int i) const {
 
     // [9]
     expr e0 = (Ei[0] <= c) && (Bi[0] == (Ei[0] > 0));
-    res.emplace_back(e0, format("Enq[{}]@{}", i, 0));
+    res.emplace_back(e0);
 
     for (int j = 1; j < timesteps; ++j) {
         // [10]
         expr lt_cap = ((Ei[j] + Ci[j - 1]) <= c);
         expr ej = lt_cap;
-        res.emplace_back(ej, format("Enq[{}]@{}", i, j));
+        res.emplace_back(ej);
     }
     return res;
 }
@@ -148,7 +118,7 @@ std::vector<NamedExp> STSChecker::drops(int i) {
 
     // [11]
     expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == c), Di[0] == 0);
-    res.emplace_back(d0, format("Drop[{}]@{}", i, 0));
+    res.emplace_back(d0);
 
     // timesteps 1..m-1
     for (int j = 1; j < timesteps; ++j) {
@@ -156,7 +126,7 @@ std::vector<NamedExp> STSChecker::drops(int i) {
         expr dj = ite(Bi[j],
                       implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == c),
                       Di[j] == 0);
-        res.emplace_back(dj, format("Drop[{}]@{}", i, j));
+        res.emplace_back(dj);
     }
     return res;
 }
@@ -169,99 +139,31 @@ std::vector<NamedExp> STSChecker::enq_deq_sum(int i) {
     std::vector<NamedExp> res;
 
     // timestep 0
-    res.emplace_back(Ii[0] == (Ei[0] + Di[0]), format("InpSum[{}]@{}", i, 0));
+    res.emplace_back(Ii[0] == (Ei[0] + Di[0]));
 
     // timesteps 1..m-1
     for (int j = 1; j < timesteps; ++j) {
         expr ij = (Ii[j] == (Ei[j] + Di[j]));
         // [13]
-        res.emplace_back(ij, format("InpSum[{}]@{}", i, j));
+        res.emplace_back(ij);
     }
     return res;
 }
 
-//
-vector<NamedExp> STSChecker::winds_old(int i) {
-    vector<NamedExp> nes;
-    int cap = c;
-    // [14]
-    nes.emplace_back(wnd_enq[i][0] == E[i][0], format("WndEnq[{}]@{}", i, 0));
-    nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
-    nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
-    for (int j = 1; j < timesteps; ++j) {
-        auto te = tmp_wnd_enq[i][j];
-        auto tn = tmp_wnd_enq_nxt[i][j];
-        // auto to = tmp_wnd_out[i][j];
-        // auto m = match[i][j];
-
-        // nes.emplace_back(implies(wnd_enq[i][j - 1] + E[i][j] <= cap, te == wnd_enq[i][j - 1] + E[i][j] && sum(tn) == 0),
-        // format("WndEnq[{}]@{}", i, j));
-        //
-        // nes.emplace_back(implies(wnd_enq[i][j - 1] <= cap && sum(wnd_enq[i][j - 1] + E[i][j]) > cap,
-        // te == cap && sum(tn) == sum(
-        // wnd_enq[i][j - 1] + E[i][j] + wnd_enq_nxt[i][j - 1]) - cap),
-        // format("WndEnqNxt[{}]@{}", i, j));
-        // nes.emplace_back(
-        // implies(sum(wnd_enq[i][j]) > cap, te == wnd_enq[i][j - 1] && tn == wnd_enq_nxt[i][j - 1] + E[i][j]),
-        // format("next_wnd_enq[{}]@{}", i, j));
-
-        // [15]
-        auto total_sum = wnd_enq[i][j - 1] + wnd_enq_nxt[i][j - 1] + E[i][j];
-        // auto te = ite(total_sum <= c, total_sum, c);
-
-
-        nes.emplace_back((te + tn) == total_sum, format("Update te + tn[{}]@{}", i, j));
-        // [16], [17], [18], [19]
-        nes.emplace_back((!(te < cap && tn > 0)) && (te <= cap) && (tn <= cap) && (wnd_enq[i][j - 1] <= te),
-                         format("Overflow mechanism[{}]@{}", i, j));
-        // [20]
-        // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
-
-        auto to = wnd_out[i][j - 1] + O[i][j];
-        // [21]
-        // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
-        auto m = te <= to;
-        // [22]
-        nes.emplace_back(
-            ite(m, wnd_enq[i][j] == tn, ite(total_sum <= cap, wnd_enq[i][j] == total_sum, wnd_enq[i][j] == total_sum)),
-            format("Update WE[{}]@{}", i, j));
-        // [23]
-        nes.emplace_back(ite(m, wnd_enq_nxt[i][j] == 0, wnd_enq_nxt[i][j] == tn), format("Update WN[{}]@{}", i, j));
-        // [24]
-        nes.emplace_back(ite(m, wnd_out[i][j] == to - te, wnd_out[i][j] == to), format("Update WO[{}]@{}", i, j));
-        // [25]
-        nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j], format("WndOut <= WndEnq[{}]@{}", i, j));
-
-        nes.emplace_back(C[i][j] == wnd_enq[i][j] + wnd_enq_nxt[i][j] - wnd_out[i][j], format("equity[{}]@{}", i, j));
-    }
-    return nes;
-}
-
-
-vector<NamedExp> STSChecker::inputs(const int i) {
-    vector<NamedExp> res;
-    extend(res, bl_size(i));
-    extend(res, enqs(i));
-    extend(res, drops(i));
-    extend(res, enq_deq_sum(i));
-    // extend(res, winds_old(i));
-    extend(res, winds(i));
-    return res;
-}
 
 vector<NamedExp> STSChecker::winds(int i) {
     vector<NamedExp> nes;
     // [14]
-    nes.emplace_back(wnd_enq[i][0] == E[i][0], format("WndEnq[{}]@{}", i, 0));
-    nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
-    nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
+    nes.emplace_back(wnd_enq[i][0] == E[i][0]);
+    nes.emplace_back(wnd_out[i][0] == O[i][0]);
+    nes.emplace_back(wnd_enq_nxt[i][0] == 0);
     for (int j = 1; j < timesteps; ++j) {
         // auto res = slv.capped(wnd_enq[i][j - 1] + E[i][j], c);
         // auto se = res.first;
         // auto sn = res.second;
         auto se = tmp_wnd_enq[i][j];
         auto sn = tmp_wnd_enq_nxt[i][j];
-        nes.emplace_back(wnd_enq[i][j - 1] + E[i][j] == se + sn, format("win tmps [{}]@{}", i, j));
+        nes.emplace_back(wnd_enq[i][j - 1] + E[i][j] == se + sn);
 
         // auto se = slv.const_vec(pkt_types, 1);
         // auto sn = slv.const_vec(pkt_types, 0);
@@ -283,8 +185,8 @@ vector<NamedExp> STSChecker::winds(int i) {
         constr = constr && implies(sum(sn) > 0, sum(se) == c);
         constr = constr && implies(sum(se) < c, sum(sn) == 0);
         constr = constr && !(sum(se) < c && sum(sn) > 0);
-        nes.emplace_back(constr, format("win constr[{}]@{}", i, j));
-        nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j], format("WndOut <= WndEnq[{}]@{}", i, j));
+        nes.emplace_back(constr);
+        nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j]);
         // nes.emplace_back(C[i][j] == wnd_enq[i][j] + wnd_enq_nxt[i][j] - wnd_out[i][j], format("equity[{}]@{}", i, j));
         // ite( m, wn == 0, wn == wn + )
         // auto tn = total_sum - te;
@@ -301,21 +203,13 @@ vector<NamedExp> STSChecker::winds(int i) {
     return nes;
 }
 
-vector<NamedExp> STSChecker::to_uniqe(vector<NamedExp> &v) const {
-    vector<NamedExp> unique_constrs;
-    unique_constrs.reserve(v.size());
-    for (auto &ne: v)
-        unique_constrs.push_back(ne.prefix(this->var_prefix));
-    return unique_constrs;
-}
-
 vector<NamedExp> STSChecker::scheduler_constrs() {
     vector<NamedExp> res;
     auto trs_constrs = trs();
     res.insert(res.end(), trs_constrs.begin(), trs_constrs.end());
     auto out_constrs = out();
     res.insert(res.end(), out_constrs.begin(), out_constrs.end());
-    return to_uniqe(res);
+    return res;
 }
 
 vector<NamedExp> STSChecker::input_constrs(int i) {
@@ -391,3 +285,60 @@ vector<NamedExp> STSChecker::out() {
     }
     return res;
 }
+//
+vector<NamedExp> STSChecker::winds_old(int i) {
+    vector<NamedExp> nes;
+    int cap = c;
+    // [14]
+    nes.emplace_back(wnd_enq[i][0] == E[i][0], format("WndEnq[{}]@{}", i, 0));
+    nes.emplace_back(wnd_out[i][0] == O[i][0], format("WndOut[{}]@{}", i, 0));
+    nes.emplace_back(wnd_enq_nxt[i][0] == 0, format("WndNxt[{}]@{}", i, 0));
+    for (int j = 1; j < timesteps; ++j) {
+        auto te = tmp_wnd_enq[i][j];
+        auto tn = tmp_wnd_enq_nxt[i][j];
+        // auto to = tmp_wnd_out[i][j];
+        // auto m = match[i][j];
+
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] + E[i][j] <= cap, te == wnd_enq[i][j - 1] + E[i][j] && sum(tn) == 0),
+        // format("WndEnq[{}]@{}", i, j));
+        //
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] <= cap && sum(wnd_enq[i][j - 1] + E[i][j]) > cap,
+        // te == cap && sum(tn) == sum(
+        // wnd_enq[i][j - 1] + E[i][j] + wnd_enq_nxt[i][j - 1]) - cap),
+        // format("WndEnqNxt[{}]@{}", i, j));
+        // nes.emplace_back(
+        // implies(sum(wnd_enq[i][j]) > cap, te == wnd_enq[i][j - 1] && tn == wnd_enq_nxt[i][j - 1] + E[i][j]),
+        // format("next_wnd_enq[{}]@{}", i, j));
+
+        // [15]
+        auto total_sum = wnd_enq[i][j - 1] + wnd_enq_nxt[i][j - 1] + E[i][j];
+        // auto te = ite(total_sum <= c, total_sum, c);
+
+
+        nes.emplace_back((te + tn) == total_sum, format("Update te + tn[{}]@{}", i, j));
+        // [16], [17], [18], [19]
+        nes.emplace_back((!(te < cap && tn > 0)) && (te <= cap) && (tn <= cap) && (wnd_enq[i][j - 1] <= te),
+                         format("Overflow mechanism[{}]@{}", i, j));
+        // [20]
+        // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
+
+        auto to = wnd_out[i][j - 1] + O[i][j];
+        // [21]
+        // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
+        auto m = te <= to;
+        // [22]
+        nes.emplace_back(
+            ite(m, wnd_enq[i][j] == tn, ite(total_sum <= cap, wnd_enq[i][j] == total_sum, wnd_enq[i][j] == total_sum)),
+            format("Update WE[{}]@{}", i, j));
+        // [23]
+        nes.emplace_back(ite(m, wnd_enq_nxt[i][j] == 0, wnd_enq_nxt[i][j] == tn), format("Update WN[{}]@{}", i, j));
+        // [24]
+        nes.emplace_back(ite(m, wnd_out[i][j] == to - te, wnd_out[i][j] == to), format("Update WO[{}]@{}", i, j));
+        // [25]
+        nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j], format("WndOut <= WndEnq[{}]@{}", i, j));
+
+        nes.emplace_back(C[i][j] == wnd_enq[i][j] + wnd_enq_nxt[i][j] - wnd_out[i][j], format("equity[{}]@{}", i, j));
+    }
+    return nes;
+}
+

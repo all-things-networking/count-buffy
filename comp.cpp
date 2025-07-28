@@ -94,7 +94,7 @@ public:
         rr2 = new RRChecker(slv, "rr2", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
         rr3 = new RRChecker(slv, "rr3", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
         rr4 = new RRChecker(slv, "rr4", RR_IN_BUFS, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
-        merger = new Merger(slv, "mg", 4, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);;
+        merger = new Merger(slv, "mg", 4, TIME_STEPS, PKT_TYPES, C, MAX_ENQ, MAX_DEQ);
         O = merger->O[0] + merger->O[1] + merger->O[2] + merger->O[3];
         slv.add_bound({O}, 0, MAX_ENQ);
     }
@@ -102,22 +102,22 @@ public:
     model run() {
         slv.s.push();
 
-        vector<STSChecker *> rrs = {rr1, rr2, rr3, rr4};
-        for (int i = 0; i < rrs.size(); ++i) {
-            auto constrs = rrs[i]->base_constrs();
+        // vector<STSChecker *> rrs = {rr1, rr2, rr3, rr4};
+        // for (int i = 0; i < rrs.size(); ++i) {
+            // auto constrs = rrs[i]->base_constrs();
             // auto constrs = rrs[i]->scheduler_constrs();
-            slv.add(constrs);
-            slv.add({
-                rrs[i]->O[0] + rrs[i]->O[1] == merger->I[i], format("mg.I[{}] == rr{}.O[0] + rr{}.O[1])", i, i, i)
-            });
-        }
-        slv.add(merger->base_constrs());
+            // slv.add(constrs);
+            // slv.add({
+                // rrs[i]->O[0] + rrs[i]->O[1] == merger->I[i], format("mg.I[{}] == rr{}.O[0] + rr{}.O[1])", i, i, i)
+            // });
+        // }
+        // slv.add(merger->base_constrs());
         // slv.add({merger->I[0][0] > 0, "bar"});
         // slv.add({rr1->I[0][0][0] > 1, "baz"});
-        auto ins = {rr1->I, rr2->I, rr3->I, rr4->I};
+        // auto ins = {rr1->I, rr2->I, rr3->I, rr4->I};
 
-        auto base_wl_constrs = base_wl(ins);
-        slv.add(base_wl_constrs);
+        // auto base_wl_constrs = base_wl(ins);
+        // slv.add(base_wl_constrs);
         // slv.add({rr1->E[0][0] == 2, "x"});
         // slv.add({rr2->E[0][0] == 3, "y"});
         // slv.add(query(slv, O));

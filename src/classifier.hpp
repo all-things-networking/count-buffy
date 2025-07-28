@@ -22,7 +22,7 @@ public:
 
     Classifier(SmtSolver &slv, const string &var_prefix, int m, int k, int o);
 
-    vector<NamedExp> constrs();
+    vector<NamedExp> set_out();
 
     void print(model m) const;
 };

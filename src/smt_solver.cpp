@@ -23,7 +23,7 @@ ev &SmtSolver::bv(const int k, const string &name) {
     const auto result = new vector<expr>[k];
     for (int i = 0; i < k; i++) {
         string vname = name;
-        vname += to_string(i);
+        vname += "_" + to_string(i);
         expr e = ctx.bool_const(vname.c_str());
         result->push_back(e);
     }
@@ -34,7 +34,7 @@ ev2 &SmtSolver::bvv(const int m, const int k, const string &name) {
     auto *result = new vector<ev>[m];
     for (int i = 0; i < m; i++) {
         string vname = name;
-        vname += to_string(i);
+        vname += "_" + to_string(i);
         auto v = bv(k, vname);
         result->push_back(v);
     }
@@ -93,8 +93,8 @@ ev SmtSolver::const_vec(int size, int val) {
     return result;
 }
 
-void SmtSolver::add(const expr &e, const string &name) {
-    add({e, name});
+void SmtSolver::add(const expr &e, const string &prefix) {
+    add({e, format("{}_{}", prefix, e.to_string())});
 }
 
 void SmtSolver::add(const NamedExp &ne) {
@@ -121,8 +121,8 @@ model SmtSolver::check_sat() {
             return s.get_model();
         default:
             // cout << s.statistics() << endl;
-        cout << s.unsat_core() << endl;
-        throw runtime_error("Model is not SAT!");
+            cout << s.unsat_core() << endl;
+            throw runtime_error("Model is not SAT!");
     }
 }
 
@@ -140,13 +140,15 @@ void SmtSolver::check_unsat() {
 
 
 void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
+    expr res = ctx.bool_val(true);
     for (const auto &vv: vvv) {
         for (const auto &v: vv) {
             for (const auto &e: v) {
-                s.add((e >= lower) & (e <= upper));
+                res = res && (e >= lower) && (e <= upper);
             }
         }
     }
+    s.add(res);
 }
 
 pair<ev, ev> SmtSolver::capped(const ev &v, int cap) {
