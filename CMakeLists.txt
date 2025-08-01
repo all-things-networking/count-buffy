@@ -45,3 +45,18 @@ target_link_directories(Loom PRIVATE /usr/local/lib)
 target_link_libraries(Loom PRIVATE z3)
 target_link_libraries(Loom PRIVATE antlr4-runtime)
 
+add_executable(LoomMem loom.mem.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(LoomMem PRIVATE /usr/local/include/antlr4-runtime)
+target_include_directories(LoomMem PRIVATE /usr/local/include)
+target_link_directories(LoomMem PRIVATE /usr/local/lib)
+target_link_libraries(LoomMem PRIVATE z3)
+target_link_libraries(LoomMem PRIVATE antlr4-runtime)
+
+
+add_executable(LoomNoMem loom.nomem.cpp ${SRC_FILES} ${HPP_FILES})
+target_include_directories(LoomNoMem PRIVATE /usr/local/include/antlr4-runtime)
+target_include_directories(LoomNoMem PRIVATE /usr/local/include)
+target_link_directories(LoomNoMem PRIVATE /usr/local/lib)
+target_link_libraries(LoomNoMem PRIVATE z3)
+target_link_libraries(LoomNoMem PRIVATE antlr4-runtime)
+

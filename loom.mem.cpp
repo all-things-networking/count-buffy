@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 
 #include"z3++.h"
@@ -103,6 +104,8 @@ class Composed {
 
 public:
     Composed(int buffer_size, unsigned int random_seed): slv(random_seed) {
+        this->buffer_size = buffer_size;
+        this->random_seed = random_seed;
         I = slv.ivvv(4 * PKT_TYPES, TIME_STEPS, PKT_TYPES, "INS");
         slv.add_bound(I, 0, MAX_ENQ);
 
@@ -137,8 +140,11 @@ public:
         auto bwl = base_wl(slv, I);
         slv.add(bwl);
         auto O = prio->O[0] + prio->O[1];
-
-        vector<vector<string> > wls = read_wl_file("../wls/loom.mem.txt");
+        string wl_file = format("wls/loom.mem.45.txt", buffer_size);
+        vector<vector<string> > wls = read_wl_file(wl_file);
+        string out_file_path = format("logs/loom.mem.{}.txt", buffer_size);
+        ofstream out(out_file_path, ios::out);
+        out << "scheduler,buf_size,wl_idx,time_millis,solver_res" << endl;
         for (int i = 0; i < wls.size(); ++i) {
             auto wl = wls[i];
             slv.s.push();
@@ -149,12 +155,16 @@ public:
 
             slv.add(merge(query(slv, O), "not query").negate());
             // slv.add(merge(query(slv, O), "query"));
+            auto start_t = chrono::high_resolution_clock::now();
             if (res_stat == "SAT")
                 slv.check_sat();
             else if (res_stat == "UNSAT")
                 slv.check_unsat();
             slv.s.pop();
-            cout << "WL " << i  << " Done!" << endl;
+            auto end_t = chrono::high_resolution_clock::now();
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
+            cout << "Loom[mem],"<< buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
+            out << "Loom[mem],"<< buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
         }
     }
 

@@ -1,0 +1,12 @@
+scheduler,buf_size,wl_idx,time_millis,solver_res
+Loom[mem],200,0,6826,UNSAT
+Loom[mem],200,1,17066,SAT
+Loom[mem],200,2,20095,UNSAT
+Loom[mem],200,3,31708,SAT
+Loom[mem],200,4,28351,SAT
+Loom[mem],200,5,27774,UNSAT
+Loom[mem],200,6,50982,SAT
+Loom[mem],200,7,122785,SAT
+Loom[mem],200,8,19233,SAT
+Loom[mem],200,9,30803,SAT
+Loom[mem],200,10,31707,SAT

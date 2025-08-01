@@ -14,7 +14,8 @@ using namespace z3;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-const int TIME_STEPS = 10;
+const int TIME_STEPS = 12;
+const int TIME_LIMIT = 4;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 3;
 
@@ -29,7 +30,7 @@ vector<NamedExp> query(SmtSolver &slv, ev2 &out) {
 vector<NamedExp> wl(const ev3 &ins) {
     vector<NamedExp> res;
     for (int i = 0; i < ins.size(); ++i) {
-        for (int t = 0; t < ins[i].size(); ++t) {
+        for (int t = 0; t < TIME_LIMIT; ++t) {
             if (i == 1 || i == 4 || i == 7 || i == 10 || i == 9)
                 res.emplace_back(sum(ins[i], t) >= t + 1, format("sum(wl[{}][{}]) >= 1", i, t));
             else
@@ -41,7 +42,7 @@ vector<NamedExp> wl(const ev3 &ins) {
 
 vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
     vector<NamedExp> res;
-    for (int t = 0; t < ins[0].size(); ++t) {
+    for (int t = 0; t < TIME_STEPS; ++t) {
         for (int i = 0; i < ins.size(); ++i) {
             for (int k = 0; k < ins[0][0].size(); ++k) {
                 if (i % 3 != k)
@@ -49,7 +50,7 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
             }
         }
     }
-    for (int t = 0; t < ins[0].size(); ++t) {
+    for (int t = 0; t < TIME_LIMIT; ++t) {
         expr s0 = slv.ctx.int_val(0);
         expr s1 = slv.ctx.int_val(0);
         expr s2 = slv.ctx.int_val(0);
@@ -67,7 +68,7 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
         res.emplace_back(s1 >= t + 1, format("I%1 >= t @{}", t));
     }
 
-    for (int t = 0; t < ins[0].size(); ++t) {
+    for (int t = 0; t < TIME_STEPS; ++t) {
         for (int i = 0; i < ins.size(); ++i) {
             if (i % 3 == 2)
                 res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
