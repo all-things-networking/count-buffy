@@ -13,7 +13,7 @@ vector<NamedExp> STSChecker::inputs(const int i) {
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
     // extend(res, winds_old(i));
-    // extend(res, winds(i));
+    extend(res, winds(i));
     return res;
 }
 
@@ -175,6 +175,7 @@ vector<NamedExp> STSChecker::winds(int i) {
         );
         constr = constr && se <= c && sn <= c - 1 && sn >= 0 && se >= 0 && to >= 0 && to <= 2 * c && wnd_enq_nxt[i][j] <
                  c;
+        constr = constr && (wnd_enq[i][j - 1] <= se);
         constr = constr && implies(sum(sn) > 0, sum(se) == c);
         constr = constr && implies(sum(se) < c, sum(sn) == 0);
         constr = constr && !(sum(se) < c && sum(sn) > 0);
