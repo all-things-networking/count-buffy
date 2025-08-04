@@ -18,7 +18,7 @@ WorkloadParser::WorkloadParser(ev3 &I, SmtSolver &slv, int n, int m) : I(I), slv
 }
 
 
-void WorkloadParser::parse(string prefix, string wl_line) {
+expr WorkloadParser::parse(string prefix, string wl_line) {
     ANTLRInputStream inputStream(wl_line);
     fperfLexer lexer(&inputStream);
     CommonTokenStream tokens(&lexer);
@@ -26,17 +26,22 @@ void WorkloadParser::parse(string prefix, string wl_line) {
     auto tree = parser.con();
     ConstrExtractor *visitor = new ConstrExtractor(slv, n, m);
     visitor->visit(tree);
+    expr wl_expr = slv.ctx.bool_val(true);
     for (int i = 0; i < visitor->constrs.size(); ++i)
-        slv.add(visitor->constrs[i], prefix);
+        wl_expr = wl_expr && visitor->constrs[i];
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < m; ++j)
-            slv.add(sum(I[i][j]) == visitor->IT[i][j], prefix);
+            wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
+    return wl_expr;
 }
 
 void WorkloadParser::parse(vector<string> wl) {
+    auto wl_expr = slv.ctx.bool_val(true);
     for (int i = 0; i < wl.size(); ++i) {
         string line = wl[i];
         string prefix = format("WL_{}", i);
-        parse(prefix, line);
+        auto expr = parse(prefix, line);
+        wl_expr = wl_expr && expr;
     }
+    slv.add({wl_expr, "wl_expr"});
 }

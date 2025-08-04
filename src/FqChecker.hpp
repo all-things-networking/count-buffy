@@ -10,17 +10,27 @@
 
 class FqChecker : public STSChecker {
 public:
-    FqChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md)
-        : STSChecker(slv, var_prefix, n, m, k, c, me, md) {
-    }
+    FqChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 
-    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
+    ev2 SS;
+    ev2 nq;
+    ev2 oq;
+    ev tmp;
 
-    vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp) override;
+    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov, int t) override;
+
+    vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) override;
 
     vector<NamedExp> init(const ev &b0, const ev &s0) override;
 
+    vector<NamedExp> workload() override;
+
+    vector<NamedExp> query(int m) override;
+
+    ev2 get_state() const override;
+
     vector<IntSeq> nqs;
+
     vector<IntSeq> oqs;
 };
 

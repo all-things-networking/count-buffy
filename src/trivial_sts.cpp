@@ -7,7 +7,7 @@ vector<NamedExp> TrivialSts::workload() {
     return {NamedExp(base_wl, "workload")};
 }
 
-vector<NamedExp> TrivialSts::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> TrivialSts::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
     expr res = slv.ctx.bool_val(true);
     return {NamedExp(res, "out")};
 }
@@ -18,7 +18,7 @@ vector<NamedExp> TrivialSts::init(const ev &b0, const ev &s0) {
 }
 
 
-vector<NamedExp> TrivialSts::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
+vector<NamedExp> TrivialSts::trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
     expr res = slv.ctx.bool_val(true);
     return {NamedExp(res, "trs")};
 }

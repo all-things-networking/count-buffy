@@ -17,7 +17,7 @@ vector<NamedExp> PrioSTS::workload() {
     return res;
 }
 
-vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
     vector<NamedExp> rv;
     expr res = slv.ctx.bool_val(true);
     expr not_until = slv.ctx.bool_val(true);
@@ -29,7 +29,7 @@ vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov) {
     return rv;
 }
 
-vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
+vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) {
     vector<NamedExp> rv;
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {

@@ -13,7 +13,7 @@ vector<NamedExp> STSChecker::inputs(const int i) {
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
     // extend(res, winds_old(i));
-    extend(res, winds(i));
+    // extend(res, winds(i));
     return res;
 }
 
@@ -40,7 +40,7 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     E = slv.ivvv(n, m, k, format("E_{}", var_prefix));
     D = slv.ivvv(n, m, k, format("D_{}", var_prefix));
     B = slv.bvv(n, m, format("B_{}", var_prefix));
-    S = slv.ivv(n, m, format("S_{}", var_prefix));
+    S_int = slv.ivv(n, m, format("S_{}", var_prefix));
     O = slv.ivvv(n, m, k, format("O_{}", var_prefix));
     C = slv.ivvv(n, m, k, format("C_{}", var_prefix));
     wnd_enq = slv.ivvv(n, m, k, format("WndEnq_{}", var_prefix));
@@ -184,6 +184,10 @@ vector<NamedExp> STSChecker::winds(int i) {
     return nes;
 }
 
+ev2 STSChecker::get_state() const {
+    return S_int;
+}
+
 vector<NamedExp> STSChecker::scheduler_constrs() {
     vector<NamedExp> res;
     auto trs_constrs = trs();
@@ -199,15 +203,15 @@ vector<NamedExp> STSChecker::input_constrs(int i) {
 vector<NamedExp> STSChecker::trs() {
     vector<NamedExp> res;
     ev const &b0 = get_buf_vec_at_i(B, 0);
-    ev const &s0 = get_buf_vec_at_i(S, 0);
+    ev const &s0 = get_buf_vec_at_i(get_state(), 0);
     auto nes = init(b0, s0);
     extend(res, nes);
     for (int i = 0; i < timesteps - 1; ++i) {
         ev const &b = get_buf_vec_at_i(B, i);
         ev const &bp = get_buf_vec_at_i(B, i + 1);
-        ev const &s = get_buf_vec_at_i(S, i);
-        ev const &sp = get_buf_vec_at_i(S, i + 1);
-        nes = trs(b, s, bp, sp);
+        ev const &s = get_buf_vec_at_i(get_state(), i);
+        ev const &sp = get_buf_vec_at_i(get_state(), i + 1);
+        nes = trs(b, s, bp, sp, i + 1);
         extend(res, nes, format("Trs({},{})", i, i + 1));
     }
     return res;
@@ -254,16 +258,17 @@ void STSChecker::print(model m) const {
     cout << "B:" << endl;
     cout << str(B, m, "\n").str();
     cout << "S:" << endl;
-    cout << str(S, m, "\n").str();
+    cout << str(get_state(), m, "\n").str();
 }
 
 vector<NamedExp> STSChecker::out() {
     vector<NamedExp> res;
     for (int j = 0; j < timesteps; ++j) {
-        auto nes = out(get_buf_vec_at_i(B, j), get_buf_vec_at_i(S, j), get_buf_vec_at_i(O, j));
+        auto nes = out(get_buf_vec_at_i(B, j), get_buf_vec_at_i(get_state(), j), get_buf_vec_at_i(O, j), j);
         extend(res, nes, format("@{}", j));
     }
     return res;
+    // return {merge(res, "out")};
 }
 
 //

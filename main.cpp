@@ -85,7 +85,7 @@ int main(const int argc, const char *argv[]) {
         cout << "B:" << endl;
         cout << str(sts->B, mod, "\n").str();
         cout << "S:" << endl;
-        cout << str(sts->S, mod, "\n").str();
+        cout << str(sts->S_int, mod, "\n").str();
         cout << "O:" << endl;
         cout << str(sts->O, mod).str();
         // if (res_stat == "SAT")

@@ -15,7 +15,7 @@ class WorkloadParser {
 public:
     WorkloadParser(ev3 &I, SmtSolver &slv, int n, int m);
 
-    void parse(string prefix, string wl_line);
+    expr parse(string prefix, string wl_line);
 
     void parse(vector<string> wl);
 

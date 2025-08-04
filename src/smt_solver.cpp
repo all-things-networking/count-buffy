@@ -7,6 +7,8 @@
 #include <fstream>
 #include <set>
 
+#include "IntSeq.hpp"
+
 SmtSolver::SmtSolver(): s(ctx) {
     params p(ctx);
     p.set("random_seed", 600u);
@@ -59,6 +61,30 @@ ev &SmtSolver::iv(const int k, const string &name) {
         vname += "_" + to_string(i);
         expr e = ctx.int_const(vname.c_str());
         result->push_back(e);
+    }
+    return *result;
+}
+
+ev &SmtSolver::sv(const int k, const string &name) {
+    IntSeq is(&ctx);
+
+    auto *result = new vector<expr>[k];
+    for (int i = 0; i < k; i++) {
+        string vname = name;
+        vname += "_" + to_string(i);
+        expr e = is.create(vname);
+        result->push_back(e);
+    }
+    return *result;
+}
+
+ev2 &SmtSolver::svv(const int m, const int k, const string &name) {
+    const auto result = new vector<ev>[m];
+    for (int i = 0; i < m; i++) {
+        string vname = name;
+        vname += "_" + to_string(i);
+        auto v = sv(k, vname);
+        result->push_back(v);
     }
     return *result;
 }

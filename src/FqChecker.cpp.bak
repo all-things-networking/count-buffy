@@ -1,0 +1,116 @@
+//
+// Created by Amir Hossein Seyhani on 7/28/25.
+//
+
+#include "FqChecker.hpp"
+
+#include <support/CPPUtils.h>
+
+#include "IntSeq.hpp"
+
+ev get_new_queue(const ev2 &s) {
+    return s[0];
+}
+
+ev get_old_queue(const ev2 &s) {
+    return s[1];
+}
+
+FqChecker::FqChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md)
+    : STSChecker(slv, var_prefix, n, m, k, c, me, md) {
+    SS = slv.svv(n, m, "state_seq");
+    inactive_ = slv.bvv(n, m, "inactive");
+}
+
+
+vector<NamedExp> FqChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
+    IntSeq is(&slv.ctx);
+    expr nq = sv[0];
+    expr oq = sv[1];
+    context *ctx = &nq.ctx();
+
+    vector<NamedExp> res;
+    for (int i = 0; i < num_bufs; ++i) {
+        expr i_selected = ite(is.length(nq) > 0, is.head(nq) == ctx->int_val(i),
+                              ite(is.length(oq) > 0, is.head(oq) == ctx->int_val(i), ctx->bool_val(false)));
+        res.emplace_back(ite(i_selected, ov[i] == 1, ov[i] == 0), format("out[{}]", i));
+    }
+
+    return res;
+}
+
+vector<NamedExp> FqChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
+    IntSeq is(&slv.ctx);
+    vector<expr> is_head;
+    vector<expr> is_selected;
+
+    expr nq = s[0];
+    expr oq = s[1];
+    context *ctx = &nq.ctx();
+
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     expr i_selected = ite(is.length(nq) > 0, is.head(nq) == ctx->int_val(i),
+    //                           ite(is.length(oq) > 0, is.head(oq) == ctx->int_val(i), ctx->bool_val(false)));
+    //     is_selected.push_back(i_selected);
+    // }
+    //
+    expr new_nq = nq;
+    expr new_oq = oq;
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     expr i_val = ctx->int_val(i);
+    //     new_nq = ite(is_selected[i] && is.head(nq) == i_val, is.pop_front(new_nq),
+    //                  ite(!b[i] && bp[i], is.push_back(new_nq, i_val), new_nq));
+    //     new_oq = ite(is_selected[i] && is.head(oq) == i_val, is.pop_front(new_oq), new_oq);
+    //     new_oq = ite(is_selected[i] && is.head(nq) == i_val && bp[i], is.push_back(new_oq, i_val), new_oq);
+    // }
+
+    vector<NamedExp> res;
+    // for (int i = 0; i < num_bufs; ++i) {
+    // expr i_val = ctx->int_val(i);
+    // expr e = implies(is.head(nq) == i_val, is.head(oq) != i_val);
+    // e = e && implies(is.head(oq) == i_val, is.head(nq) != i_val);
+    // res.emplace_back(e);
+    // }
+    new_nq = is.push_back(new_nq, 2);
+    res.emplace_back(sp[0] == new_nq, "new_nq");
+    res.emplace_back(sp[1] == new_oq, "new_oq");
+    return res;
+}
+
+vector<NamedExp> FqChecker::init(const ev &b0, const ev &s0) {
+    IntSeq is(&slv.ctx);
+    vector<NamedExp> res;
+
+    expr nq = is.create("nq");
+    res.emplace_back(is.length(nq) == 0);
+
+    expr oq = is.create("oq");
+    res.emplace_back(is.length(oq) == 0);
+
+    context *ctx = &nq.ctx();
+    res.emplace_back(is.length(nq) == 0, "|nq| == 0 @0");
+    res.emplace_back(is.length(oq) == 0, "|oq| == 0 @0");
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     nq = ite(b0[i], is.push_back(nq, 7), nq);
+    // }
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     nq = ite(b0[i], is.push_back(nq, 7), nq);
+    // }
+    res.emplace_back(s0[0] == nq);
+    res.emplace_back(s0[1] == oq);
+    return res;
+}
+
+vector<NamedExp> FqChecker::workload() {
+    vector<NamedExp> res;
+    return res;
+}
+
+vector<NamedExp> FqChecker::query(int m) {
+    vector<NamedExp> res;
+    return res;
+}
+
+ev2 FqChecker::get_state() const {
+    return SS;
+}

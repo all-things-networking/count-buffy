@@ -45,6 +45,10 @@ expr IntSeq::push_back(const expr &s, const expr &x) const {
     return new_s;
 }
 
+expr IntSeq::push_back(const expr &s, int i) const {
+    return push_back(s, ctx->int_val(i));
+}
+
 expr IntSeq::pop_front(const expr &s) const {
     expr one = ctx->int_val(1);
     expr new_length = length(s) - one;

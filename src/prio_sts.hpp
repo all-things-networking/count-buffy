@@ -12,9 +12,9 @@ public:
 
     vector<NamedExp> workload() override;
 
-    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
+    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov, int t) override;
 
-    vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp) override;
+    vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) override;
 
     vector<NamedExp> query(int p) override;
 

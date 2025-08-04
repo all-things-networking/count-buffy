@@ -27,6 +27,8 @@ public:
 
     expr push_back(const expr &s, const expr &x) const;
 
+    expr push_back(const expr &s, int i) const;
+
     expr pop_front(const expr &s) const;
 
     expr contains(const expr &s, const expr &x) const;

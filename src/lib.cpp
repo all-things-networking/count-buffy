@@ -4,6 +4,7 @@
 
 #include "lib.hpp"
 
+#include "IntSeq.hpp"
 #include "named_expr.hpp"
 
 ev2 &get_buf_vec_at_i(ev3 const &vvv, int i) {
@@ -24,6 +25,21 @@ ev &get_buf_vec_at_i(ev2 const &vv, int i) {
     return *v;
 }
 
+stringstream seq_str(const expr &e, const model &m) {
+    stringstream ss;
+    context *ctx = &e.ctx();
+    IntSeq is(ctx);
+    expr len = m.eval(is.length(e));
+    int l = len.get_numeral_int();
+    ss << l << "[";
+    for (int i = 0; i < l; ++i) {
+        expr elem = m.eval(is.at(e, ctx->int_val(i)));
+        ss << elem << ",";
+    }
+    ss << "]";
+    return ss;
+}
+
 stringstream str(const ev &v, const model &m) {
     stringstream ss;
     if (v.size() <= 1) {
@@ -31,8 +47,12 @@ stringstream str(const ev &v, const model &m) {
     } else {
         ss << "<";
         for (const auto &e: v) {
-            auto x = m.eval(e);
-            ss << x << ",";
+            if (e.is_seq()) {
+                ss << seq_str(e, m).str() << ",";
+            } else {
+                auto x = m.eval(e);
+                ss << x << ",";
+            }
         }
         ss << ">";
     }

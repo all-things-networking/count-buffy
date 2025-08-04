@@ -38,7 +38,7 @@ vector<NamedExp> RRChecker::base_wl() {
     return {NamedExp(base_wl, "base_wl")};
 }
 
-vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> RRChecker::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_bufs; ++i) {
         // [5]
@@ -59,7 +59,7 @@ vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
 }
 
 
-vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp) {
+vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
     assert(b.size() == num_bufs);
     assert(s.size() == num_bufs);
 

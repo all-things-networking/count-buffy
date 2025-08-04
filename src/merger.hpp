@@ -9,9 +9,9 @@ public:
         : STSChecker(slv, var_prefix, n, m, k, c, me, md) {
     }
 
-    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov) override;
+    vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov, int t) override;
 
-    vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp) override;
+    vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) override;
 
     vector<NamedExp> init(ev const &b0, ev const &s0) override;
 

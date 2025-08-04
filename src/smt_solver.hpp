@@ -33,6 +33,10 @@ public:
 
     ev &iv(int k, const string &name);
 
+    ev &sv(int k, const string &name);
+
+    ev2 &svv(int m, int k, const string &name);
+
     ev2 &ivv(int m, int k, const string &name);
 
     ev3 &ivvv(int n, int m, int k, const string &name);

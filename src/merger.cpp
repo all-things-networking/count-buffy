@@ -5,14 +5,14 @@
 #include "merger.hpp"
 
 
-vector<NamedExp> Merger::out(const ev &bv, const ev &sv, const ev2 &ov) {
+vector<NamedExp> Merger::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
     vector<NamedExp> res;
     for (int i = 0; i < num_bufs; ++i)
         res.emplace_back(implies(bv[i], ov[i] == 1));
     return res;
 }
 
-vector<NamedExp> Merger::trs(ev const &b, ev const &s, ev const &bp, ev const &sp) {
+vector<NamedExp> Merger::trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) {
     vector<NamedExp> res;
     return res;
 }

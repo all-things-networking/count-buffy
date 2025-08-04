@@ -86,4 +86,6 @@ void extend(vector<T> &source, const vector<T> &extra) {
 
 void extend(vector<NamedExp> &source, const vector<NamedExp> &extra, const string &suffix);
 
+stringstream seq_str(const expr &e, const model &m);
+
 #endif //LIB_HPP
