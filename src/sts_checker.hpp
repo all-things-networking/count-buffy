@@ -32,6 +32,7 @@ public:
     int c;
     int me;
     int md;
+    bool use_win;
 
     STSChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md);
 

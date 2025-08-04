@@ -140,7 +140,7 @@ public:
         auto bwl = base_wl(slv, I);
         slv.add(bwl);
         auto O = prio->O[0] + prio->O[1];
-        string wl_file = format("wls/loom.mem.45.txt", buffer_size);
+        string wl_file = format("wls/loom.mem.{}.txt", buffer_size);
         vector<vector<string> > wls = read_wl_file(wl_file);
         string out_file_path = format("logs/loom.mem.{}.txt", buffer_size);
         ofstream out(out_file_path, ios::out);
@@ -163,8 +163,8 @@ public:
             slv.s.pop();
             auto end_t = chrono::high_resolution_clock::now();
             auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-            cout << "Loom[mem],"<< buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
-            out << "Loom[mem],"<< buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
+            cout << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
+            out << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
         }
     }
 

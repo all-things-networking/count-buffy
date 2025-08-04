@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from logs.chart_ebar import get_buffy_df, get_fperf_df
 
 # buf_sizes = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450]
-# buf_sizes = [10, 25, 50, 75, 100, 125, 150, 175, 200]
-buf_sizes = [10, 15, 25, 30, 35, 40, 45, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+buf_sizes = [10, 25, 50, 75, 100, 125, 150, 175, 200]
+# buf_sizes = [10, 15, 25, 30, 35, 40, 45, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
 
 
 def gen_chart(tc):
@@ -31,4 +31,5 @@ def gen_chart(tc):
 
 
 if __name__ == '__main__':
-    gen_chart("loom.mem")
+    # gen_chart("loom.mem")
+    gen_chart("rr")

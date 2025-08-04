@@ -13,7 +13,8 @@ vector<NamedExp> STSChecker::inputs(const int i) {
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
     // extend(res, winds_old(i));
-    extend(res, winds(i));
+    if (this->use_win)
+        extend(res, winds(i));
     return res;
 }
 
@@ -61,6 +62,7 @@ STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, co
     slv.add_bound(tmp_wnd_enq, 0, c);
     slv.add_bound(tmp_wnd_enq_nxt, 0, c);
     slv.add_bound(tmp_wnd_out, 0, c);
+    this->use_win = true;
 }
 
 vector<NamedExp> STSChecker::bl_size(const int i) const {

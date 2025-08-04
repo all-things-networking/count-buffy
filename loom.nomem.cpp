@@ -194,7 +194,14 @@ public:
         cout << "------------------------------------" << endl;
         cout << "Priority:" << endl;
         cout << "In:" << endl << str(prio->I, m).str() << endl;
+        cout << "Enq:" << endl << str(prio->E, m).str() << endl;
         cout << "Out:" << endl << str(prio->O, m).str() << endl;
+        cout << "WE:" << endl;
+        cout << str(prio->wnd_enq, m).str();
+        cout << "WN:" << endl;
+        cout << str(prio->wnd_enq_nxt, m).str();
+        cout << "WO:" << endl;
+        cout << str(prio->wnd_out, m).str();
         cout << "------------------------------------" << endl;
     }
 };

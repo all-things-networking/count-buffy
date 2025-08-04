@@ -1,2 +1,2 @@
 scheduler, buf_size, wl_idx, time_millis, solver_res
-prio, 10, 0, 28, SAT
+prio, 10, 0, 35, UNSAT
