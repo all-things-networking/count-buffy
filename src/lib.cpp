@@ -51,7 +51,10 @@ stringstream str(const ev &v, const model &m) {
                 ss << seq_str(e, m).str() << ",";
             } else {
                 auto x = m.eval(e);
-                ss << x << ",";
+                if (x.is_numeral() && x.get_numeral_int() < 0)
+                    ss << "-" << ",";
+                else
+                    ss << x << ",";
             }
         }
         ss << ">";
@@ -76,12 +79,12 @@ stringstream str(const ev3 &vvv, const model &m) {
 }
 
 expr sum(const ev &v) {
-    return sum(v, v.size());
+    return sum(v, v.size() - 1);
 }
 
 expr sum(const ev &v, const int limit) {
     expr s = v[0];
-    for (int i = 1; i < limit; ++i) {
+    for (int i = 1; i <= limit; ++i) {
         s = s + v[i];
     }
     return s;
@@ -93,7 +96,7 @@ expr sum(const ev2 &vv) {
 
 expr sum(const ev2 &vv, const int limit) {
     expr s = sum(vv[0]);
-    for (int i = 1; i < limit; ++i) {
+    for (int i = 1; i <= limit; ++i) {
         s = s + sum(vv[i]);
     }
     return s;
@@ -102,7 +105,7 @@ expr sum(const ev2 &vv, const int limit) {
 expr sum(const ev2 &vv, const int from, const int limit) {
     assert(from <= limit);
     expr s = sum(vv[from]);
-    for (int i = from + 1; i < limit; ++i)
+    for (int i = from + 1; i <= limit; ++i)
         s = s + sum(vv[i]);
     return s;
 }

@@ -15,7 +15,9 @@ public:
     ev2 SS;
     ev2 nq;
     ev2 oq;
-    ev tmp;
+    ev2 tmp;
+    ev2 ipn;
+    ev2 ipo;
 
     vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov, int t) override;
 

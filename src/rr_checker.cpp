@@ -32,7 +32,7 @@ vector<NamedExp> RRChecker::base_wl() {
     int rate = period - 1;
     for (int i = 0; i < num_bufs; ++i) {
         for (int j = 1; j <= recur; ++j) {
-            base_wl = base_wl && (sum(I[i], j * period) >= rate);
+            base_wl = base_wl && (sum(I[i], j * period - 1) >= rate);
         }
     }
     return {NamedExp(base_wl, "base_wl")};
@@ -58,6 +58,26 @@ vector<NamedExp> RRChecker::init(const ev &b0, const ev &s0) {
     return {NamedExp(res)};
 }
 
+const int NUM_BUFS = 5;
+
+expr turn_transition(context &ctx, const vector<expr> &cur_b, const expr &cur_s, const vector<expr> &nxt_b,
+                     const expr &nxt_s) {
+    expr transition_expr = ctx.bool_val(true);
+    for (int i = 0; i < NUM_BUFS; ++i) {
+        expr x = ctx.bool_val(true);
+        expr y = ctx.bool_val(true);
+        for (int j = 1; j < NUM_BUFS; ++j) {
+            const int l = (i + j) % NUM_BUFS;
+            y = y && implies(x && nxt_b[l], nxt_s == l);
+            x = x && !nxt_b[l];
+        }
+        y = y && implies(x, nxt_s == i);
+        transition_expr = transition_expr && implies(cur_s == i, y);
+    }
+
+    return transition_expr;
+}
+
 
 vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
     assert(b.size() == num_bufs);
@@ -71,7 +91,7 @@ vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
         expr next_backlogged = slv.ctx.bool_val(true);
         for (int j = 1; j < num_bufs; ++j) {
             const int l = (i + j) % num_bufs;
-            next_backlogged = next_backlogged && implies(not_until && bp[l], state == l);
+            next_backlogged = next_backlogged && implies((s[0] == i) && not_until && bp[l], state == l);
             not_until = not_until && !bp[l];
         }
         next_backlogged = next_backlogged && implies(not_until, sp[0] == i);

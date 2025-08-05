@@ -75,7 +75,7 @@ int main(const int argc, const char *argv[]) {
         slv.add(sts->base_constrs());
         slv.add(sts->base_wl());
         // slv.add(sts->base_wl());
-        slv.add(merge(sts->query(5), "Query").negate());
+        slv.add(merge(sts->query(4), "Query").negate());
         // slv.add(merge(sts->query(5), "Query"));
         // auto e = sts->B[2][2] && sts->B[2][3] && sts->B[2][4] && sts->B[2][5] && sts->B[2][6];
         // e = e && sts->O[2][2] == 0 && sts->O[2][3] == 0 && sts->O[2][4] == 0 && sts->O[2][5] == 0 && sts->O[2][6] == 0;

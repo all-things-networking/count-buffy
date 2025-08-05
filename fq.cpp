@@ -11,27 +11,65 @@ using namespace std;
 using namespace z3;
 using namespace antlr4;
 
-constexpr int MAX_ENQ = 1;
+constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 
-constexpr int NUM_BUFS = 3;
-constexpr int TIME_STEPS = 5;
+constexpr int NUM_BUFS = 5;
+constexpr int TIME_STEPS = 14;
 constexpr int PKT_TYPES = 1;
 constexpr int BUF_CAP = 10;
+
+vector<NamedExp> query(SmtSolver &slv, const ev3 &out) {
+    unsigned int query_thresh = (TIME_STEPS / NUM_BUFS) + 3;
+    vector<NamedExp> res;
+    expr e = (sum(out[NUM_BUFS - 1], TIME_STEPS - 1) >= slv.ctx.int_val(query_thresh));
+    res.emplace_back(e);
+    return res;
+}
+
+vector<NamedExp> wl(const ev3 &ins) {
+    vector<NamedExp> res;
+    return res;
+}
+
+vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
+    vector<NamedExp> res;
+    cout << ins.size() << endl;
+    for (int i = 0; i < NUM_BUFS; ++i) {
+        if (i < NUM_BUFS - 1) {
+            for (int t = 0; t < TIME_STEPS; ++t) {
+                expr e = sum(ins[i], t) >= t + 1;
+                res.emplace_back(e);
+                // res.emplace_back(sum(ins[i], t) >= t + 1, format("sum(wl[{}][{}]) >= 1", i, t));
+            }
+        }
+    }
+    return res;
+}
 
 int main(const int argc, const char *argv[]) {
     SmtSolver slv;
     FqChecker sts(slv, "fq", NUM_BUFS, TIME_STEPS, PKT_TYPES, BUF_CAP, MAX_ENQ, MAX_DEQ);
+    sts.use_win = false;
     string wl_file_path = "../wls/fq.txt";
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-
     slv.s.push();
     slv.add(sts.base_constrs());
-    WorkloadParser parser(sts.I, slv, NUM_BUFS, TIME_STEPS);
-    auto wl = wls[0];
-    string res_stat = wl[0];
-    wl.erase(wl.begin());
-    parser.parse(wl);
+
+    auto bwl = base_wl(slv, sts.I);
+    slv.add(bwl);
+
+    slv.add(query(slv, sts.O));
+
+    // slv.add(merge(query(slv, sts.O), "not query").negate());
+    // slv.add(merge(query(slv, sts.O), "query"));
+
+    // WorkloadParser parser(sts.I, slv, NUM_BUFS, TIME_STEPS);
+    // auto wl = wls[0];
+    // string res_stat = wl[0];
+    // wl.erase(wl.begin());
+    // parser.parse(wl);
+
     // for (int j = 0; j < NUM_BUFS; ++j) {
     //     if (j == 1) {
     //         continue;
@@ -47,16 +85,22 @@ int main(const int argc, const char *argv[]) {
 
     auto mod = slv.check_sat();
 
+    cout << "I:" << endl;
+    cout << str(sts.I, mod).str();
     cout << "B:" << endl;
     cout << str(sts.B, mod, "\n").str();
+    cout << "E:" << endl;
+    cout << str(sts.E, mod).str();
     cout << "OQ:" << endl;
     cout << str(sts.oq, mod, "\n").str();
     cout << "NQ:" << endl;
     cout << str(sts.nq, mod, "\n").str();
-    cout << "I:" << endl;
-    cout << str(sts.I, mod).str();
-    cout << "E:" << endl;
-    cout << str(sts.E, mod).str();
+    cout << "Tmp:" << endl;
+    cout << str(sts.tmp, mod, "\n").str() << endl;
+    cout << "IPN:" << endl;
+    cout << str(sts.ipn, mod, "\n").str() << endl;
+    cout << "IPO:" << endl;
+    cout << str(sts.ipo, mod, "\n").str() << endl;
     cout << "O:" << endl;
     cout << str(sts.O, mod).str();
     // cout << "B:" << endl;
