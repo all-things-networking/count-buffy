@@ -17,6 +17,7 @@ endfunction()
 
 add_target(Intr intr.cpp)
 add_target(Single main.cpp)
+add_target(Prio prio.cpp)
 add_target(Comp comp.cpp)
 add_target(Wins wins.cpp)
 add_target(Debug debug.cpp)

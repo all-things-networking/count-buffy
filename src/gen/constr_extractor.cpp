@@ -31,25 +31,47 @@ using namespace std;
 ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
     IT = slv.ivv(n, m, "Workload");
     for (int i = 0; i < IT.size(); ++i) {
-        vector<expr> cenqs_i;
-        expr cenq = IT[i][0];
-        cenqs_i.push_back(cenq);
-        for (int j = 1; j < IT[i].size(); ++j) {
-            cenq = cenq + IT[i][j];
-            cenqs_i.push_back(cenq);
-        }
+        auto cenqs_i = get_cenqs_for_buff(IT[i]);
         cenqs.push_back(cenqs_i);
+        auto aipgs_i = get_aipgs_for_buf(IT[i]);
+        aipgs.push_back(aipgs_i);
     }
 }
 
+ev ConstrExtractor::get_cenqs_for_buff(ev it) {
+    ev cenqs_i;
+    expr cenq = it[0];
+    cenqs_i.push_back(cenq);
+    for (int j = 1; j < it.size(); ++j) {
+        cenq = cenq + it[j];
+        cenqs_i.push_back(cenq);
+    }
+    return cenqs_i;
+}
 
-any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
-    auto result = visitChildren(ctx);
-    constrs.clear();
-    if (metric != "cenq")
-        return result;
+ev ConstrExtractor::get_aipgs_for_buf(ev it) const {
+    int total_time = it.size();
+    ev aipgs_i;
+    aipgs_i.push_back(slv.ctx.int_val(0));
+    for (unsigned int t1 = 1; t1 < total_time; t1++) {
+        expr val_expr = slv.ctx.int_val(total_time);
 
+        for (unsigned int t2 = total_time - 1; t2 > t1; t2--) {
+            val_expr = ite(it[t2] > 0, slv.ctx.int_val(t2 - t1), val_expr);
+        }
 
+        for (unsigned int t2 = 0; t2 < t1; t2++) {
+            val_expr = ite(it[t2] > 0, slv.ctx.int_val(t1 - t2), val_expr);
+        }
+        auto expr = ite(it[t1] > 1,
+                        slv.ctx.int_val(0),
+                        ite(it[t1] <= 0, aipgs_i[t1 - 1], val_expr));
+        aipgs_i.push_back(expr);
+    }
+    return aipgs_i;
+}
+
+void ConstrExtractor::parse_cenq() {
     assert(begin > 0);
     for (int t = begin; t <= end; ++t) {
         int t_index = t - 1;
@@ -64,6 +86,38 @@ any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
         }
         constrs.push_back(e);
         // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
+    }
+}
+
+void ConstrExtractor::parse_aipg() {
+    assert(begin > 0);
+    for (int t = begin; t <= end; ++t) {
+        int t_index = t - 1;
+        assert(tmp_ids.size() == 1);
+        int i = tmp_ids[0];
+        expr s = aipgs[i][t_index];
+        expr e = slv.ctx.bool_val(true);
+        if (rhs_linear) {
+            e = binop(s, op, slv.ctx.int_val(rhs * t));
+        } else {
+            e = binop(s, op, slv.ctx.int_val(rhs));
+        }
+        constrs.push_back(e);
+        // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
+    }
+}
+
+
+any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
+    auto result = visitChildren(ctx);
+    constrs.clear();
+    if (metric == "cenq") {
+        parse_cenq();
+        return result;
+    }
+    if (metric == "aipg") {
+        parse_aipg();
+        return result;
     }
     return result;
 }

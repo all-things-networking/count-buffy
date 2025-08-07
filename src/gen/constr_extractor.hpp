@@ -30,12 +30,21 @@ class ConstrExtractor : public fperfBaseVisitor {
     int rhs;
     bool rhs_linear;
     ev2 cenqs;
+    ev2 aipgs;
 
 public:
     vector<expr> constrs;
     ev2 IT;
 
     ConstrExtractor(SmtSolver &slv, int n, int m);
+
+    ev get_cenqs_for_buff(ev it);
+
+    ev get_aipgs_for_buf(ev it) const;
+
+    void parse_cenq();
+
+    void parse_aipg();
 
     std::any visitCon(fperfParser::ConContext *ctx) override;
 

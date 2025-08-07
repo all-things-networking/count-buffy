@@ -56,34 +56,34 @@ void fperfParserInitialize() {
     },
     std::vector<std::string>{
       "", "':'", "'('", "', t)'", "'SUM_[q in'", "']'", "'(q ,t)'", "'cenq'", 
-      "'cdeq'", "'ecmp'", "'t'", "'['", "','", "'{'", "'}'", "'>='", "'<='", 
-      "'>'", "'<'", "'=='", "'!='"
+      "'aipg'", "'t'", "'['", "','", "'{'", "'}'", "'>='", "'<='", "'>'", 
+      "'<'", "'=='", "'!='"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-      "", "", "", "", "ID", "INT", "WS"
+      "", "", "", "ID", "INT", "WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,23,70,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+  	4,1,22,70,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
   	7,7,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   	1,3,1,34,8,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,1,4,3,4,44,8,4,1,5,1,5,1,5,1,
   	5,1,5,1,5,1,6,1,6,1,6,1,6,5,6,56,8,6,10,6,12,6,59,9,6,3,6,61,8,6,1,6,
-  	3,6,64,8,6,1,6,1,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,2,1,0,7,9,1,
-  	0,15,20,67,0,16,1,0,0,0,2,33,1,0,0,0,4,35,1,0,0,0,6,37,1,0,0,0,8,43,1,
+  	3,6,64,8,6,1,6,1,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,2,1,0,7,8,1,
+  	0,14,19,67,0,16,1,0,0,0,2,33,1,0,0,0,4,35,1,0,0,0,6,37,1,0,0,0,8,43,1,
   	0,0,0,10,45,1,0,0,0,12,51,1,0,0,0,14,67,1,0,0,0,16,17,3,10,5,0,17,18,
   	5,1,0,0,18,19,3,2,1,0,19,20,3,14,7,0,20,21,3,8,4,0,21,1,1,0,0,0,22,23,
   	3,4,2,0,23,24,5,2,0,0,24,25,3,6,3,0,25,26,5,3,0,0,26,34,1,0,0,0,27,28,
   	5,4,0,0,28,29,3,12,6,0,29,30,5,5,0,0,30,31,3,4,2,0,31,32,5,6,0,0,32,34,
   	1,0,0,0,33,22,1,0,0,0,33,27,1,0,0,0,34,3,1,0,0,0,35,36,7,0,0,0,36,5,1,
-  	0,0,0,37,38,5,22,0,0,38,7,1,0,0,0,39,44,5,22,0,0,40,44,5,10,0,0,41,42,
-  	5,22,0,0,42,44,5,10,0,0,43,39,1,0,0,0,43,40,1,0,0,0,43,41,1,0,0,0,44,
-  	9,1,0,0,0,45,46,5,11,0,0,46,47,5,22,0,0,47,48,5,12,0,0,48,49,5,22,0,0,
-  	49,50,5,5,0,0,50,11,1,0,0,0,51,60,5,13,0,0,52,57,5,22,0,0,53,54,5,12,
-  	0,0,54,56,5,22,0,0,55,53,1,0,0,0,56,59,1,0,0,0,57,55,1,0,0,0,57,58,1,
-  	0,0,0,58,61,1,0,0,0,59,57,1,0,0,0,60,52,1,0,0,0,60,61,1,0,0,0,61,63,1,
-  	0,0,0,62,64,5,12,0,0,63,62,1,0,0,0,63,64,1,0,0,0,64,65,1,0,0,0,65,66,
-  	5,14,0,0,66,13,1,0,0,0,67,68,7,1,0,0,68,15,1,0,0,0,5,33,43,57,60,63
+  	0,0,0,37,38,5,21,0,0,38,7,1,0,0,0,39,44,5,21,0,0,40,44,5,9,0,0,41,42,
+  	5,21,0,0,42,44,5,9,0,0,43,39,1,0,0,0,43,40,1,0,0,0,43,41,1,0,0,0,44,9,
+  	1,0,0,0,45,46,5,10,0,0,46,47,5,21,0,0,47,48,5,11,0,0,48,49,5,21,0,0,49,
+  	50,5,5,0,0,50,11,1,0,0,0,51,60,5,12,0,0,52,57,5,21,0,0,53,54,5,11,0,0,
+  	54,56,5,21,0,0,55,53,1,0,0,0,56,59,1,0,0,0,57,55,1,0,0,0,57,58,1,0,0,
+  	0,58,61,1,0,0,0,59,57,1,0,0,0,60,52,1,0,0,0,60,61,1,0,0,0,61,63,1,0,0,
+  	0,62,64,5,11,0,0,63,62,1,0,0,0,63,64,1,0,0,0,64,65,1,0,0,0,65,66,5,13,
+  	0,0,66,13,1,0,0,0,67,68,7,1,0,0,68,15,1,0,0,0,5,33,43,57,60,63
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -248,8 +248,7 @@ fperfParser::LhsContext* fperfParser::lhs() {
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case fperfParser::T__6:
-      case fperfParser::T__7:
-      case fperfParser::T__8: {
+      case fperfParser::T__7: {
         enterOuterAlt(_localctx, 1);
         setState(22);
         m();
@@ -326,8 +325,9 @@ fperfParser::MContext* fperfParser::m() {
     enterOuterAlt(_localctx, 1);
     setState(35);
     _la = _input->LA(1);
-    if (!((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 896) != 0))) {
+    if (!(_la == fperfParser::T__6
+
+    || _la == fperfParser::T__7)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -442,7 +442,7 @@ fperfParser::RhsContext* fperfParser::rhs() {
     case 2: {
       enterOuterAlt(_localctx, 2);
       setState(40);
-      match(fperfParser::T__9);
+      match(fperfParser::T__8);
       break;
     }
 
@@ -451,7 +451,7 @@ fperfParser::RhsContext* fperfParser::rhs() {
       setState(41);
       match(fperfParser::INT);
       setState(42);
-      match(fperfParser::T__9);
+      match(fperfParser::T__8);
       break;
     }
 
@@ -510,11 +510,11 @@ fperfParser::IntervalContext* fperfParser::interval() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(45);
-    match(fperfParser::T__10);
+    match(fperfParser::T__9);
     setState(46);
     match(fperfParser::INT);
     setState(47);
-    match(fperfParser::T__11);
+    match(fperfParser::T__10);
     setState(48);
     match(fperfParser::INT);
     setState(49);
@@ -573,7 +573,7 @@ fperfParser::SetContext* fperfParser::set() {
     size_t alt;
     enterOuterAlt(_localctx, 1);
     setState(51);
-    match(fperfParser::T__12);
+    match(fperfParser::T__11);
     setState(60);
     _errHandler->sync(this);
 
@@ -587,7 +587,7 @@ fperfParser::SetContext* fperfParser::set() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(53);
-          match(fperfParser::T__11);
+          match(fperfParser::T__10);
           setState(54);
           match(fperfParser::INT); 
         }
@@ -600,12 +600,12 @@ fperfParser::SetContext* fperfParser::set() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == fperfParser::T__11) {
+    if (_la == fperfParser::T__10) {
       setState(62);
-      match(fperfParser::T__11);
+      match(fperfParser::T__10);
     }
     setState(65);
-    match(fperfParser::T__13);
+    match(fperfParser::T__12);
    
   }
   catch (RecognitionException &e) {
@@ -653,7 +653,7 @@ fperfParser::Comp_opContext* fperfParser::comp_op() {
     setState(67);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2064384) != 0))) {
+      ((1ULL << _la) & 1032192) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {

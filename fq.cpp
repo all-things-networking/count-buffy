@@ -53,23 +53,37 @@ int main(const int argc, const char *argv[]) {
     sts.use_win = false;
     string wl_file_path = "../wls/fq.txt";
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    slv.s.push();
     slv.add(sts.base_constrs());
 
     auto bwl = base_wl(slv, sts.I);
     slv.add(bwl);
 
-    slv.add(query(slv, sts.O));
+    // slv.add(query(slv, sts.O));
 
-    // slv.add(merge(query(slv, sts.O), "not query").negate());
+    slv.add(merge(query(slv, sts.O), "not query").negate());
     // slv.add(merge(query(slv, sts.O), "query"));
+    for (int i = 0; i < wls.size(); ++i) {
+        slv.s.push();
+        WorkloadParser parser(sts.I, slv, NUM_BUFS, TIME_STEPS);
+        auto wl = wls[i];
+        string res_stat = wl[0];
+        wl.erase(wl.begin());
+        parser.parse(wl);
 
-    // WorkloadParser parser(sts.I, slv, NUM_BUFS, TIME_STEPS);
-    // auto wl = wls[0];
-    // string res_stat = wl[0];
-    // wl.erase(wl.begin());
-    // parser.parse(wl);
-
+        if (res_stat == "SAT")
+            slv.check_sat();
+        else if (res_stat == "UNSAT") {
+            try {
+                slv.check_unsat();
+            } catch (runtime_error e) {
+                cout << "ERRRRRRRRRRRRRRRRRRRRRRROR, model is SAT!!!!!!" << endl;
+                auto mod = slv.check_sat();
+                exit(1);
+            }
+        }
+        cout << "fq, " <<  i << ", " << res_stat << endl;
+        slv.s.pop();
+    }
     // for (int j = 0; j < NUM_BUFS; ++j) {
     //     if (j == 1) {
     //         continue;
@@ -83,26 +97,27 @@ int main(const int argc, const char *argv[]) {
     //     }
     // }
 
-    auto mod = slv.check_sat();
+    // auto mod = slv.check_sat();
 
-    cout << "I:" << endl;
-    cout << str(sts.I, mod).str();
-    cout << "B:" << endl;
-    cout << str(sts.B, mod, "\n").str();
-    cout << "E:" << endl;
-    cout << str(sts.E, mod).str();
-    cout << "OQ:" << endl;
-    cout << str(sts.oq, mod, "\n").str();
-    cout << "NQ:" << endl;
-    cout << str(sts.nq, mod, "\n").str();
-    cout << "Tmp:" << endl;
-    cout << str(sts.tmp, mod, "\n").str() << endl;
-    cout << "IPN:" << endl;
-    cout << str(sts.ipn, mod, "\n").str() << endl;
-    cout << "IPO:" << endl;
-    cout << str(sts.ipo, mod, "\n").str() << endl;
-    cout << "O:" << endl;
-    cout << str(sts.O, mod).str();
+    // cout << "I:" << endl;
+    // cout << str(sts.I, mod).str();
+    return 0;
+    // cout << "B:" << endl;
+    // cout << str(sts.B, mod, "\n").str();
+    // cout << "E:" << endl;
+    // cout << str(sts.E, mod).str();
+    // cout << "OQ:" << endl;
+    // cout << str(sts.oq, mod, "\n").str();
+    // cout << "NQ:" << endl;
+    // cout << str(sts.nq, mod, "\n").str();
+    // cout << "Tmp:" << endl;
+    // cout << str(sts.tmp, mod, "\n").str() << endl;
+    // cout << "IPN:" << endl;
+    // cout << str(sts.ipn, mod, "\n").str() << endl;
+    // cout << "IPO:" << endl;
+    // cout << str(sts.ipo, mod, "\n").str() << endl;
+    // cout << "O:" << endl;
+    // cout << str(sts.O, mod).str();
     // cout << "B:" << endl;
     // cout << str(sts.B, mod, "\n").str();
     // cout << "I:" << endl;

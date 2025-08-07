@@ -1,4 +1,2883 @@
-### - Time: 837 Res: SAT
-[5, 5]: cenq(0, t) == 5
-[5, 5]: cenq(1, t) == 5
-[5, 5]: cenq(2, t) == 5
+### - Time: 837 Res: UNSAT
+[1, 6]: cenq(4, t) <= 1
+[7, 14]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 5
+[1, 14]: cenq(0, t) >= t
+[1, 14]: cenq(1, t) >= t
+[1, 14]: cenq(2, t) >= t
+[1, 14]: cenq(3, t) >= t
+
+### - Time: 38 Res: SAT
+[1, 14]: cenq(0, t) >= 4
+[4, 8]: aipg(0, t) <= 0
+[4, 14]: cenq(0, t) >= 4
+[9, 10]: aipg(2, t) >= 4
+[9, 10]: aipg(0, t) <= 0
+[9, 14]: cenq(0, t) >= 4
+
+### - Time: 42 Res: SAT
+[4, 8]: aipg(0, t) <= 0
+[4, 14]: cenq(0, t) >= 4
+[9, 9]: aipg(2, t) >= 4
+[9, 14]: cenq(0, t) >= 4
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[10, 10]: aipg(2, t) >= 4
+[10, 14]: cenq(0, t) >= 4
+[11, 13]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+
+### - Time: 37 Res: SAT
+[3, 3]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[4, 8]: aipg(0, t) <= 0
+[4, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: aipg(2, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 14]: cenq(0, t) >= 4
+[10, 10]: aipg(2, t) >= 4
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10
+
+### - Time: 38 Res: SAT
+[3, 3]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[4, 8]: aipg(0, t) <= 0
+[4, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: aipg(2, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 14]: cenq(0, t) >= 4
+[10, 10]: aipg(2, t) >= 5
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10
+
+### - Time: 41 Res: SAT
+[3, 3]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[4, 8]: aipg(0, t) <= 0
+[4, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[9, 9]: aipg(2, t) >= 4
+[9, 14]: cenq(0, t) >= 4
+[10, 10]: aipg(2, t) >= 5
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[11, 14]: SUM_[q in {0, 2, 3, }] cenq(q ,t) >= 10
+
+### - Time: 43 Res: SAT
+[3, 3]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[4, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+
+### - Time: 36 Res: SAT
+[4, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+
+### - Time: 42 Res: SAT
+[4, 4]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[5, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[5, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[9, 9]: cenq(0, t) == 4t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: cenq(0, t) == 4t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+
+### - Time: 36 Res: SAT
+[4, 4]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[5, 8]: cenq(0, t) == 4t
+[5, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[9, 9]: cenq(0, t) == 4t
+[10, 10]: cenq(1, t) == 4t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+
+### - Time: 39 Res: SAT
+[4, 4]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) >= 10t
+[5, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: cenq(0, t) == 4t
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: cenq(1, t) == 4t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+
+### - Time: 43 Res: SAT
+[5, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, }] cenq(q ,t) >= 10
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 38 Res: SAT
+[5, 5]: cenq(0, t) == 4t
+[6, 8]: cenq(0, t) == 4t
+[6, 14]: cenq(4, t) >= 2
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[10, 14]: cenq(4, t) >= 2
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(4, t) >= 2
+
+### - Time: 38 Res: SAT
+[5, 5]: cenq(3, t) == 4t
+[6, 8]: cenq(0, t) == 4t
+[6, 14]: cenq(4, t) >= 2
+[9, 9]: aipg(3, t) >= 4
+[9, 9]: SUM_[q in {0, 3, 4, }] cenq(q ,t) <= 10t
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: cenq(4, t) >= 2
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 43 Res: SAT
+[5, 5]: cenq(3, t) == 4t
+[6, 8]: cenq(0, t) == 4t
+[6, 14]: cenq(4, t) >= 2
+[9, 9]: aipg(4, t) >= 4
+[9, 9]: SUM_[q in {0, 4, }] cenq(q ,t) <= 10t
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(4, t) >= 2
+
+### - Time: 42 Res: SAT
+[5, 5]: cenq(3, t) == 2t
+[6, 8]: cenq(0, t) == 4t
+[6, 14]: cenq(4, t) >= 2
+[9, 9]: aipg(4, t) >= 4
+[9, 9]: SUM_[q in {0, 4, }] cenq(q ,t) <= 10t
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) <= 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(4, t) >= 2
+
+### - Time: 46 Res: SAT
+[5, 5]: cenq(3, t) == 2t
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: SUM_[q in {0, 4, }] cenq(q ,t) <= 10t
+[9, 9]: aipg(4, t) >= 4
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) > 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(4, t) >= 2
+
+### - Time: 39 Res: SAT
+[2, 5]: cenq(3, t) == 2t
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(4, t) >= 4
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) > 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 43 Res: SAT
+[2, 4]: cenq(3, t) == 2t
+[5, 5]: aipg(4, t) >= 4
+[5, 5]: cenq(3, t) == 2t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= 4
+[9, 9]: aipg(4, t) >= 4
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) > 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 46 Res: SAT
+[2, 4]: cenq(3, t) == 2t
+[5, 5]: cenq(3, t) == 2t
+[5, 5]: aipg(4, t) >= 4
+[6, 8]: aipg(4, t) >= 4
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(4, t) >= 5
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) > 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 42 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[5, 5]: aipg(4, t) >= 4
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= 4
+[9, 9]: aipg(4, t) >= 5
+[9, 14]: cenq(4, t) >= 2
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) > 10t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 37 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= 4
+[9, 9]: aipg(4, t) >= 5
+[9, 9]: cenq(4, t) == 2
+[10, 10]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(4, t) == 2
+
+### - Time: 36 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= 4
+[9, 9]: cenq(0, t) == 4t
+[9, 9]: aipg(4, t) >= 5
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(0, t) == 4t
+[11, 14]: cenq(4, t) == 2
+[11, 14]: cenq(0, t) == 4t
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 39 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: aipg(4, t) >= 4
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: cenq(0, t) == 4t
+[9, 9]: aipg(4, t) >= 5
+[10, 10]: cenq(0, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(0, t) == 4t
+
+### - Time: 44 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: aipg(4, t) >= t
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(4, t) >= 5
+[9, 9]: cenq(0, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(0, t) == 4t
+[11, 14]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(0, t) == 4t
+
+### - Time: 45 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: aipg(4, t) >= t
+[6, 8]: cenq(0, t) == 4t
+[9, 9]: aipg(3, t) >= 5
+[10, 10]: cenq(0, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: cenq(0, t) == 4t
+[11, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 37 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 14]: cenq(0, t) == 4t
+
+### - Time: 39 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: cenq(0, t) < 4t
+[11, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+
+### - Time: 45 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 14]: cenq(0, t) < 4t
+
+### - Time: 43 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: cenq(0, t) == 4t
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) <= 4
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 14]: cenq(0, t) < 4t
+
+### - Time: 44 Res: SAT
+[2, 4]: cenq(3, t) == 3t
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) <= 4
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 12]: cenq(4, t) == 2
+[13, 14]: cenq(0, t) < 4t
+[13, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+
+### - Time: 39 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) <= 4
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 12]: cenq(4, t) == 2
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[13, 14]: cenq(0, t) < 4t
+[13, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+
+### - Time: 40 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) <= 4
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 12]: cenq(4, t) == 2
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[13, 14]: cenq(0, t) < 4t
+
+### - Time: 37 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 4
+[10, 10]: cenq(4, t) == 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[10, 10]: cenq(2, t) == 4t
+[11, 12]: cenq(4, t) == 2
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[13, 14]: cenq(0, t) < 4t
+
+### - Time: 38 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 4
+[10, 10]: cenq(4, t) == 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[10, 10]: cenq(2, t) == 4t
+[11, 12]: cenq(4, t) == 2
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[11, 12]: cenq(0, t) < 4t
+[13, 14]: cenq(0, t) < 4t
+
+### - Time: 43 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 4
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(2, t) == 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[11, 12]: cenq(0, t) < 4t
+[13, 14]: cenq(0, t) < 4t
+
+### - Time: 37 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(3, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[13, 14]: cenq(0, t) < 4t
+
+### - Time: 44 Res: SAT
+[6, 8]: aipg(4, t) >= t
+[9, 9]: aipg(0, t) >= 5
+[10, 10]: cenq(4, t) == 2
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[11, 12]: cenq(0, t) < 4t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+
+### - Time: 36 Res: SAT
+[9, 9]: aipg(0, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[11, 12]: cenq(0, t) < 4t
+
+### - Time: 45 Res: SAT
+[9, 9]: aipg(0, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: cenq(4, t) == 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[11, 11]: cenq(2, t) == 4t
+[11, 11]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+
+### - Time: 36 Res: SAT
+[9, 9]: aipg(0, t) >= 5
+[10, 10]: cenq(2, t) == 4t
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) == 10t
+[10, 10]: cenq(4, t) == 3
+[11, 11]: cenq(2, t) == 4t
+[11, 11]: cenq(0, t) < 4t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+
+### - Time: 43 Res: SAT
+[9, 9]: aipg(0, t) >= 5
+[10, 10]: cenq(4, t) == 3
+[10, 10]: aipg(0, t) >= 5
+[11, 11]: cenq(0, t) < 4t
+[11, 11]: cenq(2, t) == 4t
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+
+### - Time: 36 Res: SAT
+[10, 10]: cenq(4, t) == 3
+[10, 10]: aipg(0, t) >= 5
+[11, 11]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+
+### - Time: 39 Res: SAT
+[10, 10]: cenq(4, t) == 3
+[10, 10]: aipg(0, t) >= 5
+[11, 11]: cenq(0, t) < 4t
+[11, 11]: aipg(0, t) >= 5
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: aipg(0, t) >= 5
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[13, 13]: aipg(0, t) >= 5
+
+### - Time: 36 Res: SAT
+[5, 9]: cenq(4, t) == 3
+[10, 10]: cenq(4, t) == 3
+[10, 10]: aipg(0, t) >= 5
+[11, 11]: cenq(0, t) < 4t
+[11, 11]: aipg(0, t) >= 5
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: aipg(0, t) >= 5
+[13, 13]: aipg(0, t) >= 5
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+
+### - Time: 35 Res: SAT
+[5, 9]: cenq(4, t) == 3
+[10, 10]: aipg(0, t) >= 5
+[11, 11]: cenq(0, t) < 4t
+[12, 12]: aipg(0, t) >= 5
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) > 10t
+[12, 12]: cenq(0, t) < 4t
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(0, t) >= 5
+
+### - Time: 47 Res: SAT
+[4, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[10, 10]: aipg(0, t) >= 5
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[11, 11]: cenq(0, t) < 4t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: aipg(0, t) >= 5
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(0, t) >= 5
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+
+### - Time: 43 Res: SAT
+[4, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[10, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[11, 11]: cenq(0, t) < 4t
+[12, 12]: aipg(0, t) >= 5
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(0, t) >= 5
+
+### - Time: 39 Res: SAT
+[4, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) == 10t
+[10, 10]: SUM_[q in {0, 1, 3, }] cenq(q ,t) <= 10t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(1, t) >= 5
+
+### - Time: 38 Res: SAT
+[4, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 10t
+[10, 10]: SUM_[q in {0, 1, 3, }] cenq(q ,t) <= 10t
+[11, 11]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(1, t) >= 5
+
+### - Time: 48 Res: SAT
+[4, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[10, 10]: SUM_[q in {0, 1, 3, }] cenq(q ,t) <= 10t
+[11, 11]: SUM_[q in {0, 1, 2, }] cenq(q ,t) <= 10t
+[12, 12]: cenq(0, t) < 4t
+[12, 12]: SUM_[q in {0, 3, }] cenq(q ,t) <= 10t
+[13, 13]: aipg(1, t) >= 5
+
+### - Time: 45 Res: SAT
+[2, 3]: aipg(0, t) >= 1
+[4, 4]: SUM_[q in {0, 1, 3, 4, }] cenq(q ,t) < 10t
+[5, 7]: cenq(2, t) <= 3t
+[5, 7]: SUM_[q in {0, 1, 3, 4, }] cenq(q ,t) < 10t
+[8, 9]: cenq(2, t) <= 3t
+[8, 9]: aipg(3, t) <= 1
+[8, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[10, 10]: cenq(2, t) <= 3t
+[10, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(3, t) <= 1
+
+### - Time: 46 Res: SAT
+[2, 3]: aipg(0, t) >= 1
+[5, 5]: SUM_[q in {0, 4, }] cenq(q ,t) < 10t
+[6, 7]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 7]: SUM_[q in {0, 4, }] cenq(q ,t) < 10t
+[8, 8]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[8, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[10, 10]: cenq(2, t) <= 3t
+[10, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(3, t) <= 1
+
+### - Time: 38 Res: SAT
+[2, 3]: aipg(0, t) >= 1
+[6, 7]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 7]: cenq(4, t) < 10t
+[8, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[8, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 9]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 10]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 10]: cenq(2, t) <= 3t
+[10, 10]: aipg(3, t) <= 1
+[11, 14]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[4, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[6, 7]: SUM_[q in {0, 2, 4, }] cenq(q ,t) < 6t
+[6, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[8, 8]: SUM_[q in {0, 2, 3, 4, }] cenq(q ,t) < 6t
+[8, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[9, 9]: aipg(3, t) >= 1
+[9, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[11, 14]: SUM_[q in {0, 2, 4, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[4, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[6, 7]: SUM_[q in {0, 2, 4, }] cenq(q ,t) < 6t
+[8, 8]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[8, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[9, 9]: aipg(3, t) >= 1
+[9, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[10, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) >= 2
+[11, 14]: SUM_[q in {0, 2, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[8, 8]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(3, t) >= 1
+[10, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 44 Res: SAT
+[8, 8]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(3, t) >= 1
+[10, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 44 Res: SAT
+[8, 8]: SUM_[q in {0, 2, }] cenq(q ,t) < 6t
+[9, 9]: aipg(3, t) >= 1
+[10, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 45 Res: SAT
+[1, 8]: SUM_[q in {0, 2, }] cenq(q ,t) < 6t
+[9, 9]: aipg(3, t) == 1
+[10, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[9, 9]: aipg(3, t) == 1
+[13, 14]: aipg(0, t) <= 1
+
+### - Time: 40 Res: SAT
+[8, 8]: aipg(0, t) <= 1
+[9, 9]: aipg(3, t) == 1
+[9, 9]: aipg(0, t) <= 1
+[10, 14]: aipg(0, t) <= 1
+
+### - Time: 39 Res: SAT
+[1, 8]: aipg(1, t) <= 1
+[9, 9]: aipg(3, t) == 1
+[10, 14]: aipg(0, t) <= 1
+
+### - Time: 37 Res: SAT
+[1, 5]: aipg(4, t) <= 5
+[1, 5]: aipg(1, t) <= 1
+[6, 8]: aipg(1, t) <= 1
+[9, 9]: aipg(3, t) == 1
+
+### - Time: 39 Res: SAT
+[1, 5]: aipg(1, t) <= 1
+[1, 5]: aipg(4, t) <= 5
+[6, 8]: aipg(1, t) <= 1
+[9, 9]: aipg(3, t) == 1
+[9, 9]: aipg(1, t) <= 1
+[10, 12]: aipg(1, t) <= 1
+
+### - Time: 39 Res: SAT
+[10, 13]: aipg(1, t) <= 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 39 Res: SAT
+[12, 14]: aipg(0, t) == 1
+
+### - Time: 36 Res: SAT
+[13, 13]: aipg(3, t) == 1
+[14, 14]: cenq(0, t) >= 3
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 38 Res: SAT
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(0, t) == 1
+[14, 14]: cenq(0, t) >= 3
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 45 Res: SAT
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+[14, 14]: cenq(0, t) >= 3
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 38 Res: SAT
+[6, 12]: aipg(4, t) >= 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: cenq(0, t) >= 3
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 45 Res: SAT
+[6, 13]: aipg(4, t) >= 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 38 Res: SAT
+[13, 13]: aipg(4, t) == 2
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 37 Res: SAT
+[9, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[2, 8]: SUM_[q in {2, 3, 4, }] cenq(q ,t) <= 4t
+[9, 13]: SUM_[q in {2, 3, 4, }] cenq(q ,t) <= 4t
+[9, 13]: aipg(4, t) == 2
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[9, 13]: SUM_[q in {2, 3, 4, }] cenq(q ,t) < 4t
+[9, 13]: aipg(4, t) == 2
+
+### - Time: 36 Res: SAT
+[2, 8]: aipg(0, t) <= 1
+[9, 10]: SUM_[q in {2, 3, 4, }] cenq(q ,t) < 4t
+[9, 10]: aipg(4, t) == 2
+[9, 10]: aipg(0, t) <= 1
+[11, 11]: aipg(0, t) <= 1
+
+### - Time: 37 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[1, 6]: cenq(4, t) <= 2
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(3, t) < 2t
+[7, 8]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 44 Res: SAT
+[8, 8]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 12]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[8, 8]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 14]: aipg(4, t) == 2
+[9, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[5, 8]: aipg(4, t) >= 2
+[9, 10]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 10]: aipg(4, t) >= 2
+[11, 11]: aipg(4, t) >= 2
+
+### - Time: 41 Res: SAT
+[5, 14]: cenq(4, t) >= 1
+[9, 9]: aipg(4, t) <= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 13]: aipg(4, t) <= 2
+
+### - Time: 42 Res: SAT
+[1, 4]: aipg(2, t) <= 2
+[5, 8]: aipg(2, t) <= 2
+[5, 14]: cenq(4, t) >= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 9]: aipg(4, t) <= 2
+[9, 9]: aipg(2, t) <= 2
+[10, 14]: aipg(2, t) <= 2
+
+### - Time: 39 Res: SAT
+[1, 4]: aipg(2, t) <= 2
+[5, 14]: cenq(4, t) >= 1
+[9, 9]: aipg(2, t) <= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 14]: aipg(2, t) <= 1
+
+### - Time: 38 Res: SAT
+[4, 8]: aipg(1, t) <= 1
+[9, 9]: aipg(1, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[10, 13]: aipg(1, t) <= 1
+[10, 13]: aipg(2, t) <= 1
+[14, 14]: aipg(2, t) <= 1
+
+### - Time: 45 Res: SAT
+[1, 8]: aipg(0, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[1, 1]: aipg(0, t) <= 1
+[2, 3]: aipg(2, t) <= 1
+[2, 3]: aipg(0, t) <= 1
+[4, 8]: aipg(0, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 14]: aipg(1, t) <= 1
+
+### - Time: 39 Res: SAT
+[2, 3]: aipg(0, t) <= 1
+[2, 3]: aipg(2, t) <= 1
+[4, 8]: aipg(2, t) <= 1
+[4, 8]: aipg(0, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(2, t) <= 1
+[10, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[4, 8]: aipg(1, t) <= 1
+[4, 8]: aipg(3, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[4, 8]: aipg(1, t) <= 1
+[4, 8]: aipg(3, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 12]: aipg(1, t) <= 1
+[13, 14]: aipg(1, t) >= 1
+
+### - Time: 40 Res: SAT
+[1, 8]: aipg(3, t) <= 1
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) >= 2
+[11, 12]: aipg(1, t) <= 1
+[13, 14]: aipg(1, t) >= 1
+
+### - Time: 37 Res: SAT
+[1, 7]: aipg(3, t) <= 1
+[8, 8]: aipg(3, t) <= 1
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(1, t) <= 1
+[11, 12]: aipg(1, t) <= 1
+[13, 14]: aipg(1, t) >= 1
+
+### - Time: 39 Res: SAT
+[1, 4]: aipg(3, t) <= 1
+[5, 7]: aipg(3, t) <= 1
+[5, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(1, t) <= 1
+
+### - Time: 44 Res: SAT
+[5, 7]: aipg(3, t) <= 1
+[5, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[9, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) >= 2
+
+### - Time: 41 Res: SAT
+[5, 7]: aipg(3, t) <= 1
+[5, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[10, 10]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) >= 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: aipg(1, t) <= 1
+
+### - Time: 41 Res: SAT
+[5, 7]: aipg(3, t) <= 1
+[5, 7]: aipg(4, t) >= 2
+[9, 10]: aipg(4, t) == 2
+[9, 10]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+[11, 11]: aipg(4, t) == 2
+[11, 11]: aipg(1, t) <= 1
+
+### - Time: 44 Res: SAT
+[1, 4]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 9t
+[1, 4]: cenq(4, t) <= 1
+[5, 5]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 9t
+[5, 5]: aipg(4, t) >= 2
+[5, 5]: aipg(3, t) <= 1
+[9, 14]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[1, 2]: cenq(4, t) <= 1
+[1, 2]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 9t
+[1, 4]: cenq(4, t) <= 1
+[3, 4]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 9t
+[3, 4]: aipg(3, t) <= 1
+[5, 5]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 9t
+[5, 5]: aipg(3, t) <= 1
+[5, 5]: aipg(4, t) >= 2
+[9, 14]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[1, 2]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 8t
+[1, 2]: cenq(4, t) <= 1
+[1, 4]: cenq(4, t) <= 1
+[3, 4]: aipg(3, t) <= 1
+[5, 5]: aipg(4, t) >= 2
+[5, 5]: aipg(3, t) <= 1
+[9, 14]: aipg(4, t) == 2
+
+### - Time: 41 Res: SAT
+[1, 2]: SUM_[q in {1, 2, }] cenq(q ,t) < 5t
+[1, 4]: cenq(4, t) <= 1
+[5, 5]: aipg(3, t) <= 1
+[5, 5]: aipg(4, t) >= 2
+[10, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[7, 8]: cenq(3, t) <= t
+
+### - Time: 38 Res: SAT
+[7, 8]: cenq(1, t) <= t
+
+### - Time: 41 Res: SAT
+[10, 11]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 81 Res: SAT
+[2, 9]: aipg(1, t) <= 1
+[12, 12]: aipg(4, t) == 2
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+
+### - Time: 46 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[12, 12]: aipg(1, t) <= 1
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 43 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[13, 14]: aipg(0, t) <= 1
+
+### - Time: 51 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[13, 14]: aipg(2, t) <= 1
+
+### - Time: 41 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[13, 14]: aipg(3, t) <= 1
+
+### - Time: 37 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(3, t) == 1
+
+### - Time: 41 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(1, t) == 1
+
+### - Time: 37 Res: SAT
+[2, 11]: aipg(1, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, 4, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[2, 10]: aipg(0, t) <= 1
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 12]: aipg(0, t) <= 1
+[13, 14]: aipg(0, t) <= 1
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[2, 10]: aipg(3, t) <= 1
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 37 Res: SAT
+[2, 10]: aipg(2, t) <= 1
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 37 Res: SAT
+[2, 2]: aipg(2, t) <= 1
+[3, 10]: aipg(2, t) <= 1
+[3, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(1, t) <= 1
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 9]: aipg(3, t) <= 1
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 9]: aipg(3, t) <= 1
+[10, 10]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) >= 2
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: SUM_[q in {2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: aipg(4, t) >= 2
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 9]: aipg(3, t) <= 1
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[13, 14]: aipg(1, t) <= 1
+
+### - Time: 39 Res: SAT
+[3, 3]: aipg(3, t) <= 1
+[4, 9]: aipg(1, t) <= 1
+[4, 9]: aipg(3, t) <= 1
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[4, 9]: aipg(3, t) <= 1
+[4, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) >= 2
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 38 Res: SAT
+[4, 9]: aipg(2, t) <= 1
+[4, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(2, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 40 Res: SAT
+[4, 9]: aipg(1, t) <= 1
+[4, 9]: aipg(2, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[10, 10]: aipg(2, t) <= 1
+[11, 14]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 14]: aipg(2, t) <= 1
+
+### - Time: 42 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 13]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 13]: aipg(2, t) <= 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 43 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 42 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: SUM_[q in {2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(1, t) == 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 40 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 43 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(0, t) == 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 45 Res: SAT
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 43 Res: SAT
+[7, 9]: aipg(3, t) <= 2
+[10, 10]: aipg(3, t) <= 2
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 12]: aipg(3, t) <= 2
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 44 Res: SAT
+[8, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(3, t) <= 2
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 13]: aipg(4, t) >= 2
+[11, 13]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 44 Res: SAT
+[5, 7]: aipg(1, t) <= 1
+[8, 9]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(3, t) <= 2
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[10, 10]: aipg(1, t) <= 1
+[11, 13]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 40 Res: SAT
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[8, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 13]: SUM_[q in {1, 2, }] cenq(q ,t) <= 4t
+
+### - Time: 39 Res: SAT
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) == 2
+[12, 13]: cenq(2, t) <= 4t
+[12, 13]: aipg(4, t) == 2
+
+### - Time: 43 Res: SAT
+[2, 5]: aipg(1, t) <= 1
+[6, 7]: aipg(1, t) <= 1
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 13]: aipg(4, t) == 2
+[12, 13]: cenq(2, t) <= 4t
+
+### - Time: 38 Res: SAT
+[2, 5]: aipg(1, t) <= 1
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 41 Res: SAT
+[2, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 47 Res: SAT
+[2, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[10, 10]: aipg(1, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(1, t) <= 1
+[12, 14]: aipg(1, t) <= 1
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 43 Res: SAT
+[6, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(1, t) <= 1
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 14]: aipg(0, t) <= 1
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[7, 7]: aipg(4, t) >= 2
+[8, 9]: aipg(1, t) <= 1
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(1, t) <= 1
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 14]: aipg(2, t) <= 1
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 40 Res: SAT
+[7, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 14]: aipg(4, t) == 2
+[12, 14]: aipg(2, t) <= 1
+
+### - Time: 38 Res: SAT
+[7, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(2, t) <= 1
+[13, 14]: aipg(2, t) >= 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 9]: aipg(3, t) <= 1
+[7, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(2, t) <= 1
+[13, 14]: aipg(2, t) >= 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 43 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 9]: aipg(3, t) <= 1
+[7, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(3, t) <= 1
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(3, t) <= 1
+[13, 14]: aipg(3, t) <= 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 43 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 9]: aipg(3, t) <= 1
+[7, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(3, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(3, t) <= 1
+[13, 14]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(3, t) <= 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 44 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 9]: aipg(3, t) <= 1
+[7, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(3, t) <= 1
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(3, t) <= 1
+[13, 14]: SUM_[q in {1, 2, 3, }] cenq(q ,t) < 4t
+[13, 14]: aipg(3, t) <= 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(3, t) <= 1
+[12, 12]: aipg(3, t) <= 1
+[13, 14]: aipg(2, t) <= 1
+[13, 14]: aipg(4, t) == 2
+[13, 14]: SUM_[q in {1, 2, 3, }] cenq(q ,t) < 4t
+
+### - Time: 44 Res: SAT
+[6, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(3, t) <= 1
+[13, 14]: aipg(2, t) <= 1
+[13, 14]: aipg(4, t) == 2
+[13, 14]: SUM_[q in {1, 2, 3, }] cenq(q ,t) < 4t
+
+### - Time: 42 Res: SAT
+[6, 9]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(3, t) <= 1
+[13, 14]: aipg(2, t) == 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[6, 10]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: aipg(4, t) == 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 42 Res: SAT
+[6, 10]: aipg(4, t) >= 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) == 2
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: aipg(4, t) == 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 40 Res: SAT
+[7, 8]: aipg(4, t) >= 2
+[9, 10]: aipg(4, t) == 2
+[9, 10]: aipg(4, t) >= 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[7, 8]: aipg(4, t) >= 2
+[9, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) == 2
+[12, 12]: aipg(4, t) == 2
+[13, 14]: aipg(2, t) == 1
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[7, 8]: aipg(4, t) >= 2
+[9, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(3, t) == 1
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 41 Res: SAT
+[7, 8]: aipg(4, t) >= 2
+[9, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 47 Res: SAT
+[7, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 39 Res: SAT
+[5, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[5, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 11]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+
+### - Time: 41 Res: SAT
+[5, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[11, 11]: aipg(4, t) >= 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: aipg(2, t) == 1
+
+### - Time: 40 Res: SAT
+[7, 9]: aipg(4, t) >= 2
+[10, 10]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(3, t) == 1
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(3, t) == 1
+
+### - Time: 39 Res: SAT
+[7, 7]: aipg(4, t) >= 2
+[9, 11]: aipg(4, t) == 2
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(3, t) == 1
+
+### - Time: 40 Res: SAT
+[7, 7]: aipg(4, t) >= 2
+[9, 11]: aipg(4, t) == 2
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[12, 12]: aipg(4, t) == 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(4, t) == 2
+
+### - Time: 38 Res: SAT
+[5, 8]: aipg(4, t) >= 2
+[9, 11]: aipg(4, t) == 2
+[12, 12]: aipg(4, t) == 2
+[12, 12]: SUM_[q in {1, 2, 3, }] cenq(q ,t) <= 4t
+[13, 13]: aipg(3, t) == 1
+[13, 13]: aipg(2, t) == 1
+
+### - Time: 39 Res: SAT
+[5, 8]: aipg(4, t) >= 2
+[9, 9]: aipg(4, t) == 2
+[9, 9]: cenq(4, t) == 3
+[10, 11]: aipg(4, t) == 2
+[12, 12]: aipg(4, t) == 2
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(3, t) == 1
+
+### - Time: 37 Res: SAT
+[1, 6]: aipg(3, t) <= 2
+[7, 8]: aipg(3, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 9]: aipg(3, t) <= 2
+[9, 9]: aipg(4, t) == 2
+[9, 9]: cenq(4, t) == 3
+[10, 10]: aipg(3, t) <= 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[7, 8]: aipg(4, t) >= 2
+[9, 9]: aipg(4, t) == 2
+[9, 9]: cenq(4, t) == 3
+[9, 9]: aipg(2, t) <= 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 42 Res: SAT
+[7, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[8, 8]: aipg(2, t) <= 2
+[9, 9]: aipg(0, t) <= 2
+[9, 9]: aipg(4, t) == 2
+[9, 9]: cenq(4, t) == 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 39 Res: SAT
+[8, 8]: aipg(1, t) <= 3
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: aipg(1, t) <= 3
+[9, 9]: cenq(4, t) == 3
+[9, 9]: aipg(4, t) == 2
+[10, 12]: aipg(1, t) <= 3
+[13, 13]: aipg(1, t) <= 3
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(2, t) == 1
+
+### - Time: 39 Res: SAT
+[4, 5]: cenq(1, t) < 2t
+[8, 8]: aipg(4, t) >= 2
+[9, 9]: cenq(4, t) == 3
+[9, 9]: aipg(4, t) == 2
+[10, 12]: aipg(1, t) <= 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 36 Res: SAT
+[1, 6]: cenq(1, t) <= 9
+[7, 8]: aipg(4, t) >= 1
+[9, 9]: cenq(4, t) == 3
+[9, 9]: aipg(4, t) == 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 37 Res: SAT
+[1, 6]: cenq(1, t) <= 9
+[7, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[8, 8]: aipg(1, t) <= 2
+[9, 10]: cenq(4, t) == 3
+[9, 10]: aipg(1, t) <= 2
+[11, 12]: aipg(1, t) <= 2
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 41 Res: SAT
+[1, 2]: cenq(1, t) <= 9
+[1, 6]: cenq(1, t) <= 9
+[3, 6]: aipg(4, t) <= 4t
+[7, 7]: aipg(4, t) <= 4t
+[7, 7]: aipg(2, t) >= 1
+[8, 9]: aipg(4, t) >= 1
+[10, 10]: cenq(4, t) == 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 36 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[9, 10]: cenq(4, t) == 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[9, 10]: aipg(4, t) >= 1
+[9, 10]: cenq(4, t) == 3
+[11, 12]: aipg(4, t) >= 1
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 37 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[7, 7]: aipg(4, t) >= 1
+[8, 8]: aipg(4, t) >= 1
+[9, 10]: cenq(4, t) == 3
+[9, 10]: aipg(4, t) >= 1
+[9, 10]: aipg(4, t) >= 1
+[11, 12]: aipg(4, t) >= 1
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 39 Res: SAT
+[5, 6]: aipg(4, t) >= 1
+[7, 7]: aipg(2, t) == 1
+[7, 7]: aipg(4, t) >= 1
+[8, 8]: aipg(4, t) >= 1
+[9, 10]: cenq(4, t) == 3
+[9, 10]: aipg(4, t) >= 1
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 36 Res: SAT
+[5, 6]: aipg(4, t) >= 1
+[7, 7]: aipg(2, t) == 1
+[7, 7]: aipg(4, t) >= 1
+[9, 10]: aipg(4, t) >= 2
+[9, 10]: cenq(4, t) == 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 39 Res: SAT
+[5, 6]: aipg(4, t) >= 1
+[7, 7]: aipg(2, t) == 1
+[7, 7]: aipg(4, t) >= 1
+[9, 10]: aipg(4, t) == 2
+[9, 10]: cenq(4, t) == 3
+[13, 14]: aipg(2, t) == 1
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[9, 11]: aipg(4, t) == 2
+[12, 12]: aipg(4, t) == 2
+[12, 14]: cenq(4, t) >= 4
+[13, 14]: cenq(4, t) >= 4
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: aipg(4, t) >= 2
+[8, 8]: aipg(4, t) >= 2
+[9, 11]: aipg(4, t) == 2
+[9, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 4
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[8, 8]: aipg(4, t) >= 2
+[9, 11]: aipg(4, t) == 2
+[9, 11]: aipg(4, t) >= 2
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 4
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[8, 8]: aipg(4, t) >= 2
+[11, 11]: SUM_[q in {0, 3, }] cenq(q ,t) <= 3t
+[12, 12]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 4
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[11, 11]: SUM_[q in {0, 3, }] cenq(q ,t) <= 3t
+[12, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: SUM_[q in {1, 3, 4, }] cenq(q ,t) <= 3t
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[14, 14]: SUM_[q in {1, 3, 4, }] cenq(q ,t) < 3t
+[14, 14]: aipg(4, t) >= 2
+
+### - Time: 41 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[9, 13]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {1, 3, 4, }] cenq(q ,t) < 3t
+
+### - Time: 41 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[8, 13]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(0, t) <= 1
+[7, 7]: aipg(2, t) >= 1
+[8, 13]: aipg(0, t) <= 1
+[8, 13]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: aipg(0, t) <= 1
+[8, 11]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[8, 11]: aipg(0, t) <= 1
+[12, 13]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 10t
+[12, 13]: aipg(0, t) <= 1
+[12, 13]: aipg(4, t) == 2
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[8, 8]: aipg(0, t) <= 1
+[9, 11]: aipg(4, t) == 2
+[9, 11]: aipg(0, t) <= 1
+[12, 13]: aipg(0, t) <= 1
+[12, 13]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[9, 11]: aipg(2, t) <= 1
+[9, 11]: aipg(4, t) == 2
+[12, 13]: aipg(0, t) <= 1
+
+### - Time: 39 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[9, 11]: aipg(2, t) <= 1
+[9, 11]: aipg(4, t) == 2
+[12, 14]: aipg(2, t) <= 1
+[12, 14]: aipg(0, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 4]: aipg(0, t) <= 1
+[5, 6]: aipg(0, t) <= 1
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: aipg(0, t) <= 1
+[8, 8]: aipg(0, t) <= 1
+[9, 11]: aipg(0, t) <= 1
+[9, 11]: aipg(4, t) == 2
+[12, 14]: aipg(2, t) <= 1
+[12, 14]: aipg(0, t) <= 1
+
+### - Time: 37 Res: SAT
+[3, 4]: aipg(0, t) <= 1
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[9, 10]: aipg(4, t) == 2
+[11, 11]: aipg(4, t) == 2
+[11, 11]: SUM_[q in {3, 4, }] cenq(q ,t) <= 2t
+[12, 14]: SUM_[q in {3, 4, }] cenq(q ,t) <= 2t
+[12, 14]: aipg(0, t) <= 1
+[12, 14]: aipg(2, t) <= 1
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: SUM_[q in {3, 4, }] cenq(q ,t) <= 2t
+[8, 10]: SUM_[q in {3, 4, }] cenq(q ,t) <= 2t
+[11, 11]: SUM_[q in {3, 4, }] cenq(q ,t) <= 2t
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(0, t) <= 1
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: SUM_[q in {3, 4, }] cenq(q ,t) < 2t
+[11, 11]: cenq(3, t) <= 2t
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(0, t) <= 1
+
+### - Time: 38 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: SUM_[q in {3, 4, }] cenq(q ,t) < 2t
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(3, t) <= 1
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) <= 1
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: aipg(3, t) <= 1
+[8, 10]: SUM_[q in {3, 4, }] cenq(q ,t) < 2t
+[11, 11]: aipg(3, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(3, t) <= 1
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) <= 1
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(3, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[12, 12]: aipg(0, t) >= 1
+[12, 12]: aipg(3, t) <= 1
+[13, 14]: aipg(3, t) <= 1
+
+### - Time: 38 Res: SAT
+[2, 4]: aipg(3, t) <= 1
+[5, 6]: aipg(4, t) >= 2
+[5, 6]: aipg(3, t) <= 1
+[7, 7]: aipg(3, t) <= 1
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[12, 12]: aipg(3, t) <= 1
+[12, 12]: aipg(0, t) >= 1
+[13, 14]: aipg(3, t) <= 1
+
+### - Time: 38 Res: SAT
+[2, 4]: aipg(3, t) <= 1
+[5, 6]: aipg(4, t) >= 2
+[5, 6]: aipg(3, t) <= 1
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: aipg(3, t) <= 1
+[8, 10]: aipg(3, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(0, t) >= 1
+
+### - Time: 39 Res: SAT
+[5, 6]: aipg(3, t) <= 1
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) >= 1
+[7, 7]: aipg(3, t) <= 1
+[11, 11]: aipg(4, t) == 2
+[12, 14]: aipg(0, t) >= 1
+
+### - Time: 37 Res: SAT
+[5, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) >= 1
+[12, 14]: aipg(0, t) == 1
+
+### - Time: 36 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[12, 12]: aipg(0, t) == 1
+[13, 14]: aipg(2, t) == 1
+[13, 14]: aipg(0, t) == 1
+
+### - Time: 39 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 37 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 41 Res: SAT
+[1, 3]: cenq(4, t) <= 3
+[1, 4]: cenq(4, t) <= 3
+[1, 6]: cenq(4, t) <= 3
+[1, 7]: cenq(4, t) <= 3
+[1, 10]: cenq(4, t) <= 3
+[4, 4]: aipg(3, t) <= t
+[7, 7]: aipg(2, t) >= 1
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 40 Res: SAT
+[1, 10]: cenq(4, t) <= 3
+[6, 6]: cenq(0, t) < 2t
+[7, 7]: cenq(0, t) < 2t
+[7, 7]: aipg(2, t) >= 1
+[8, 10]: cenq(0, t) < 2t
+[11, 12]: cenq(0, t) < 2t
+[13, 13]: cenq(0, t) < 2t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+
+### - Time: 42 Res: SAT
+[6, 6]: cenq(0, t) < 2t
+[7, 7]: cenq(1, t) < 2t
+[7, 7]: aipg(2, t) >= 1
+[8, 8]: cenq(0, t) < 2t
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+
+### - Time: 42 Res: SAT
+[4, 5]: cenq(1, t) < 2t
+[6, 6]: cenq(0, t) <= 2t
+[6, 6]: cenq(1, t) < 2t
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: cenq(1, t) < 2t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+
+### - Time: 40 Res: SAT
+[4, 6]: cenq(1, t) < 2t
+[7, 7]: aipg(2, t) >= 1
+[7, 7]: cenq(1, t) < 2t
+[8, 11]: cenq(2, t) < 2t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+
+### - Time: 39 Res: SAT
+[4, 6]: cenq(0, t) < 2t
+[7, 7]: aipg(2, t) >= 1
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+
+### - Time: 42 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 6t
+[13, 13]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 6t
+
+### - Time: 106 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: SUM_[q in {0, 1, 2, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(0, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 6t
+
+### - Time: 43 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[13, 13]: SUM_[q in {0, 1, 2, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(0, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) <= 6t
+
+### - Time: 44 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[13, 13]: SUM_[q in {0, 1, 2, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 43 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 43 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(1, t) == 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 40 Res: SAT
+[7, 7]: aipg(2, t) >= 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 43 Res: SAT
+[7, 7]: aipg(2, t) == 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 40 Res: SAT
+[5, 6]: cenq(4, t) == 1
+[7, 7]: aipg(2, t) == 1
+[13, 13]: aipg(2, t) == 1
+[13, 13]: aipg(0, t) == 1
+
+### - Time: 43 Res: SAT
+[5, 5]: cenq(4, t) == 1
+[6, 6]: cenq(4, t) == 1
+[6, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 43 Res: SAT
+[6, 6]: aipg(4, t) >= 2
+[6, 6]: cenq(4, t) == 1
+[7, 7]: aipg(4, t) >= 2
+[7, 7]: aipg(2, t) == 1
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 40 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(2, t) == 1
+[8, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(2, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 40 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 8]: aipg(4, t) >= 0
+[9, 12]: aipg(4, t) == 2
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 42 Res: SAT
+[1, 4]: aipg(2, t) <= 1
+[1, 4]: cenq(4, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[5, 6]: aipg(2, t) <= 1
+[5, 6]: aipg(2, t) <= 1
+[7, 7]: aipg(2, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 13]: aipg(2, t) <= 1
+[14, 14]: aipg(2, t) <= 1
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 43 Res: SAT
+[1, 4]: cenq(4, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[5, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 10t
+[7, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 10t
+[7, 7]: aipg(0, t) == 1
+[8, 11]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 10t
+[8, 11]: aipg(1, t) <= 2
+[12, 12]: aipg(1, t) <= 2
+
+### - Time: 41 Res: SAT
+[1, 4]: cenq(4, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 11]: aipg(1, t) <= 2
+[8, 11]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 10t
+[12, 14]: aipg(4, t) <= 2
+
+### - Time: 39 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 11]: cenq(4, t) <= 10t
+[8, 11]: aipg(1, t) <= 2
+[12, 14]: aipg(4, t) == 2
+
+### - Time: 40 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[10, 10]: aipg(4, t) == 2
+[11, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[11, 12]: aipg(4, t) == 2
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 42 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[13, 14]: aipg(4, t) == 2
+
+### - Time: 41 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 12]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[8, 12]: aipg(1, t) <= 2
+[13, 13]: aipg(1, t) <= 2
+[13, 13]: aipg(4, t) == 2
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(0, t) == 1
+[7, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[8, 8]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[9, 14]: aipg(1, t) <= 2
+
+### - Time: 40 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[7, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 6t
+[7, 7]: aipg(3, t) <= 1
+[8, 9]: aipg(1, t) <= 1
+[8, 9]: aipg(3, t) <= 1
+[10, 14]: aipg(1, t) <= 1
+
+### - Time: 38 Res: SAT
+[1, 6]: aipg(3, t) <= 1
+[7, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(0, t) == 1
+[8, 13]: aipg(3, t) <= 1
+
+### - Time: 40 Res: SAT
+[1, 5]: aipg(3, t) <= 2
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(0, t) == 1
+[8, 14]: aipg(3, t) <= 1
+
+### - Time: 39 Res: SAT
+[1, 5]: aipg(0, t) <= 2
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 6]: aipg(3, t) <= 1
+[6, 6]: aipg(0, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[7, 7]: aipg(0, t) <= 2
+[8, 9]: aipg(3, t) <= 3
+[8, 9]: aipg(0, t) <= 2
+[10, 14]: aipg(3, t) <= 3
+
+### - Time: 40 Res: SAT
+[6, 6]: aipg(0, t) <= 2
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 6]: aipg(3, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[7, 7]: aipg(3, t) <= 1
+[8, 9]: aipg(3, t) <= 3
+[8, 9]: aipg(3, t) <= 1
+[10, 10]: aipg(3, t) <= 1
+
+### - Time: 38 Res: SAT
+[1, 5]: cenq(2, t) <= 8
+[6, 6]: aipg(0, t) <= 1
+[6, 6]: cenq(2, t) < 9t
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[6, 6]: aipg(3, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[7, 7]: cenq(2, t) < 9t
+[8, 9]: cenq(2, t) < 9t
+
+### - Time: 38 Res: SAT
+[1, 5]: cenq(2, t) <= 8
+[6, 6]: aipg(0, t) <= 1
+[6, 6]: aipg(3, t) <= 1
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(3, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 8]: aipg(2, t) <= 1
+[9, 9]: SUM_[q in {0, 2, 3, }] cenq(q ,t) < 5t
+
+### - Time: 38 Res: SAT
+[1, 5]: cenq(2, t) <= 8
+[6, 6]: aipg(0, t) <= 2
+[6, 6]: aipg(3, t) <= 1
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(3, t) == 1
+[7, 7]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[8, 13]: SUM_[q in {0, 4, }] cenq(q ,t) < 8t
+[8, 13]: aipg(2, t) <= 1
+[14, 14]: aipg(2, t) <= 1
+
+### - Time: 36 Res: SAT
+[6, 6]: aipg(0, t) <= 2
+[6, 6]: aipg(3, t) <= 1
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[7, 7]: aipg(3, t) == 1
+[7, 7]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+
+### - Time: 37 Res: SAT
+[6, 6]: aipg(3, t) <= 2
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[7, 7]: aipg(3, t) == 1
+[9, 11]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 36 Res: SAT
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[9, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 176 Res: SAT
+[6, 6]: aipg(4, t) >= 2
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) == 1
+[8, 8]: aipg(4, t) >= 2
+[9, 13]: aipg(4, t) >= 2
+[9, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 36 Res: SAT
+[6, 6]: aipg(4, t) >= 2
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) == 1
+[9, 13]: aipg(4, t) <= 2
+[9, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 36 Res: SAT
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[7, 7]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) <= 2
+[13, 13]: aipg(4, t) <= 2
+[13, 14]: cenq(4, t) >= 4
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 37 Res: SAT
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[7, 7]: aipg(4, t) >= 2
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 4
+[14, 14]: cenq(4, t) >= 4
+
+### - Time: 38 Res: SAT
+[6, 6]: aipg(3, t) <= 2
+[6, 6]: SUM_[q in {0, 4, }] cenq(q ,t) < 2t
+[7, 7]: aipg(4, t) >= 2
+[7, 7]: aipg(3, t) == 1
+[13, 13]: aipg(4, t) >= 2
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: cenq(4, t) >= 5
+
+### - Time: 36 Res: SAT
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[13, 13]: aipg(4, t) == 2
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: cenq(4, t) >= 5
+
+### - Time: 36 Res: SAT
+[6, 6]: aipg(3, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[13, 13]: aipg(4, t) == 2
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 36 Res: SAT
+[7, 7]: aipg(3, t) == 1
+[11, 11]: aipg(0, t) <= 1
+[13, 13]: aipg(4, t) == 2
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 36 Res: SAT
+[7, 7]: aipg(3, t) == 1
+[11, 12]: aipg(0, t) <= 1
+[13, 13]: aipg(0, t) <= 1
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[7, 7]: aipg(3, t) == 1
+[11, 12]: aipg(0, t) <= 1
+[13, 13]: aipg(1, t) <= 1
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 41 Res: SAT
+[7, 7]: aipg(3, t) == 1
+[9, 10]: aipg(2, t) <= 2
+[11, 12]: aipg(2, t) <= 2
+[11, 12]: aipg(0, t) <= 1
+[13, 13]: aipg(2, t) <= 2
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(2, t) <= 2
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 38 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[7, 7]: aipg(0, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 12]: aipg(0, t) <= 1
+[13, 14]: cenq(4, t) >= 5
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(2, t) <= 2
+
+### - Time: 37 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[1, 6]: cenq(4, t) <= 2
+[1, 7]: cenq(4, t) <= 2
+[7, 7]: aipg(3, t) == 1
+[11, 14]: SUM_[q in {1, 3, 4, }] cenq(q ,t) >= 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {1, 3, 4, }] cenq(q ,t) >= 2
+
+### - Time: 36 Res: SAT
+[1, 6]: cenq(4, t) <= 2
+[1, 6]: aipg(0, t) <= 1
+[7, 7]: aipg(0, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) <= 1
+
+### - Time: 36 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[1, 6]: aipg(0, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 36 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) >= 1
+
+### - Time: 37 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(3, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) >= 1
+
+### - Time: 36 Res: SAT
+[1, 6]: cenq(4, t) <= 1
+[1, 6]: aipg(0, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(4, t) >= 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 38 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[1, 6]: cenq(4, t) <= 1
+[7, 7]: aipg(0, t) == 1
+[8, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 36 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 6]: aipg(0, t) <= 1
+[6, 6]: aipg(4, t) >= 2
+[7, 7]: aipg(0, t) == 1
+[7, 7]: aipg(4, t) >= 2
+[8, 13]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) >= 2
+
+### - Time: 37 Res: SAT
+[2, 4]: cenq(4, t) < t
+[2, 4]: aipg(0, t) <= 1
+[5, 5]: cenq(4, t) < t
+[5, 5]: aipg(4, t) >= 2
+[5, 5]: aipg(0, t) <= 1
+[6, 13]: cenq(4, t) < t
+[6, 13]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) < t
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) >= 2
+
+### - Time: 37 Res: SAT
+[2, 4]: aipg(0, t) <= 1
+[2, 4]: cenq(4, t) < t
+[5, 5]: aipg(0, t) <= 1
+[5, 5]: aipg(0, t) <= 1
+[5, 5]: aipg(4, t) >= 2
+[6, 13]: aipg(4, t) >= 2
+[6, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 37 Res: SAT
+[2, 4]: cenq(4, t) < t
+[2, 4]: aipg(0, t) <= 1
+[5, 5]: aipg(0, t) <= 1
+[5, 5]: aipg(0, t) <= 1
+[5, 5]: aipg(4, t) >= 2
+[6, 13]: aipg(1, t) <= 1
+[6, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 40 Res: SAT
+[2, 4]: aipg(0, t) <= 1
+[2, 4]: cenq(4, t) < t
+[5, 5]: aipg(4, t) >= 2
+[6, 13]: aipg(1, t) <= 1
+[6, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(2, t) >= 1
+
+### - Time: 37 Res: SAT
+[2, 4]: aipg(0, t) <= 1
+[2, 4]: cenq(4, t) < t
+[5, 5]: aipg(4, t) >= 2
+[6, 13]: aipg(1, t) <= 1
+[6, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 37 Res: SAT
+[2, 4]: aipg(0, t) <= 1
+[2, 4]: cenq(4, t) < t
+[6, 8]: aipg(1, t) <= 1
+[9, 13]: aipg(1, t) <= 1
+[9, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) <= 1
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 36 Res: SAT
+[9, 13]: aipg(4, t) == 2
+[9, 13]: aipg(1, t) <= 1
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) <= 1
+
+### - Time: 41 Res: SAT
+[2, 8]: aipg(1, t) <= 1
+[9, 13]: aipg(1, t) <= 1
+[9, 13]: aipg(4, t) == 2
+[9, 13]: aipg(1, t) <= 1
+[14, 14]: aipg(1, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 38 Res: SAT
+[2, 8]: aipg(1, t) <= 1
+[9, 13]: aipg(1, t) <= 1
+[9, 13]: aipg(4, t) == 2
+[9, 13]: aipg(1, t) <= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) <= 1
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 37 Res: SAT
+[2, 8]: aipg(1, t) <= 1
+[9, 13]: aipg(1, t) <= 1
+[9, 13]: aipg(4, t) == 2
+[9, 13]: aipg(3, t) <= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) <= 1
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 37 Res: SAT
+[9, 11]: aipg(3, t) <= 1
+[9, 11]: aipg(4, t) == 2
+[12, 13]: aipg(3, t) <= 1
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) <= 1
+
+### - Time: 37 Res: SAT
+[9, 11]: aipg(3, t) <= 1
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: aipg(1, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 39 Res: SAT
+[2, 7]: aipg(1, t) <= 1
+[8, 13]: aipg(0, t) <= 1
+[8, 13]: aipg(2, t) <= 1
+[14, 14]: aipg(3, t) == 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) <= 1
+
+### - Time: 38 Res: SAT
+[1, 7]: aipg(0, t) <= 1
+[9, 12]: aipg(2, t) <= 1
+[13, 13]: cenq(2, t) <= 8t
+[13, 13]: aipg(2, t) >= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(2, t) <= 8t
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 39 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[8, 10]: aipg(4, t) >= 1
+[13, 13]: aipg(2, t) >= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 40 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 0
+[8, 12]: aipg(4, t) >= 1
+[13, 13]: aipg(2, t) >= 1
+[13, 13]: aipg(4, t) >= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 0
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 1
+[13, 13]: aipg(2, t) >= 1
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 37 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 0
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 1
+[13, 13]: aipg(0, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(0, t) >= 1
+[13, 13]: aipg(4, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) == 2
+[14, 14]: aipg(1, t) >= 1
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[8, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(0, t) >= 1
+[14, 14]: aipg(1, t) >= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(4, t) == 2
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[6, 7]: aipg(0, t) <= 1
+[8, 12]: aipg(0, t) <= 1
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(0, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 39 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[6, 7]: aipg(0, t) <= 1
+[13, 13]: aipg(1, t) >= 1
+[13, 13]: aipg(0, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) <= 1
+
+### - Time: 45 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[6, 7]: aipg(0, t) <= 1
+[6, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 7t
+[8, 11]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 7t
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(1, t) >= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(0, t) <= 1
+
+### - Time: 39 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[6, 7]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 7t
+[8, 11]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) <= 7t
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(0, t) <= 1
+
+### - Time: 37 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(1, t) == 1
+[14, 14]: aipg(0, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(1, t) == 1
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 43 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[6, 7]: aipg(4, t) >= 1
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(3, t) == 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[7, 7]: aipg(4, t) >= 1
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: aipg(3, t) <= 1
+[13, 13]: aipg(1, t) == 1
+[13, 13]: aipg(0, t) <= 1
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(3, t) == 1
+
+### - Time: 38 Res: SAT
+[1, 5]: aipg(0, t) <= 1
+[7, 7]: aipg(4, t) >= 1
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: aipg(3, t) <= 1
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(3, t) == 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 37 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 5]: aipg(4, t) >= 1
+[5, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: aipg(3, t) == 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: cenq(4, t) == 5
+
+### - Time: 38 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 5]: aipg(4, t) >= 1
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(3, t) == 1
+[14, 14]: cenq(4, t) == 5
+[14, 14]: aipg(3, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[1, 4]: aipg(3, t) <= 1
+[5, 8]: aipg(3, t) <= 1
+[5, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(3, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(3, t) <= 1
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(3, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(3, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[5, 8]: aipg(0, t) <= 1
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(3, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[5, 8]: aipg(0, t) <= 1
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[1, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: aipg(4, t) >= 2
+[14, 14]: aipg(0, t) <= 1
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 4]: aipg(0, t) <= 1
+[4, 4]: aipg(0, t) <= 1
+[5, 8]: aipg(0, t) <= 1
+[5, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: aipg(0, t) <= 1
+[6, 6]: cenq(1, t) < 2t
+[6, 6]: aipg(0, t) <= 1
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: aipg(0, t) <= 1
+[6, 6]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: cenq(1, t) < 2t
+[5, 5]: aipg(0, t) <= 1
+[6, 6]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: cenq(1, t) < 2t
+[5, 5]: aipg(0, t) <= 1
+[6, 6]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: cenq(1, t) < 2t
+[5, 5]: aipg(0, t) <= 1
+[6, 6]: cenq(1, t) < 2t
+[7, 8]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[5, 5]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 2
+[7, 8]: cenq(3, t) < 2t
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: cenq(1, t) < 2t
+[6, 6]: cenq(3, t) < 2t
+[7, 8]: aipg(4, t) >= 1
+[7, 8]: cenq(3, t) < 2t
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: cenq(1, t) < 2t
+[4, 5]: cenq(3, t) < 2t
+[6, 6]: cenq(3, t) < 2t
+[7, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 36 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: cenq(3, t) < 2t
+[4, 5]: cenq(1, t) < 2t
+[7, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: aipg(0, t) <= 1
+[4, 5]: cenq(1, t) < 2t
+[4, 5]: cenq(3, t) < 3t
+[7, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 37 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: cenq(1, t) < 2t
+[4, 5]: aipg(0, t) <= 1
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 228 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: cenq(1, t) < 2t
+[4, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[6, 8]: aipg(0, t) <= 1
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, }] cenq(q ,t) < 6t
+
+### - Time: 39 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[6, 8]: aipg(0, t) <= 1
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(0, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(3, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 38 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[4, 5]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(0, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: SUM_[q in {0, 1, 2, 3, 4, }] cenq(q ,t) < 6t
+
+### - Time: 235 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[9, 12]: aipg(0, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[1, 3]: aipg(0, t) <= 1
+[6, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(1, t) <= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: aipg(3, t) == 1
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) == 2
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 38 Res: SAT
+[1, 6]: aipg(0, t) <= 1
+[7, 8]: aipg(2, t) >= 1
+[9, 12]: aipg(1, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(3, t) == 1
+[14, 14]: aipg(4, t) == 2
+
+### - Time: 37 Res: SAT
+[7, 8]: aipg(2, t) == 1
+[9, 12]: aipg(1, t) <= 1
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(3, t) == 1
+
+### - Time: 38 Res: SAT
+[7, 8]: aipg(2, t) == 1
+[9, 12]: aipg(1, t) <= 1
+[13, 13]: aipg(0, t) == 1
+[13, 13]: cenq(4, t) == 5
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 37 Res: SAT
+[1, 6]: cenq(4, t) <= 2
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(0, t) == 1
+[14, 14]: aipg(0, t) == 1
+
+### - Time: 36 Res: SAT
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) >= 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 179 Res: UNSAT
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) >= 2
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 40 Res: SAT
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[14, 14]: aipg(1, t) == 1
+
+### - Time: 231 Res: UNSAT
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 2
+[9, 12]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) >= 2
+
+### - Time: 227 Res: SAT
+[1, 8]: cenq(4, t) <= 2
+[7, 8]: aipg(4, t) >= 1
+[9, 12]: aipg(4, t) == 2
+[13, 13]: cenq(4, t) == 5
+[13, 13]: aipg(4, t) >= 2
