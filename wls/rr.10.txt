@@ -1,3 +1,9 @@
+### - Time: 69 Res: SAT
+[1, 10]: cenq(1, t) >= t
+[1, 10]: cenq(2, t) >= t
+[1, 10]: cenq(3, t) >= t
+[1, 10]: cenq(4, t) >= t
+
 ### - Time: 68 Res: SAT
 [4, 9]: cenq(3, t) >= 4t
 

@@ -35,7 +35,7 @@ vector<NamedExp> STSChecker::base_constrs() {
 STSChecker::STSChecker(SmtSolver &slv, const string &var_prefix, const int n, const int m, const int k, const int c,
                        const int me,
                        const int md): slv(slv), var_prefix(move(var_prefix)), num_bufs(n),
-                                      timesteps(m), pkt_types(k), c(c), me(me),
+                                      timesteps(m), pkt_types(k), c(c), me(me),k(k),
                                       md(md) {
     I = slv.ivvv(n, m, k, format("I_{}", var_prefix));
     E = slv.ivvv(n, m, k, format("E_{}", var_prefix));

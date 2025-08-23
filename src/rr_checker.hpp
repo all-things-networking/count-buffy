@@ -23,6 +23,8 @@ public:
 
     vector<NamedExp> trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) override;
 
+    expr bar(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp);
+
     vector<NamedExp> query(int m) override;
 
     vector<NamedExp> init(ev const &b0, ev const &s0) override;

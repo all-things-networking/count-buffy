@@ -86,9 +86,11 @@ int main(const int argc, const char *argv[]) {
 
         auto start_t = chrono::high_resolution_clock::now();
         // auto mod = slv.check_sat();
-        if (res_stat == "SAT")
-            slv.check_sat();
-        else if (res_stat == "UNSAT") {
+        if (res_stat == "SAT") {
+            auto mod = slv.check_sat();
+            print_mod(sts, mod);
+            exit(1);
+        } else if (res_stat == "UNSAT") {
             try {
                 slv.check_unsat();
             } catch (runtime_error e) {
