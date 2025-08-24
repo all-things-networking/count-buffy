@@ -1,54 +1,45 @@
 #include "leaf_sts.hpp"
 
+#include <map>
+
+#include "Buff.hpp"
 #include "prio_sts.hpp"
 
 const int MAX_I = 10;
 
-LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, const int n, const int m, const int k, const int c,
-                 const int me,
-                 const int md,
-                 const int num_ports): slv(slv), var_prefix(move(var_prefix)), num_bufs(n),
-                                       timesteps(m), pkt_types(k), c(c), me(me), k(k),
-                                       md(md),num_ports(num_ports) {
-    I = slv.ivvv(n, m, k, format("I_{}", var_prefix));
-    E = slv.ivvv(n, m, k, format("E_{}", var_prefix));
-    D = slv.ivvv(n, m, k, format("D_{}", var_prefix));
-    B = slv.bvv(n, m, format("B_{}", var_prefix));
-    S_int = slv.ivv(n, m, format("S_{}", var_prefix));
-    O = slv.ivvv(n, m, k, format("O_{}", var_prefix));
-    C = slv.ivvv(n, m, k, format("C_{}", var_prefix));
-    wnd_enq = slv.ivvv(n, m, k, format("WndEnq_{}", var_prefix));
-    wnd_enq_nxt = slv.ivvv(n, m, k, format("WndEnqNxt_{}", var_prefix));
-    wnd_out = slv.ivvv(n, m, k, format("WndOut_{}", var_prefix));
-    tmp_wnd_enq = slv.ivvv(n, m, k, format("TmpWndEnq_{}", var_prefix));
-    tmp_wnd_enq_nxt = slv.ivvv(n, m, k, format("TmpWndEnqNxt_{}", var_prefix));
-    tmp_wnd_out = slv.ivvv(n, m, k, format("TmpWndOut_{}", var_prefix));
-    match = slv.bvv(n, m, format("Match_{}", var_prefix));
-    slv.add_bound(I, 0, MAX_I);
-    slv.add_bound(E, 0, me);
-    slv.add_bound(D, 0, me);
-    slv.add_bound(O, 0, md);
-    slv.add_bound(C, 0, c);
-    slv.add_bound(wnd_enq, 0, c);
-    slv.add_bound(wnd_enq_nxt, 0, c);
-    slv.add_bound(wnd_out, 0, c);
-    slv.add_bound(tmp_wnd_enq, 0, c);
-    slv.add_bound(tmp_wnd_enq_nxt, 0, c);
-    slv.add_bound(tmp_wnd_out, 0, c);
-    this->use_win = true;
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, const int num_bufs, const int time_steps,
+                 const int pkt_types,
+                 const int buff_cap,
+                 const int max_enq,
+                 const int max_deq,
+                 const int num_ports
+): slv(slv), var_prefix(move(var_prefix)), num_bufs(num_bufs),
+   timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
+   max_deq(max_deq), num_ports(num_ports) {
+    for (int i = 0; i < num_bufs; ++i) {
+        Buff buff(slv, format("BUF_{}", i), timesteps, pkt_types, max_enq, max_deq, buff_cap);
+        buffs.push_back(buff);
+    }
+    use_win = true;
 }
 
-LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, int num_ports, int time_steps, int c, int me,
-                 int md): LeafSts(slv, var_prefix, num_ports * num_ports, time_steps, 1, c, me, md, num_ports) {
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, int num_ports, int time_steps, int buff_cap, int max_enq,
+                 int max_deq): LeafSts(slv, var_prefix, num_ports * num_ports, time_steps, 1, buff_cap, max_enq,
+                                       max_deq,
+                                       num_ports) {
 }
 
-vector<NamedExp> LeafSts::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
+vector<Buff> LeafSts::get_buff_list() const {
+    return buffs;
+}
+
+vector<NamedExp> LeafSts::out(int t) {
     expr res = slv.ctx.bool_val(true);
     for (int src = 0; src < num_ports; ++src) {
         for (int dst = 0; dst < num_ports; ++dst) {
             int idx = src * num_ports + dst;
-            expr turn = sv[dst];
-            res = res && ite(bv[idx] && turn == slv.ctx.int_val(src), ov[idx] == 1, ov[idx] == 0);
+            // expr turn = sv[dst];
+            // res = res && ite(bv[idx] && turn == slv.ctx.int_val(src), ov[idx] == 1, ov[idx] == 0);
         }
     }
     return {res};
@@ -68,21 +59,21 @@ expr LeafSts::rr(ev const &backlog, expr &prev_turn) {
     return nxt_turn;
 }
 
-vector<NamedExp> LeafSts::trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) {
+vector<NamedExp> LeafSts::trs(int t) {
     vector<NamedExp> v;
     for (int out_idx = 0; out_idx < num_ports; ++out_idx) {
-        expr prev_turn = s[out_idx];
-        ev backlogs_of_out_i = get_voq_of_out_i(b, out_idx);
-        expr nxt_turn = rr(backlogs_of_out_i, prev_turn);
-        v.emplace_back(sp[out_idx] == nxt_turn);
+        // expr prev_turn = s[out_idx];
+        // ev backlogs_of_out_i = get_voq_of_out_i(b, out_idx);
+        // expr nxt_turn = rr(backlogs_of_out_i, prev_turn);
+        // v.emplace_back(sp[out_idx] == nxt_turn);
     }
     return v;
 }
 
-vector<NamedExp> LeafSts::init(const ev &b0, const ev &s0) {
+vector<NamedExp> LeafSts::init() {
     expr res = slv.ctx.bool_val(true);
-    for (int i = 0; i < num_ports; ++i)
-        res = res && (s0[i] == 0);
+    // for (int i = 0; i < num_ports; ++i)
+        // res = res && (s0[i] == 0);
 
     return {res};
 }
@@ -104,7 +95,7 @@ void LeafSts::print(model mod) const {
         cout << "In[" << src << "]: " << endl;
         for (int dst = 0; dst < num_ports; ++dst) {
             auto idx = src * num_ports + dst;
-            cout << "TO[" << dst << "]: " << str(I[idx], mod, ",").str() << endl;
+            // cout << "TO[" << dst << "]: " << str(I[idx], mod, ",").str() << endl;
         }
     }
     cout << endl;
@@ -113,14 +104,14 @@ void LeafSts::print(model mod) const {
         cout << "Out[" << dst << "]: " << endl;
         for (int src = 0; src < num_ports; ++src) {
             auto idx = src * num_ports + dst;
-            cout << "FROM[" << src << "]: " << str(O[idx], mod, ",").str() << endl;
+            // cout << "FROM[" << src << "]: " << str(O[idx], mod, ",").str() << endl;
         }
     }
     cout << endl;
     for (int i = 0; i < num_ports; ++i) {
         cout << "------------------------" << endl;
         cout << "Turn Dst[" << i << "]" << endl;
-        cout << str(get_state()[i], mod).str() << endl;
+        // cout << str(get_state()[i], mod).str() << endl;
     }
     // for (int i = 0; i < num_ports; ++i) {
     // cout << "------------------------" << endl;
@@ -160,10 +151,10 @@ vector<NamedExp> LeafSts::base_constrs() {
 
 
 vector<NamedExp> LeafSts::bl_size(const int i) const {
-    const auto Ei = E[i];
-    const auto Bi = B[i];
-    const auto Ci = C[i];
-    const auto Oi = O[i];
+    const auto Ei = get_buff_list()[i].E;
+    const auto Bi = get_buff_list()[i].B;
+    const auto Ci = get_buff_list()[i].C;
+    const auto Oi = get_buff_list()[i].O;
     vector<NamedExp> res;
     // [6]
     auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0]);
@@ -180,19 +171,20 @@ vector<NamedExp> LeafSts::bl_size(const int i) const {
 }
 
 std::vector<NamedExp> LeafSts::enqs(const int i) const {
-    const auto Ei = E[i];
-    const auto Bi = B[i];
-    const auto Ci = C[i];
+    const auto Ei = get_buff_list()[i].E;
+    const auto Bi = get_buff_list()[i].B;
+    const auto Ci = get_buff_list()[i].C;
+    const auto Oi = get_buff_list()[i].O;
 
     std::vector<NamedExp> res;
 
     // [9]
-    expr e0 = (Ei[0] <= c) && (Bi[0] == (Ei[0] > 0));
+    expr e0 = (Ei[0] <= buff_cap) && (Bi[0] == (Ei[0] > 0));
     res.emplace_back(e0);
 
     for (int j = 1; j < timesteps; ++j) {
         // [10]
-        expr lt_cap = ((Ei[j] + Ci[j - 1]) <= c);
+        expr lt_cap = ((Ei[j] + Ci[j - 1]) <= buff_cap);
         expr ej = lt_cap;
         res.emplace_back(ej);
     }
@@ -201,22 +193,22 @@ std::vector<NamedExp> LeafSts::enqs(const int i) const {
 
 
 std::vector<NamedExp> LeafSts::drops(int i) {
-    const auto Di = D[i];
-    const auto Ei = E[i];
-    const auto Bi = B[i];
-    const auto Ci = C[i];
+    const auto Di = get_buff_list()[i].D;
+    const auto Ei = get_buff_list()[i].E;
+    const auto Bi = get_buff_list()[i].B;
+    const auto Ci = get_buff_list()[i].C;
 
     std::vector<NamedExp> res;
 
     // [11]
-    expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == c), Di[0] == 0);
+    expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == buff_cap), Di[0] == 0);
     res.emplace_back(d0);
 
     // timesteps 1..m-1
     for (int j = 1; j < timesteps; ++j) {
         // [12]
         expr dj = ite(Bi[j],
-                      implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == c),
+                      implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == buff_cap),
                       Di[j] == 0);
         res.emplace_back(dj);
     }
@@ -224,9 +216,9 @@ std::vector<NamedExp> LeafSts::drops(int i) {
 }
 
 std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
-    const auto Ii = I[i];
-    const auto Ei = E[i];
-    const auto Di = D[i];
+    const auto Ii = get_buff_list()[i].I;
+    const auto Di = get_buff_list()[i].D;
+    const auto Ei = get_buff_list()[i].E;
 
     std::vector<NamedExp> res;
 
@@ -244,55 +236,54 @@ std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
 
 
 vector<NamedExp> LeafSts::winds(int i) {
+    const auto Oi = get_buff_list()[i].O;
+    const auto Ei = get_buff_list()[i].E;
+    const auto wnd_enq_i = get_buff_list()[i].wnd_enq;
+    const auto wnd_out_i = get_buff_list()[i].wnd_out;
+    const auto wnd_enq_nxt_i = get_buff_list()[i].wnd_enq_nxt;
+    const auto tmp_wnd_enq_i = get_buff_list()[i].tmp_wnd_enq;
+    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i].tmp_wnd_enq_nxt;
+
     vector<NamedExp> nes;
     // [14]
-    nes.emplace_back(wnd_enq[i][0] == E[i][0]);
-    nes.emplace_back(wnd_out[i][0] == O[i][0]);
-    nes.emplace_back(wnd_enq_nxt[i][0] == 0);
+    nes.emplace_back(wnd_enq_i[0] == Ei[0]);
+    nes.emplace_back(wnd_out_i[0] == Oi[0]);
+    nes.emplace_back(wnd_enq_nxt_i[0] == 0);
     for (int j = 1; j < timesteps; ++j) {
-        auto se = tmp_wnd_enq[i][j];
-        auto sn = tmp_wnd_enq_nxt[i][j];
-        nes.emplace_back(wnd_enq[i][j - 1] + E[i][j] == se + sn);
+        auto se = tmp_wnd_enq_i[j];
+        auto sn = tmp_wnd_enq_nxt_i[j];
+        nes.emplace_back(wnd_enq_i[j - 1] + Ei[j] == se + sn);
 
-        auto to = wnd_out[i][j - 1] + O[i][j];
+        auto to = wnd_out_i[j - 1] + Oi[j];
         auto m = se <= to;
         auto constr = ite(m,
-                          wnd_enq[i][j] == wnd_enq_nxt[i][j] + sn
-                          && wnd_enq_nxt[i][j] == slv.const_vec(pkt_types, 0)
-                          && wnd_out[i][j] == to - se
+                          wnd_enq_i[j] == wnd_enq_nxt_i[j] + sn
+                          && wnd_enq_nxt_i[j] == slv.const_vec(pkt_types, 0)
+                          && wnd_out_i[j] == to - se
                           ,
-                          wnd_enq[i][j] == se
-                          && wnd_enq_nxt[i][j] == wnd_enq_nxt[i][j - 1] + sn
-                          && wnd_out[i][j] == to
+                          wnd_enq_i[j] == se
+                          && wnd_enq_nxt_i[j] == wnd_enq_nxt_i[j - 1] + sn
+                          && wnd_out_i[j] == to
         );
-        constr = constr && se <= c && sn <= c - 1 && sn >= 0 && se >= 0 && to >= 0 && to <= 2 * c && wnd_enq_nxt[i][j] <
-                 c;
-        constr = constr && (wnd_enq[i][j - 1] <= se);
-        constr = constr && implies(sum(sn) > 0, sum(se) == c);
-        constr = constr && implies(sum(se) < c, sum(sn) == 0);
-        constr = constr && !(sum(se) < c && sum(sn) > 0);
+        constr = constr && se <= buff_cap && sn <= buff_cap - 1 && sn >= 0 && se >= 0 && to >= 0 && to <= 2 * buff_cap
+                 && wnd_enq_nxt_i[j] <
+                 buff_cap;
+        constr = constr && (wnd_enq_i[j - 1] <= se);
+        constr = constr && implies(sum(sn) > 0, sum(se) == buff_cap);
+        constr = constr && implies(sum(se) < buff_cap, sum(sn) == 0);
+        constr = constr && !(sum(se) < buff_cap && sum(sn) > 0);
         nes.emplace_back(constr);
-        nes.emplace_back(wnd_out[i][j] <= wnd_enq[i][j]);
+        nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j]);
     }
     return nes;
 }
 
-ev2 LeafSts::get_state() const {
-    return S_int;
-}
-
 vector<NamedExp> LeafSts::trs() {
     vector<NamedExp> res;
-    ev const &b0 = get_buf_vec_at_i(B, 0);
-    ev const &s0 = get_buf_vec_at_i(get_state(), 0);
-    auto nes = init(b0, s0);
+    auto nes = init();
     extend(res, nes);
     for (int i = 0; i < timesteps - 1; ++i) {
-        ev const &b = get_buf_vec_at_i(B, i);
-        ev const &bp = get_buf_vec_at_i(B, i + 1);
-        ev const &s = get_buf_vec_at_i(get_state(), i);
-        ev const &sp = get_buf_vec_at_i(get_state(), i + 1);
-        nes = trs(b, s, bp, sp, i + 1);
+        nes = trs(i);
         extend(res, nes, format("Trs({},{})", i, i + 1));
     }
     return res;
@@ -302,7 +293,7 @@ vector<NamedExp> LeafSts::trs() {
 vector<NamedExp> LeafSts::out() {
     vector<NamedExp> res;
     for (int j = 0; j < timesteps; ++j) {
-        auto nes = out(get_buf_vec_at_i(B, j), get_buf_vec_at_i(get_state(), j), get_buf_vec_at_i(O, j), j);
+        auto nes = out(j);
         extend(res, nes, format("@{}", j));
     }
     return res;

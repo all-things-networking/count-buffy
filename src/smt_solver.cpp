@@ -168,10 +168,16 @@ void SmtSolver::check_unsat() {
 void SmtSolver::add_bound(const ev3 &vvv, const int lower, const int upper) {
     expr res = ctx.bool_val(true);
     for (const auto &vv: vvv) {
-        for (const auto &v: vv) {
-            for (const auto &e: v) {
-                res = res && (e >= lower) && (e <= upper);
-            }
+        add_bound(vv, lower, upper);
+    }
+    s.add(res);
+}
+
+void SmtSolver::add_bound(const ev2 &vv, const int lower, const int upper) {
+    expr res = ctx.bool_val(true);
+    for (const auto &v: vv) {
+        for (const auto &e: v) {
+            res = res && (e >= lower) && (e <= upper);
         }
     }
     s.add(res);

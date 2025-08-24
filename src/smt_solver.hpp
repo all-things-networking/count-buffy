@@ -51,6 +51,8 @@ public:
 
     void add_bound(const ev3 &vv, int lower, int upper);
 
+    void add_bound(const ev2 &vv, int lower, int upper);
+
     pair<ev, ev> capped(const ev &v, int cap);
 
     model check_sat();
