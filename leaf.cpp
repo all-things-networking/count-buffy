@@ -54,19 +54,25 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
 
 int main(const int argc, const char *argv[]) {
     SmtSolver slv;
-    LeafSts *sts;
-    sts = new LeafSts(slv, "leaf", NUM_PORTS, TIME_STEPS, 5, MAX_ENQ, MAX_DEQ);
+    LeafSts *l1;
+    l1 = new LeafSts(slv, "leaf", NUM_PORTS, TIME_STEPS, 5, MAX_ENQ, MAX_DEQ);
+
+    // LeafSts *l2;
+    // l2 = new LeafSts(slv, "leaf", NUM_PORTS, TIME_STEPS, 5, MAX_ENQ, MAX_DEQ);
+
     map<tuple<int, int, int>, int> ins = {
         {{1, 2, 0}, 2},
         {{0, 2, 0}, 2},
+        {{0, 1, 0}, 2},
+        {{2, 1, 0}, 2},
     };
-    auto constr = add_constr(sts, ins);
+    auto constr = add_constr(l1, ins);
     slv.add({constr, "inp"});
 
-    auto base = sts->base_constrs();
+    auto base = l1->base_constrs();
     slv.add(base);
 
     auto mod = slv.check_sat();
 
-    sts->print(mod);
+    l1->print(mod);
 }
