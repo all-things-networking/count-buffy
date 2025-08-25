@@ -42,7 +42,9 @@ public:
 
     expr rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t);
 
-    vector<Buff *> get_src_buffs(int dst);
+    vector<Buff *> get_buffs_for_dst(int dst);
+
+    vector<Buff *> get_buffs_for_src(int src);
 
     vector<NamedExp> trs(int t);
 
@@ -65,6 +67,10 @@ public:
     vector<NamedExp> out();
 
     vector<NamedExp> trs();
+
+    ev2 get_in_port(int src);
+
+    ev2 get_out_port(int dst);
 
     template<class V>
     V get_voq_of_out_i(const V &all_ev, int i);

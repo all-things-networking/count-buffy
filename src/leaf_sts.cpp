@@ -19,6 +19,25 @@ map<int, map<int, Buff *> > LeafSts::get_per_dst_buff_map() {
     return src_buffs_map;
 }
 
+ev2 LeafSts::get_in_port(int src) {
+    vector<Buff *> src_buffs = get_buffs_for_src(src);
+    assert(src_buffs.size() > 0);
+    ev2 in = src_buffs[0]->I;
+    for (auto buff: src_buffs)
+        in = in + buff->I;
+    return in;
+}
+
+ev2 LeafSts::get_out_port(int dst) {
+    vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
+    assert(dst_buffs.size() > 0);
+    ev2 out = dst_buffs[0]->O;
+    for (auto buff: dst_buffs)
+        out = out + buff->O;
+    return out;
+}
+
+
 LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
                  const int time_steps,
                  const int pkt_types,
@@ -33,16 +52,12 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
     tmp = slv.iv(time_steps, "TMP");
 
     for (auto src_dst: port_list) {
-        try {
-            int src = get<0>(src_dst);
-            int dst = get<1>(src_dst);
-            Buff *buff = new Buff(slv, format("BUF_{}_{}", src, dst), timesteps,
-                                  pkt_types, max_enq, max_deq, buff_cap, src, dst);
-            buffs[{src, dst}] = buff;
-            dsts.insert(dst);
-        } catch (std::exception e) {
-            cout << "ERR" << endl;
-        }
+        int src = get<0>(src_dst);
+        int dst = get<1>(src_dst);
+        Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
+                              pkt_types, max_enq, max_deq, buff_cap, src, dst);
+        buffs[{src, dst}] = buff;
+        dsts.insert(dst);
     }
 
     for (int dst: dsts) {
@@ -62,7 +77,7 @@ vector<Buff *> LeafSts::get_buff_list() const {
 vector<NamedExp> LeafSts::out(int t) {
     expr res = slv.ctx.bool_val(true);
     for (const auto &[dst, turn]: turn_for_dst) {
-        vector<Buff *> src_buffs = get_src_buffs(dst);
+        vector<Buff *> src_buffs = get_buffs_for_dst(dst);
         expr turn_val = slv.ctx.int_val(0);
         for (int i = 0; i < src_buffs.size(); ++i) {
             Buff *buff = src_buffs[i];
@@ -87,7 +102,7 @@ expr LeafSts::rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t) 
     return nxt_turn;
 }
 
-vector<Buff *> LeafSts::get_src_buffs(int dst) {
+vector<Buff *> LeafSts::get_buffs_for_dst(int dst) {
     auto per_dst = get_per_dst_buff_map();
     auto dst_map = per_dst[dst];
     vector<Buff *> dst_buffs_list;
@@ -95,6 +110,17 @@ vector<Buff *> LeafSts::get_src_buffs(int dst) {
         dst_buffs_list.push_back(buff);
     return dst_buffs_list;
 }
+
+vector<Buff *> LeafSts::get_buffs_for_src(int src) {
+    vector<Buff *> src_buffs;
+    for (const auto &[key, buff]: buffs) {
+        int s = get<0>(key);
+        if (s == src)
+            src_buffs.push_back(buff);
+    }
+    return src_buffs;
+}
+
 
 vector<NamedExp> LeafSts::trs(int t) {
     vector<NamedExp> v;
@@ -117,7 +143,7 @@ vector<NamedExp> LeafSts::trs(int t) {
 vector<NamedExp> LeafSts::init() {
     expr res = slv.ctx.bool_val(true);
     for (const auto &[dst, turn]: turn_for_dst) {
-        vector<Buff *> src_buffs = get_src_buffs(dst);
+        vector<Buff *> src_buffs = get_buffs_for_dst(dst);
         expr turn_val = slv.ctx.int_val(0);
         for (int i = 1; i <= src_buffs.size(); ++i) {
             int idx = ((src_buffs.size() - i) % src_buffs.size());
@@ -154,7 +180,7 @@ void LeafSts::print(model mod) {
     cout << "TMP: " << endl;
     cout << str(tmp, mod).str() << endl;
     for (const auto &[dst, turn]: turn_for_dst) {
-        auto src_buffs = get_src_buffs(dst);
+        auto src_buffs = get_buffs_for_dst(dst);
         cout << "-----------------" << endl;
         cout << "DST = " << dst << endl;
         for (int i = 0; i < src_buffs.size(); ++i) {

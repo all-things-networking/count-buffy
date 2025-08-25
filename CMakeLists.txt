@@ -26,4 +26,5 @@ add_target(LoomMem loom.mem.cpp)
 add_target(LoomNoMem loom.nomem.cpp)
 add_target(FQ fq.cpp)
 add_target(leaf leaf.cpp)
+add_target(line line.cpp)
 
