@@ -29,4 +29,5 @@ add_target(FQ fq.cpp)
 add_target(leaf leaf.cpp)
 add_target(line line.cpp)
 add_target(demux demux.cpp)
+add_target(demux_big demux_big.cpp)
 
