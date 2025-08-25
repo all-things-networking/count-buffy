@@ -4,77 +4,127 @@
 
 #include "Buff.hpp"
 #include "prio_sts.hpp"
+#include <set>
 
 const int MAX_I = 10;
 
-LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, const int num_bufs, const int time_steps,
+map<int, map<int, Buff *> > LeafSts::get_per_dst_buff_map() {
+    map<int, map<int, Buff *> > src_buffs_map;
+    for (const auto &[key, buf]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        auto buff = buffs[{src, dst}];
+        src_buffs_map[dst][src] = buff;
+    }
+    return src_buffs_map;
+}
+
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
+                 const int time_steps,
                  const int pkt_types,
                  const int buff_cap,
                  const int max_enq,
-                 const int max_deq,
-                 const int num_ports
-): slv(slv), var_prefix(move(var_prefix)), num_bufs(num_bufs),
+                 const int max_deq
+): slv(slv), var_prefix(move(var_prefix)),
    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
-   max_deq(max_deq), num_ports(num_ports) {
-    for (int i = 0; i < num_bufs; ++i) {
-        Buff buff(slv, format("BUF_{}", i), timesteps, pkt_types, max_enq, max_deq, buff_cap);
-        buffs.push_back(buff);
+   max_deq(max_deq) {
+    set<int> dsts;
+    vector<Buff *> bar;
+    tmp = slv.iv(time_steps, "TMP");
+
+    for (auto src_dst: port_list) {
+        try {
+            int src = get<0>(src_dst);
+            int dst = get<1>(src_dst);
+            Buff *buff = new Buff(slv, format("BUF_{}_{}", src, dst), timesteps,
+                                  pkt_types, max_enq, max_deq, buff_cap, src, dst);
+            buffs[{src, dst}] = buff;
+            dsts.insert(dst);
+        } catch (std::exception e) {
+            cout << "ERR" << endl;
+        }
+    }
+
+    for (int dst: dsts) {
+        turn_for_dst[dst] = slv.iv(time_steps, format("TURN_{}", dst));
     }
     use_win = true;
 }
 
-LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, int num_ports, int time_steps, int buff_cap, int max_enq,
-                 int max_deq): LeafSts(slv, var_prefix, num_ports * num_ports, time_steps, 1, buff_cap, max_enq,
-                                       max_deq,
-                                       num_ports) {
-}
-
-vector<Buff> LeafSts::get_buff_list() const {
-    return buffs;
+vector<Buff *> LeafSts::get_buff_list() const {
+    std::vector<Buff *> result;
+    for (const auto &[key, buffPtr]: buffs) {
+        result.push_back(buffPtr);
+    }
+    return result;
 }
 
 vector<NamedExp> LeafSts::out(int t) {
     expr res = slv.ctx.bool_val(true);
-    for (int src = 0; src < num_ports; ++src) {
-        for (int dst = 0; dst < num_ports; ++dst) {
-            int idx = src * num_ports + dst;
-            // expr turn = sv[dst];
-            // res = res && ite(bv[idx] && turn == slv.ctx.int_val(src), ov[idx] == 1, ov[idx] == 0);
+    for (const auto &[dst, turn]: turn_for_dst) {
+        vector<Buff *> src_buffs = get_src_buffs(dst);
+        expr turn_val = slv.ctx.int_val(0);
+        for (int i = 0; i < src_buffs.size(); ++i) {
+            Buff *buff = src_buffs[i];
+            res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
+            // res = res && (buff->O[t] == 1);
         }
     }
     return {res};
 }
 
-expr LeafSts::rr(ev const &backlog, expr &prev_turn) {
-    int count = backlog.size();
+expr LeafSts::rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t) {
+    int count = src_buffs.size();
     expr nxt_turn = slv.ctx.int_val(0);
     for (int i = 0; i < count; ++i) {
         expr x = slv.ctx.int_val(i);
         for (int j = 1; j < count; ++j) {
             const int l = (i - j + count) % count;
-            x = ite(backlog[l], slv.ctx.int_val(l), x);
+            x = ite(src_buffs[l]->B[t], slv.ctx.int_val(l), x);
         }
         nxt_turn = ite(prev_turn == i, x, nxt_turn);
     }
     return nxt_turn;
 }
 
+vector<Buff *> LeafSts::get_src_buffs(int dst) {
+    auto per_dst = get_per_dst_buff_map();
+    auto dst_map = per_dst[dst];
+    vector<Buff *> dst_buffs_list;
+    for (const auto &[src, buff]: dst_map)
+        dst_buffs_list.push_back(buff);
+    return dst_buffs_list;
+}
+
 vector<NamedExp> LeafSts::trs(int t) {
     vector<NamedExp> v;
-    for (int out_idx = 0; out_idx < num_ports; ++out_idx) {
-        // expr prev_turn = s[out_idx];
-        // ev backlogs_of_out_i = get_voq_of_out_i(b, out_idx);
-        // expr nxt_turn = rr(backlogs_of_out_i, prev_turn);
-        // v.emplace_back(sp[out_idx] == nxt_turn);
+    auto per_dst = get_per_dst_buff_map();
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        auto prev_turn = turn_for_dst[dst][t];
+        auto dst_buffs = per_dst[dst];
+        vector<Buff *> dst_buffs_list;
+        for (const auto &[src, buff]: dst_buffs)
+            dst_buffs_list.push_back(buff);
+        auto nxt_turn_val = rr(dst_buffs_list, prev_turn, t + 1);
+        v.emplace_back(turn_for_dst[dst][t + 1] == nxt_turn_val);
+        // v.emplace_back(turn_for_dst[dst][t + 1] == 7);
     }
     return v;
 }
 
 vector<NamedExp> LeafSts::init() {
     expr res = slv.ctx.bool_val(true);
-    // for (int i = 0; i < num_ports; ++i)
-        // res = res && (s0[i] == 0);
-
+    for (const auto &[dst, turn]: turn_for_dst) {
+        vector<Buff *> src_buffs = get_src_buffs(dst);
+        expr turn_val = slv.ctx.int_val(0);
+        for (int i = 1; i <= src_buffs.size(); ++i) {
+            int idx = ((src_buffs.size() - i) % src_buffs.size());
+            turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+        }
+        res = res && (turn_for_dst[dst][0] == turn_val);
+    }
     return {res};
 }
 
@@ -89,38 +139,78 @@ V LeafSts::get_voq_of_out_i(const V &all_ev, const int i) {
     return ev;
 }
 
-void LeafSts::print(model mod) const {
-    for (int src = 0; src < num_ports; ++src) {
-        cout << "------------------------" << endl;
-        cout << "In[" << src << "]: " << endl;
-        for (int dst = 0; dst < num_ports; ++dst) {
-            auto idx = src * num_ports + dst;
-            // cout << "TO[" << dst << "]: " << str(I[idx], mod, ",").str() << endl;
+void LeafSts::print(model mod) {
+    // for (const auto &[src_dst, buf]: buffs) {
+    //     int src = get<0>(src_dst);
+    //     int dst = get<1>(src_dst);
+    //     cout << "-----------------------------" << endl;
+    //     cout << src << " -> " << dst << endl;
+    //     cout << "IN :" << endl;
+    //     cout << str(buf->I, mod, ",").str() << endl;
+    //     cout << "OUT:" << endl;
+    //     cout << str(buf->O, mod, ",").str() << endl;
+    // }
+
+    cout << "TMP: " << endl;
+    cout << str(tmp, mod).str() << endl;
+    for (const auto &[dst, turn]: turn_for_dst) {
+        auto src_buffs = get_src_buffs(dst);
+        cout << "-----------------" << endl;
+        cout << "DST = " << dst << endl;
+        for (int i = 0; i < src_buffs.size(); ++i) {
+            auto buf = src_buffs[i];
+            cout << "IN: " << i << "-" << buf->src << endl;
+            cout << str(buf->I, mod, ",").str() << endl;
+            cout << "O : " << i << "-" << buf->src << endl;
+            cout << str(buf->O, mod, ",").str() << endl;
+            cout << "B : " << i << "-" << buf->src << endl;
+            cout << str(buf->B, mod).str() << endl;
         }
+        // expr turn_val = slv.ctx.int_val(0);
+        // for (int i = 1; i <= src_buffs.size(); ++i) {
+        //     int idx = ((src_buffs.size() - i) % src_buffs.size());
+        //     turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+        // }
+        // res = res && (turn_for_dst[dst][0] == turn_val);
     }
-    cout << endl;
-    for (int dst = 0; dst < num_ports; ++dst) {
-        cout << "------------------------" << endl;
-        cout << "Out[" << dst << "]: " << endl;
-        for (int src = 0; src < num_ports; ++src) {
-            auto idx = src * num_ports + dst;
-            // cout << "FROM[" << src << "]: " << str(O[idx], mod, ",").str() << endl;
-        }
+    for (const auto &[dst, v]: turn_for_dst) {
+        cout << "-----------------------------" << endl;
+        cout << "DST: " << dst << endl;
+        cout << str(v, mod).str() << endl;
     }
-    cout << endl;
-    for (int i = 0; i < num_ports; ++i) {
-        cout << "------------------------" << endl;
-        cout << "Turn Dst[" << i << "]" << endl;
-        // cout << str(get_state()[i], mod).str() << endl;
-    }
+    // int src = get<0>(src_dst);
+    // int dst = get<1>();
+    // for (int src = 0; src < num_ports; ++src) {
+    //     cout << "------------------------" << endl;
+    //     cout << "In[" << src << "]: " << endl;
+    //     for (int dst = 0; dst < num_ports; ++dst) {
+    //         auto idx = src * num_ports + dst;
+    //         // cout << "TO[" << dst << "]: " << str(I[idx], mod, ",").str() << endl;
+    //     }
+    // }
+    // cout << endl;
+    // for (int dst = 0; dst < num_ports; ++dst) {
+    //     cout << "------------------------" << endl;
+    //     cout << "Out[" << dst << "]: " << endl;
+    //     for (int src = 0; src < num_ports; ++src) {
+    //         auto idx = src * num_ports + dst;
+    //         // cout << "FROM[" << src << "]: " << str(O[idx], mod, ",").str() << endl;
+    //     }
+    // }
+    // cout << endl;
     // for (int i = 0; i < num_ports; ++i) {
-    // cout << "------------------------" << endl;
-    // cout << "M = " << i << endl;
-    // cout << str(I[i], mod, ",").str() << endl;
-    // for (int j = 0; j < k; ++j) {
-    // cout << str(I[i * k + j], mod, ",").str() << endl;
+    //     cout << "------------------------" << endl;
+    //     cout << "Turn Dst[" << i << "]" << endl;
+    //     // cout << str(get_state()[i], mod).str() << endl;
     // }
-    // }
+    // // for (int i = 0; i < num_ports; ++i) {
+    // // cout << "------------------------" << endl;
+    // // cout << "M = " << i << endl;
+    // // cout << str(I[i], mod, ",").str() << endl;
+    // // for (int j = 0; j < k; ++j) {
+    // // cout << str(I[i * k + j], mod, ",").str() << endl;
+    // // }
+    // // }
 }
 
 vector<NamedExp> LeafSts::inputs(const int i) {
@@ -137,7 +227,7 @@ vector<NamedExp> LeafSts::inputs(const int i) {
 
 vector<NamedExp> LeafSts::base_constrs() {
     vector<NamedExp> res;
-    for (int i = 0; i < num_bufs; ++i) {
+    for (int i = 0; i < buffs.size(); ++i) {
         auto ie = inputs(i);
         res.insert(res.end(), ie.begin(), ie.end());
     }
@@ -151,10 +241,10 @@ vector<NamedExp> LeafSts::base_constrs() {
 
 
 vector<NamedExp> LeafSts::bl_size(const int i) const {
-    const auto Ei = get_buff_list()[i].E;
-    const auto Bi = get_buff_list()[i].B;
-    const auto Ci = get_buff_list()[i].C;
-    const auto Oi = get_buff_list()[i].O;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto Bi = get_buff_list()[i]->B;
+    const auto Ci = get_buff_list()[i]->C;
+    const auto Oi = get_buff_list()[i]->O;
     vector<NamedExp> res;
     // [6]
     auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0]);
@@ -171,10 +261,10 @@ vector<NamedExp> LeafSts::bl_size(const int i) const {
 }
 
 std::vector<NamedExp> LeafSts::enqs(const int i) const {
-    const auto Ei = get_buff_list()[i].E;
-    const auto Bi = get_buff_list()[i].B;
-    const auto Ci = get_buff_list()[i].C;
-    const auto Oi = get_buff_list()[i].O;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto Bi = get_buff_list()[i]->B;
+    const auto Ci = get_buff_list()[i]->C;
+    const auto Oi = get_buff_list()[i]->O;
 
     std::vector<NamedExp> res;
 
@@ -193,10 +283,10 @@ std::vector<NamedExp> LeafSts::enqs(const int i) const {
 
 
 std::vector<NamedExp> LeafSts::drops(int i) {
-    const auto Di = get_buff_list()[i].D;
-    const auto Ei = get_buff_list()[i].E;
-    const auto Bi = get_buff_list()[i].B;
-    const auto Ci = get_buff_list()[i].C;
+    const auto Di = get_buff_list()[i]->D;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto Bi = get_buff_list()[i]->B;
+    const auto Ci = get_buff_list()[i]->C;
 
     std::vector<NamedExp> res;
 
@@ -216,9 +306,9 @@ std::vector<NamedExp> LeafSts::drops(int i) {
 }
 
 std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
-    const auto Ii = get_buff_list()[i].I;
-    const auto Di = get_buff_list()[i].D;
-    const auto Ei = get_buff_list()[i].E;
+    const auto Ii = get_buff_list()[i]->I;
+    const auto Di = get_buff_list()[i]->D;
+    const auto Ei = get_buff_list()[i]->E;
 
     std::vector<NamedExp> res;
 
@@ -236,13 +326,13 @@ std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
 
 
 vector<NamedExp> LeafSts::winds(int i) {
-    const auto Oi = get_buff_list()[i].O;
-    const auto Ei = get_buff_list()[i].E;
-    const auto wnd_enq_i = get_buff_list()[i].wnd_enq;
-    const auto wnd_out_i = get_buff_list()[i].wnd_out;
-    const auto wnd_enq_nxt_i = get_buff_list()[i].wnd_enq_nxt;
-    const auto tmp_wnd_enq_i = get_buff_list()[i].tmp_wnd_enq;
-    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i].tmp_wnd_enq_nxt;
+    const auto Oi = get_buff_list()[i]->O;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto wnd_enq_i = get_buff_list()[i]->wnd_enq;
+    const auto wnd_out_i = get_buff_list()[i]->wnd_out;
+    const auto wnd_enq_nxt_i = get_buff_list()[i]->wnd_enq_nxt;
+    const auto tmp_wnd_enq_i = get_buff_list()[i]->tmp_wnd_enq;
+    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i]->tmp_wnd_enq_nxt;
 
     vector<NamedExp> nes;
     // [14]
@@ -284,7 +374,8 @@ vector<NamedExp> LeafSts::trs() {
     extend(res, nes);
     for (int i = 0; i < timesteps - 1; ++i) {
         nes = trs(i);
-        extend(res, nes, format("Trs({},{})", i, i + 1));
+        res.push_back(merge(nes, format("Trs({},{})", i, i + 1)));
+        // extend(res, nes, format("Trs({},{})", i, i + 1));
     }
     return res;
 }

@@ -4,6 +4,8 @@
 
 #ifndef PRIO_STS_HPP
 #define PRIO_STS_HPP
+#include <map>
+
 #include "Buff.hpp"
 #include "sts_checker.hpp"
 
@@ -11,27 +13,36 @@ class LeafSts final {
 public:
     SmtSolver &slv;
     string var_prefix;
-    int num_bufs;
     int timesteps;
     int pkt_types;
     int buff_cap;
     int max_enq;
     int max_deq;
     bool use_win;
+    ev tmp;
 
-    vector<Buff> buffs;
+    map<tuple<int, int>, Buff *> buffs;
 
-    LeafSts(SmtSolver &slv, const string &var_prefix, int num_bufs, int time_steps, int pkt_types, int buf_cap,
-            int max_enq, int max_deq, int num_ports);
+    map<int, map<int, Buff *> > get_per_dst_buff_map();
 
-    LeafSts(SmtSolver &slv, const string &var_prefix, int num_bufs, int num_ports, int buff_cap, int max_enq,
+    map<int, ev> turn_for_dst;
+
+    LeafSts(SmtSolver &slv,
+            const string &var_prefix,
+            vector<tuple<int, int> > port_list,
+            int time_steps,
+            int pkt_types,
+            int buf_cap,
+            int max_enq,
             int max_deq);
 
-    vector<Buff> get_buff_list() const;
+    vector<Buff *> get_buff_list() const;
 
     vector<NamedExp> out(int t);
 
-    expr rr(ev const &backlog, expr &prev_turn);
+    expr rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t);
+
+    vector<Buff *> get_src_buffs(int dst);
 
     vector<NamedExp> trs(int t);
 
@@ -58,7 +69,7 @@ public:
     template<class V>
     V get_voq_of_out_i(const V &all_ev, int i);
 
-    void print(model m) const;
+    void print(model m);
 
     int num_ports;
 };
