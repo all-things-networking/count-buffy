@@ -61,40 +61,55 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
 
 int main(const int argc, const char *argv[]) {
     SmtSolver slv;
-    LeafSts *l1;
-    vector<tuple<int, int> > l1_ports = {
-        {0, 1},
+    LeafSts *s1;
+    vector<tuple<int, int> > s1_ports = {
+        {0, 2},
+        {1, 2},
     };
-    l1 = new LeafSts(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ);
+    s1 = new LeafSts(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ);
 
-    LeafSts *l2;
-    vector<tuple<int, int> > l2_ports = {
+    LeafSts *s2;
+    vector<tuple<int, int> > s2_ports = {
         {0, 1},
     };
-    l2 = new LeafSts(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ);
+    s2 = new LeafSts(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ);
+
+    LeafSts *s3;
+    vector<tuple<int, int> > s3_ports = {
+        {2, 0},
+        {2, 1},
+    };
+    s3 = new LeafSts(slv, "s3", s3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ);
 
     map<tuple<int, int, int>, int> ins = {
-        {{0, 1, 0}, 2},
-        // {{2, 0, 0}, 2},
-        // {{2, 0, 0}, 0},
-        // {{0, 1, 0}, 2},
-        // {{2, 1, 0}, 2},
+        {{1, 2, 0}, 2},
     };
-    auto constr = add_constr(l1, ins);
+    auto constr = add_constr(s1, ins);
     slv.add({constr, "inp"});
 
-    auto base1 = l1->base_constrs();
+    auto base1 = s1->base_constrs();
     auto base1_merged = merge(base1, "base1");
     slv.add(base1_merged);
 
-    auto base2 = l2->base_constrs();
+    auto base2 = s2->base_constrs();
     auto base2_merged = merge(base2, "base2");
     slv.add(base2_merged);
 
-    slv.add(link_ports(l1->get_out_port(1), l2->get_in_port(0)), "link");
+    auto base3 = s3->base_constrs();
+    auto base3_merged = merge(base3, "base3");
+    slv.add(base3_merged);
+
+    slv.add(link_ports(s1->get_out_port(2), s2->get_in_port(0)), "link1");
+    slv.add(link_ports(s2->get_out_port(1), s3->get_in_port(2)), "link2");
 
     auto mod = slv.check_sat();
 
-    l1->print(mod);
-    l2->print(mod);
+    cout << "S1" << endl << "##################################" << endl;
+    s1->print(mod);
+
+    cout << "S2" << endl << "##################################" << endl;
+    s2->print(mod);
+
+    cout << "S3" << endl << "##################################" << endl;
+    s3->print(mod);
 }

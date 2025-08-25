@@ -23,8 +23,9 @@ ev2 LeafSts::get_in_port(int src) {
     vector<Buff *> src_buffs = get_buffs_for_src(src);
     assert(src_buffs.size() > 0);
     ev2 in = src_buffs[0]->I;
-    for (auto buff: src_buffs)
-        in = in + buff->I;
+    for (int i = 1; i < src_buffs.size(); ++i) {
+        in = in + src_buffs[i]->I;
+    }
     return in;
 }
 
@@ -32,8 +33,9 @@ ev2 LeafSts::get_out_port(int dst) {
     vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
     assert(dst_buffs.size() > 0);
     ev2 out = dst_buffs[0]->O;
-    for (auto buff: dst_buffs)
-        out = out + buff->O;
+    for (int i = 1; i < dst_buffs.size(); ++i) {
+        out = out + dst_buffs[i]->O;
+    }
     return out;
 }
 
@@ -166,44 +168,44 @@ V LeafSts::get_voq_of_out_i(const V &all_ev, const int i) {
 }
 
 void LeafSts::print(model mod) {
-    // for (const auto &[src_dst, buf]: buffs) {
-    //     int src = get<0>(src_dst);
-    //     int dst = get<1>(src_dst);
-    //     cout << "-----------------------------" << endl;
-    //     cout << src << " -> " << dst << endl;
-    //     cout << "IN :" << endl;
-    //     cout << str(buf->I, mod, ",").str() << endl;
-    //     cout << "OUT:" << endl;
-    //     cout << str(buf->O, mod, ",").str() << endl;
-    // }
-
-    cout << "TMP: " << endl;
-    cout << str(tmp, mod).str() << endl;
-    for (const auto &[dst, turn]: turn_for_dst) {
-        auto src_buffs = get_buffs_for_dst(dst);
-        cout << "-----------------" << endl;
-        cout << "DST = " << dst << endl;
-        for (int i = 0; i < src_buffs.size(); ++i) {
-            auto buf = src_buffs[i];
-            cout << "IN: " << i << "-" << buf->src << endl;
-            cout << str(buf->I, mod, ",").str() << endl;
-            cout << "O : " << i << "-" << buf->src << endl;
-            cout << str(buf->O, mod, ",").str() << endl;
-            cout << "B : " << i << "-" << buf->src << endl;
-            cout << str(buf->B, mod).str() << endl;
-        }
-        // expr turn_val = slv.ctx.int_val(0);
-        // for (int i = 1; i <= src_buffs.size(); ++i) {
-        //     int idx = ((src_buffs.size() - i) % src_buffs.size());
-        //     turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
-        // }
-        // res = res && (turn_for_dst[dst][0] == turn_val);
-    }
-    for (const auto &[dst, v]: turn_for_dst) {
+    for (const auto &[src_dst, buf]: buffs) {
+        int src = get<0>(src_dst);
+        int dst = get<1>(src_dst);
         cout << "-----------------------------" << endl;
-        cout << "DST: " << dst << endl;
-        cout << str(v, mod).str() << endl;
+        cout << src << " -> " << dst << endl;
+        cout << "IN :" << endl;
+        cout << str(buf->I, mod, ",").str() << endl;
+        cout << "OUT:" << endl;
+        cout << str(buf->O, mod, ",").str() << endl;
     }
+
+    // cout << "TMP: " << endl;
+    // cout << str(tmp, mod).str() << endl;
+    // for (const auto &[dst, turn]: turn_for_dst) {
+    // auto src_buffs = get_buffs_for_dst(dst);
+    // cout << "-----------------" << endl;
+    // cout << "DST = " << dst << endl;
+    // for (int i = 0; i < src_buffs.size(); ++i) {
+    // auto buf = src_buffs[i];
+    // cout << "IN: " << i << "-" << buf->src << endl;
+    // cout << str(buf->I, mod, ",").str() << endl;
+    // cout << "O : " << i << "-" << buf->src << endl;
+    // cout << str(buf->O, mod, ",").str() << endl;
+    // cout << "B : " << i << "-" << buf->src << endl;
+    // cout << str(buf->B, mod).str() << endl;
+    // }
+    // expr turn_val = slv.ctx.int_val(0);
+    // for (int i = 1; i <= src_buffs.size(); ++i) {
+    //     int idx = ((src_buffs.size() - i) % src_buffs.size());
+    //     turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+    // }
+    // res = res && (turn_for_dst[dst][0] == turn_val);
+    // }
+    // for (const auto &[dst, v]: turn_for_dst) {
+    // cout << "-----------------------------" << endl;
+    // cout << "DST: " << dst << endl;
+    // cout << str(v, mod).str() << endl;
+    // }
     // int src = get<0>(src_dst);
     // int dst = get<1>();
     // for (int src = 0; src < num_ports; ++src) {
