@@ -21,7 +21,7 @@ constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int NUM_PORTS = 3;
-constexpr int PKT_TYPES = 1;
+constexpr int PKT_TYPES = 2;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {

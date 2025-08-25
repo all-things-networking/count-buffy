@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_BUILD_TYPE Debug)
 project(DFA)
 file(GLOB SRC_FILES src/*.cpp src/gen/*.cpp)
 file(GLOB HPP_FILES src/*.hpp src/gen/*.hpp)
@@ -27,4 +28,5 @@ add_target(LoomNoMem loom.nomem.cpp)
 add_target(FQ fq.cpp)
 add_target(leaf leaf.cpp)
 add_target(line line.cpp)
+add_target(demux demux.cpp)
 

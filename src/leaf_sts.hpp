@@ -9,8 +9,10 @@
 #include "Buff.hpp"
 #include "sts_checker.hpp"
 
-class LeafSts final {
+class LeafSts {
 public:
+    virtual ~LeafSts() = default;
+
     SmtSolver &slv;
     string var_prefix;
     int timesteps;
@@ -68,7 +70,11 @@ public:
 
     vector<NamedExp> trs();
 
-    ev2 get_in_port(int src);
+    virtual ev2 get_in_port(int src);
+
+    vector<int> get_in_ports();
+
+    vector<int> get_out_ports();
 
     ev2 get_out_port(int dst);
 

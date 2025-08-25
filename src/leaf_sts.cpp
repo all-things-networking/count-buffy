@@ -29,6 +29,28 @@ ev2 LeafSts::get_in_port(int src) {
     return in;
 }
 
+vector<int> LeafSts::get_in_ports() {
+    vector<int> in_ports;
+    for (const auto &[src_dst, buff]: buffs) {
+        int src = get<0>(src_dst);
+        if (ranges::find(in_ports, src) == in_ports.end()) {
+            in_ports.push_back(src);
+        }
+    }
+    return in_ports;
+}
+
+vector<int> LeafSts::get_out_ports() {
+    vector<int> out_ports;
+    for (const auto &[src_dst, buff]: buffs) {
+        int dst = get<0>(src_dst);
+        if (ranges::find(out_ports, dst) == out_ports.end()) {
+            out_ports.push_back(dst);
+        }
+    }
+    return out_ports;
+}
+
 ev2 LeafSts::get_out_port(int dst) {
     vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
     assert(dst_buffs.size() > 0);
