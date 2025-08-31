@@ -30,4 +30,7 @@ add_target(leaf leaf.cpp)
 add_target(line line.cpp)
 add_target(demux demux.cpp)
 add_target(demux_big demux_big.cpp)
+add_target(demux_two_side.cpp demux_two_side.cpp)
+add_target(multiple_dst demux_multiple_dst.cpp)
+add_target(multiple_src demux_multiple_src.cpp)
 

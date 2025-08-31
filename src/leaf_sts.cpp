@@ -19,6 +19,17 @@ map<int, map<int, Buff *> > LeafSts::get_per_dst_buff_map() {
     return src_buffs_map;
 }
 
+map<int, map<int, Buff *> > LeafSts::get_per_src_buff_map() {
+    map<int, map<int, Buff *> > dst_buffs_map;
+    for (const auto &[key, buf]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        auto buff = buffs[{src, dst}];
+        dst_buffs_map[src][dst] = buff;
+    }
+    return dst_buffs_map;
+}
+
 ev2 LeafSts::get_in_port(int src) {
     vector<Buff *> src_buffs = get_buffs_for_src(src);
     assert(src_buffs.size() > 0);
@@ -52,7 +63,7 @@ vector<int> LeafSts::get_out_ports() {
 }
 
 ev2 LeafSts::get_out_port(int dst) {
-    vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
+    vector<Buff *> dst_buffs = get_buffs_for_src(dst);
     assert(dst_buffs.size() > 0);
     ev2 out = dst_buffs[0]->O;
     for (int i = 1; i < dst_buffs.size(); ++i) {
@@ -72,6 +83,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
    max_deq(max_deq) {
     set<int> dsts;
+    set<int> srcs;
     vector<Buff *> bar;
     tmp = slv.iv(time_steps, "TMP");
 
@@ -82,10 +94,15 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
                               pkt_types, max_enq, max_deq, buff_cap, src, dst);
         buffs[{src, dst}] = buff;
         dsts.insert(dst);
+        srcs.insert(src);
     }
 
     for (int dst: dsts) {
-        turn_for_dst[dst] = slv.iv(time_steps, format("TURN_{}", dst));
+        selected_src_idx_for_dst[dst] = slv.iv(time_steps, format("TURN_DST_{}", dst));
+    }
+
+    for (int src: srcs) {
+        selected_dst_idx_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
     }
     use_win = true;
 }
@@ -100,26 +117,66 @@ vector<Buff *> LeafSts::get_buff_list() const {
 
 vector<NamedExp> LeafSts::out(int t) {
     expr res = slv.ctx.bool_val(true);
-    for (const auto &[dst, turn]: turn_for_dst) {
-        vector<Buff *> src_buffs = get_buffs_for_dst(dst);
-        expr turn_val = slv.ctx.int_val(0);
-        for (int i = 0; i < src_buffs.size(); ++i) {
-            Buff *buff = src_buffs[i];
-            res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
-            // res = res && (buff->O[t] == 1);
+
+    map<int, map<int, int> > dst_src_to_idx;
+    map<int, map<int, int> > src_dst_to_idx;
+
+    auto per_dst = get_per_dst_buff_map();
+    for (const auto &[dst, src_map]: per_dst) {
+        vector<Buff *> src_buffs_list;
+        for (const auto &[src, buff]: src_map)
+            src_buffs_list.push_back(buff);
+        for (int i = 0; i < src_buffs_list.size(); ++i) {
+            auto buff = src_buffs_list[i];
+            dst_src_to_idx[dst][buff->src] = i;
         }
     }
+
+    auto per_src = get_per_src_buff_map();
+    for (const auto &[src, dst_map]: per_src) {
+        vector<Buff *> dst_buffs_list;
+        for (const auto &[dst, buff]: dst_map)
+            dst_buffs_list.push_back(buff);
+        for (int i = 0; i < dst_buffs_list.size(); ++i) {
+            auto buff = dst_buffs_list[i];
+            src_dst_to_idx[src][buff->dst] = i;
+        }
+    }
+
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+
+        int src_idx_for_dst = dst_src_to_idx[dst][src];
+        int dst_idx_for_src = src_dst_to_idx[src][dst];
+
+        expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
+        expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
+
+        res = res && ite(
+                  buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
+                      sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
+                  buff->O[t] == 1, buff->O[t] == 0);
+    }
+    // for (const auto &[dst, turn]: turn_for_dst) {
+    // vector<Buff *> src_buffs = get_buffs_for_dst(dst);
+    // for (int i = 0; i < src_buffs.size(); ++i) {
+    // Buff *buff = src_buffs[i];
+    // res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
+    // res = res && (buff->O[t] == 1);
+    // }
+    // }
     return {res};
 }
 
-expr LeafSts::rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t) {
-    int count = src_buffs.size();
+expr LeafSts::rr(const vector<Buff *> &buffs, const expr &prev_turn, int t) {
+    int count = buffs.size();
     expr nxt_turn = slv.ctx.int_val(0);
     for (int i = 0; i < count; ++i) {
         expr x = slv.ctx.int_val(i);
         for (int j = 1; j < count; ++j) {
             const int l = (i - j + count) % count;
-            x = ite(src_buffs[l]->B[t], slv.ctx.int_val(l), x);
+            x = ite(buffs[l]->B[t], slv.ctx.int_val(l), x);
         }
         nxt_turn = ite(prev_turn == i, x, nxt_turn);
     }
@@ -147,33 +204,58 @@ vector<Buff *> LeafSts::get_buffs_for_src(int src) {
 
 
 vector<NamedExp> LeafSts::trs(int t) {
-    vector<NamedExp> v;
+
+    map<int, map<int, int> > dst_src_to_idx;
+    map<int, map<int, int> > src_dst_to_idx;
+
     auto per_dst = get_per_dst_buff_map();
+    auto per_src = get_per_src_buff_map();
+
+    vector<NamedExp> v;
     for (const auto &[key, buff]: buffs) {
-        int src = get<0>(key);
         int dst = get<1>(key);
-        auto prev_turn = turn_for_dst[dst][t];
+        auto prev_turn = selected_src_idx_for_dst[dst][t];
         auto dst_buffs = per_dst[dst];
         vector<Buff *> dst_buffs_list;
         for (const auto &[src, buff]: dst_buffs)
             dst_buffs_list.push_back(buff);
         auto nxt_turn_val = rr(dst_buffs_list, prev_turn, t + 1);
-        v.emplace_back(turn_for_dst[dst][t + 1] == nxt_turn_val);
-        // v.emplace_back(turn_for_dst[dst][t + 1] == 7);
+        v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+    }
+
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        auto prev_turn = selected_dst_idx_for_src[src][t];
+        auto src_buffs = per_src[src];
+        vector<Buff *> src_buffs_list;
+        for (const auto &[src, buff]: src_buffs)
+            src_buffs_list.push_back(buff);
+        auto nxt_turn_val = rr(src_buffs_list, prev_turn, t + 1);
+        v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
     }
     return v;
 }
 
 vector<NamedExp> LeafSts::init() {
     expr res = slv.ctx.bool_val(true);
-    for (const auto &[dst, turn]: turn_for_dst) {
-        vector<Buff *> src_buffs = get_buffs_for_dst(dst);
+    for (const auto &[dst, turn]: selected_src_idx_for_dst) {
+        vector<Buff *> src_buffs = get_buffs_for_src(dst);
         expr turn_val = slv.ctx.int_val(0);
         for (int i = 1; i <= src_buffs.size(); ++i) {
             int idx = ((src_buffs.size() - i) % src_buffs.size());
             turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
         }
-        res = res && (turn_for_dst[dst][0] == turn_val);
+        res = res && (selected_src_idx_for_dst[dst][0] == turn_val);
+    }
+
+    for (const auto &[src, turn]: selected_dst_idx_for_src) {
+        vector<Buff *> dst_buffs = get_buffs_for_src(src);
+        expr turn_val = slv.ctx.int_val(0);
+        for (int i = 1; i <= dst_buffs.size(); ++i) {
+            int idx = ((dst_buffs.size() - i) % dst_buffs.size());
+            turn_val = ite(dst_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+        }
+        res = res && (selected_dst_idx_for_src[src][0] == turn_val);
     }
     return {res};
 }
@@ -199,7 +281,16 @@ void LeafSts::print(model mod) {
         cout << str(buf->I, mod, ",").str() << endl;
         cout << "OUT:" << endl;
         cout << str(buf->O, mod, ",").str() << endl;
+        cout << "SELECETIONS:" << endl;
+        for (int t = 0; t < timesteps; ++t) {
+            cout << format("<{},{},",
+                           mod.eval(selected_src_idx_for_dst[dst][t]).get_numeral_int(),
+                           mod.eval(selected_dst_idx_for_src[src][t]).get_numeral_int()
+            ) << mod.eval(buf->B[t]) << ">,";
+        }
+        cout << endl;
     }
+
 
     // cout << "TMP: " << endl;
     // cout << str(tmp, mod).str() << endl;

@@ -27,7 +27,11 @@ public:
 
     map<int, map<int, Buff *> > get_per_dst_buff_map();
 
-    map<int, ev> turn_for_dst;
+    map<int, map<int, Buff *>> get_per_src_buff_map();
+
+    map<int, ev> selected_src_idx_for_dst;
+
+    map<int, ev> selected_dst_idx_for_src;
 
     LeafSts(SmtSolver &slv,
             const string &var_prefix,
@@ -42,7 +46,7 @@ public:
 
     vector<NamedExp> out(int t);
 
-    expr rr(const vector<Buff *> &src_buffs, const expr &prev_turn, int t);
+    expr rr(const vector<Buff *> &buffs, const expr &prev_turn, int t);
 
     vector<Buff *> get_buffs_for_dst(int dst);
 
