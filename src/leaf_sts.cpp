@@ -318,7 +318,7 @@ vector<NamedExp> LeafSts::init() {
 
         int count = src_buffs_of_dst.size();
         expr x = slv.ctx.int_val(src_buffs_of_dst[count - 1]->src);
-        for (int j = 2; j < count; ++j) {
+        for (int j = 2; j <= count; ++j) {
             int l = count - j;
             int val = src_buffs_of_dst[l]->src;
             x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);

@@ -18,7 +18,7 @@ constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int NUM_PORTS = 3;
-constexpr int PKT_TYPES = 2;
+constexpr int PKT_TYPES = 1;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -62,12 +62,11 @@ int main(const int argc, const char *argv[]) {
     SmtSolver slv;
     LeafSts *s1;
     vector<tuple<int, int> > s1_ports = {
-        {0, 2},
-        {1, 2},
         {0, 3},
         {1, 3},
+        {2, 3},
     };
-    vector s1_pkt_type_to_nxt_hop = {2, 3};
+    vector s1_pkt_type_to_nxt_hop = {3};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
@@ -75,9 +74,8 @@ int main(const int argc, const char *argv[]) {
     // in_port, time, type -> count
     map<tuple<int, int, int>, int> ins = {
         {{0, 0, 0}, 2},
-        {{0, 0, 1}, 2},
         {{1, 0, 0}, 2},
-        {{1, 0, 1}, 2},
+        {{2, 0, 0}, 2},
     };
     auto constr = add_constr(s1, ins);
     slv.add({constr, "inp"});
