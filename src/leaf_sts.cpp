@@ -63,7 +63,7 @@ vector<int> LeafSts::get_out_ports() {
 }
 
 ev2 LeafSts::get_out_port(int dst) {
-    vector<Buff *> dst_buffs = get_buffs_for_src(dst);
+    vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
     assert(dst_buffs.size() > 0);
     ev2 out = dst_buffs[0]->O;
     for (int i = 1; i < dst_buffs.size(); ++i) {

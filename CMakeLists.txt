@@ -33,4 +33,5 @@ add_target(demux_big demux_big.cpp)
 add_target(demux_two_side.cpp demux_two_side.cpp)
 add_target(multiple_dst demux_multiple_dst.cpp)
 add_target(multiple_src demux_multiple_src.cpp)
+add_target(leaf_fperf leaf_fperf.cpp)
 
