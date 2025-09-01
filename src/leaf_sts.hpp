@@ -21,17 +21,20 @@ public:
     int max_enq;
     int max_deq;
     bool use_win;
-    ev tmp;
+    map<int, ev> tmp_per_src;
+    map<int, ev> tmp_per_dst;
 
     map<tuple<int, int>, Buff *> buffs;
 
-    map<int, map<int, Buff *> > get_per_dst_buff_map();
+    map<int, map<int, Buff *> > src_map_per_dst();
 
-    map<int, map<int, Buff *>> get_per_src_buff_map();
+    map<int, map<int, Buff *> > dst_map_per_src();
 
-    map<int, ev> selected_src_idx_for_dst;
+    map<int, ev> src_turn_for_dst;
 
-    map<int, ev> selected_dst_idx_for_src;
+    map<int, ev> dst_turn_for_src;
+
+    map<tuple<int, int>, ev> matched;
 
     LeafSts(SmtSolver &slv,
             const string &var_prefix,
@@ -46,7 +49,9 @@ public:
 
     vector<NamedExp> out(int t);
 
-    expr rr(const vector<Buff *> &buffs, const expr &prev_turn, int t);
+    expr rr_for_dst(const vector<Buff *> &buffs, int t, int dst);
+
+    expr rr_for_src(const vector<Buff *> &buffs, int t, int src);
 
     vector<Buff *> get_buffs_for_dst(int dst);
 

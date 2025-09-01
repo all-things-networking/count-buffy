@@ -8,7 +8,7 @@
 
 const int MAX_I = 10;
 
-map<int, map<int, Buff *> > LeafSts::get_per_dst_buff_map() {
+map<int, map<int, Buff *> > LeafSts::src_map_per_dst() {
     map<int, map<int, Buff *> > src_buffs_map;
     for (const auto &[key, buf]: buffs) {
         int src = get<0>(key);
@@ -19,7 +19,7 @@ map<int, map<int, Buff *> > LeafSts::get_per_dst_buff_map() {
     return src_buffs_map;
 }
 
-map<int, map<int, Buff *> > LeafSts::get_per_src_buff_map() {
+map<int, map<int, Buff *> > LeafSts::dst_map_per_src() {
     map<int, map<int, Buff *> > dst_buffs_map;
     for (const auto &[key, buf]: buffs) {
         int src = get<0>(key);
@@ -85,7 +85,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
     set<int> dsts;
     set<int> srcs;
     vector<Buff *> bar;
-    tmp = slv.iv(time_steps, "TMP");
+    // tmp = slv.iv(time_steps, "TMP");
 
     for (auto src_dst: port_list) {
         int src = get<0>(src_dst);
@@ -97,13 +97,13 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
         srcs.insert(src);
     }
 
-    for (int dst: dsts) {
-        selected_src_idx_for_dst[dst] = slv.iv(time_steps, format("TURN_DST_{}", dst));
-    }
+    // for (int dst: dsts) {
+    // src_turn_for_dst[dst] = slv.iv(time_steps, format("TURN_DST_{}", dst));
+    // }
 
-    for (int src: srcs) {
-        selected_dst_idx_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
-    }
+    // for (int src: srcs) {
+    // dst_turn_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
+    // }
     use_win = true;
 }
 
@@ -121,7 +121,7 @@ vector<NamedExp> LeafSts::out(int t) {
     map<int, map<int, int> > dst_src_to_idx;
     map<int, map<int, int> > src_dst_to_idx;
 
-    auto per_dst = get_per_dst_buff_map();
+    auto per_dst = src_map_per_dst();
     for (const auto &[dst, src_map]: per_dst) {
         vector<Buff *> src_buffs_list;
         for (const auto &[src, buff]: src_map)
@@ -132,7 +132,7 @@ vector<NamedExp> LeafSts::out(int t) {
         }
     }
 
-    auto per_src = get_per_src_buff_map();
+    auto per_src = dst_map_per_src();
     for (const auto &[src, dst_map]: per_src) {
         vector<Buff *> dst_buffs_list;
         for (const auto &[dst, buff]: dst_map)
@@ -143,48 +143,100 @@ vector<NamedExp> LeafSts::out(int t) {
         }
     }
 
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     int dst = get<1>(key);
+    //
+    //     int src_idx_for_dst = dst_src_to_idx[dst][src];
+    //     int dst_idx_for_src = src_dst_to_idx[src][dst];
+    //
+    //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
+    //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
+    //
+    //     res = res && ite(
+    //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
+    //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
+    //               buff->O[t] == 1, buff->O[t] == 0);
+    // }
+
     for (const auto &[key, buff]: buffs) {
         int src = get<0>(key);
         int dst = get<1>(key);
-
-        int src_idx_for_dst = dst_src_to_idx[dst][src];
-        int dst_idx_for_src = src_dst_to_idx[src][dst];
-
-        expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
-        expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
-
+        //
+        //     int src_idx_for_dst = dst_src_to_idx[dst][src];
+        //     int dst_idx_for_src = src_dst_to_idx[src][dst];
+        //
+        //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
+        //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
+        //
         res = res && ite(
-                  buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
-                      sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
-                  buff->O[t] == 1, buff->O[t] == 0);
+                  buff->B[t] && matched[{src, dst}][t], buff->O[t] == 1, buff->O[t] == 0
+              );
+        // buff->B[t] && dst_turn_for_src[src][t] == dst
+        // && src_turn_for_dst[dst][t] == src,
+        //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
+        //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
+        // buff->O[t] == 1, buff->O[t] == 0);
+        // }
+
+
+        // for (const auto &[dst, turn]: turn_for_dst) {
+        // vector<Buff *> src_buffs = get_buffs_for_dst(dst);
+        // for (int i = 0; i < src_buffs.size(); ++i) {
+        // Buff *buff = src_buffs[i];
+        // res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
+        // res = res && (buff->O[t] == 0);
     }
-    // for (const auto &[dst, turn]: turn_for_dst) {
-    // vector<Buff *> src_buffs = get_buffs_for_dst(dst);
-    // for (int i = 0; i < src_buffs.size(); ++i) {
-    // Buff *buff = src_buffs[i];
-    // res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
-    // res = res && (buff->O[t] == 1);
-    // }
     // }
     return {res};
 }
 
-expr LeafSts::rr(const vector<Buff *> &buffs, const expr &prev_turn, int t) {
+expr LeafSts::rr_for_dst(const vector<Buff *> &buffs, int t, int dst) {
+    vector<int> src_vals;
+    for (auto buff: buffs) {
+        src_vals.push_back(buff->src);
+    }
+
     int count = buffs.size();
-    expr nxt_turn = slv.ctx.int_val(0);
+    expr prev_turn = src_turn_for_dst[dst][t - 1];
+    expr nxt_turn = prev_turn;
     for (int i = 0; i < count; ++i) {
-        expr x = slv.ctx.int_val(i);
+        int src_i = src_vals[i];
+        expr x = slv.ctx.int_val(src_i);
         for (int j = 1; j < count; ++j) {
             const int l = (i - j + count) % count;
-            x = ite(buffs[l]->B[t], slv.ctx.int_val(l), x);
+            int src_j = src_vals[l];
+            x = ite(buffs[l]->B[t], slv.ctx.int_val(src_j), x);
         }
-        nxt_turn = ite(prev_turn == i, x, nxt_turn);
+        nxt_turn = ite(prev_turn == slv.ctx.int_val(src_i), x, nxt_turn);
+    }
+    return nxt_turn;
+}
+
+expr LeafSts::rr_for_src(const vector<Buff *> &buffs, int t, int src) {
+    vector<int> dst_vals;
+    for (auto buff: buffs) {
+        dst_vals.push_back(buff->dst);
+    }
+
+    int count = buffs.size();
+    expr prev_turn = dst_turn_for_src[src][t - 1];
+    expr nxt_turn = prev_turn;
+    for (int i = 0; i < count; ++i) {
+        int dst_i = dst_vals[i];
+        expr x = slv.ctx.int_val(dst_i);
+        for (int j = 1; j < count; ++j) {
+            const int l = (i - j + count) % count;
+            int dst_j = dst_vals[l];
+            x = ite(buffs[l]->B[t], slv.ctx.int_val(dst_j), x);
+        }
+        nxt_turn = ite(prev_turn == slv.ctx.int_val(dst_i), x, nxt_turn);
     }
     return nxt_turn;
 }
 
 vector<Buff *> LeafSts::get_buffs_for_dst(int dst) {
-    auto per_dst = get_per_dst_buff_map();
+    auto per_dst = src_map_per_dst();
     auto dst_map = per_dst[dst];
     vector<Buff *> dst_buffs_list;
     for (const auto &[src, buff]: dst_map)
@@ -204,60 +256,212 @@ vector<Buff *> LeafSts::get_buffs_for_src(int src) {
 
 
 vector<NamedExp> LeafSts::trs(int t) {
+    auto per_dst = src_map_per_dst();
+    auto per_src = dst_map_per_src();
 
-    map<int, map<int, int> > dst_src_to_idx;
-    map<int, map<int, int> > src_dst_to_idx;
-
-    auto per_dst = get_per_dst_buff_map();
-    auto per_src = get_per_src_buff_map();
+    map<int, expr> highest_prio_src_for_dst;
+    map<int, expr> highest_prio_dst_for_src;
 
     vector<NamedExp> v;
-    for (const auto &[key, buff]: buffs) {
-        int dst = get<1>(key);
-        auto prev_turn = selected_src_idx_for_dst[dst][t];
-        auto dst_buffs = per_dst[dst];
+    for (const auto &[dst, dst_buffs_map]: per_dst) {
+        auto prev_turn = src_turn_for_dst[dst][t];
         vector<Buff *> dst_buffs_list;
-        for (const auto &[src, buff]: dst_buffs)
+        for (const auto &[src, buff]: dst_buffs_map)
             dst_buffs_list.push_back(buff);
-        auto nxt_turn_val = rr(dst_buffs_list, prev_turn, t + 1);
-        v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+        auto nxt_turn_val = rr_for_dst(dst_buffs_list, t + 1, dst);
+        // tmp_src_for_dst.insert(dst, nxt_turn_val);
+        // tmp_src_for_dst[dst] = nxt_turn_val;
+        src_turn_for_dst[dst].push_back(nxt_turn_val);
+        // highest_prio_src_for_dst.insert_or_assign(dst, nxt_turn_val);
+        // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+        // tmp_per_dst[dst].push_back(nxt_turn_val);
+    }
+
+    for (const auto &[src, src_buffs_map]: per_src) {
+        auto prev_turn = dst_turn_for_src[src][t];
+        vector<Buff *> src_buffs_list;
+        for (const auto &[src, buff]: src_buffs_map)
+            src_buffs_list.push_back(buff);
+        auto nxt_turn_val = rr_for_src(src_buffs_list, t + 1, src);
+        // tmp_dst_for_src[src] = nxt_turn_val;
+        // highest_prio_dst_for_src.insert_or_assign(src, nxt_turn_val);
+        dst_turn_for_src[src].push_back(nxt_turn_val);
+        // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
+        // tmp_per_src[src].push_back(nxt_turn_val);
     }
 
     for (const auto &[key, buff]: buffs) {
         int src = get<0>(key);
-        auto prev_turn = selected_dst_idx_for_src[src][t];
-        auto src_buffs = per_src[src];
-        vector<Buff *> src_buffs_list;
-        for (const auto &[src, buff]: src_buffs)
-            src_buffs_list.push_back(buff);
-        auto nxt_turn_val = rr(src_buffs_list, prev_turn, t + 1);
-        v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
+        int dst = get<1>(key);
+        expr match = buff->B[t + 1]
+                     && dst_turn_for_src[src][t + 1] == dst
+                     && src_turn_for_dst[dst][t + 1] == src;
+        matched[{src, dst}].push_back(match);
+        // expr e1 = (matched_dst_for_src[src][t + 1] == ite(match, highest_prio_dst_for_src.at(src),
+        //                                                   matched_dst_for_src[src][t]));
+        // v.emplace_back(e1);
+        // expr e2 = (matched_src_for_dst[dst][t + 1] == ite(match, highest_prio_src_for_dst.at(dst),
+        //                                                   matched_src_for_dst[dst][t]));
+        // v.emplace_back(e2);
     }
     return v;
 }
 
 vector<NamedExp> LeafSts::init() {
-    expr res = slv.ctx.bool_val(true);
-    for (const auto &[dst, turn]: selected_src_idx_for_dst) {
-        vector<Buff *> src_buffs = get_buffs_for_src(dst);
-        expr turn_val = slv.ctx.int_val(0);
-        for (int i = 1; i <= src_buffs.size(); ++i) {
-            int idx = ((src_buffs.size() - i) % src_buffs.size());
-            turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+    vector<NamedExp> v;
+
+    auto per_dst = src_map_per_dst();
+    for (const auto &[dst, src_map]: per_dst) {
+        vector<Buff *> src_buffs_of_dst;
+        for (const auto &[src, buff]: src_map)
+            src_buffs_of_dst.push_back(buff);
+
+        int count = src_buffs_of_dst.size();
+        expr x = slv.ctx.int_val(src_buffs_of_dst[count - 1]->src);
+        for (int j = 2; j < count; ++j) {
+            int l = count - j;
+            int val = src_buffs_of_dst[l]->src;
+            x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);
         }
-        res = res && (selected_src_idx_for_dst[dst][0] == turn_val);
+        src_turn_for_dst[dst].push_back(x);
     }
 
-    for (const auto &[src, turn]: selected_dst_idx_for_src) {
-        vector<Buff *> dst_buffs = get_buffs_for_src(src);
-        expr turn_val = slv.ctx.int_val(0);
-        for (int i = 1; i <= dst_buffs.size(); ++i) {
-            int idx = ((dst_buffs.size() - i) % dst_buffs.size());
-            turn_val = ite(dst_buffs[idx]->B[0], slv.ctx.int_val(idx), turn_val);
+    auto per_src = dst_map_per_src();
+    map<int, expr> highest_prio_dst_for_src;
+    for (const auto &[src, dst_map]: per_src) {
+        vector<Buff *> dst_buffs_of_src;
+        for (const auto &[dst, buff]: dst_map)
+            dst_buffs_of_src.push_back(buff);
+
+        int count = dst_buffs_of_src.size();
+        expr x = slv.ctx.int_val(dst_buffs_of_src[count - 1]->dst);
+        for (int j = 2; j <= count; ++j) {
+            int l = (count - j);
+            int val = dst_buffs_of_src[l]->dst;
+            x = ite(dst_buffs_of_src[l]->B[0], slv.ctx.int_val(val), x);
         }
-        res = res && (selected_dst_idx_for_src[src][0] == turn_val);
+        dst_turn_for_src[src].push_back(x);
     }
-    return {res};
+
+    // for (const auto &[src, dst_map]: per_src) {
+    // expr e1 = (matched_dst_for_src[src][0] == highest_prio_dst_for_src.at(src));
+    // per_src.insert_or_assign(src, highest_prio_dst_for_src.at(src));
+    // tmp_per_src[src].push_back(highest_prio_dst_for_src.at(src));
+    // v.emplace_back(e1, format("Highest Prio Dst for Src=[{}] @0", src));
+    // }
+
+    // for (const auto &[dst, dst_map]: per_dst) {
+    // expr e2 = (src_turn_for_dst[dst][0] == highest_prio_src_for_dst.at(dst));
+    // per_dst.insert_or_assign(dst, highest_prio_src_for_dst.at(dst));
+    // tmp_per_dst[dst].push_back(highest_prio_src_for_dst.at(dst));
+    // v.emplace_back(e2);
+    // }
+    //
+    //
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        expr m = buff->B[0] && src_turn_for_dst[dst][0] == src && dst_turn_for_src[src][0] == dst;
+        matched[{src, dst}].push_back(m);
+        //
+        //
+    }
+    return v;
+
+
+    // map<int, map<int, int> > dst_src_to_idx;
+    // map<int, map<int, int> > src_dst_to_idx;
+    //
+    // auto per_dst = get_per_dst_buff_map();
+    // auto per_src = get_per_src_buff_map();
+    //
+    // map<int, expr> tmp_src_for_dst;
+    // map<int, expr> tmp_dst_for_src;
+    //
+    // vector<NamedExp> v;
+    // for (const auto &[key, buff]: buffs) {
+    //     int dst = get<1>(key);
+    //     auto prev_turn = selected_src_idx_for_dst[dst][t];
+    //     auto dst_buffs = per_dst[dst];
+    //     vector<Buff *> dst_buffs_list;
+    //     for (const auto &[src, buff]: dst_buffs)
+    //         dst_buffs_list.push_back(buff);
+    //
+    //     int count = dst_buffs_list.size();
+    //     expr nxt_turn = slv.ctx.int_val(0);
+    //     expr x = slv.ctx.int_val(-1);
+    //     for (int j = 0; j < count; ++j) {
+    //         int val = dst_buffs_list[j]->src;
+    //         x = ite(buffs[l]->B[t], slv.ctx.int_val(val), x);
+    //     }
+    //     nxt_turn = ite(prev_turn == slv.ctx.int_val(vals[i]), x, nxt_turn);
+    //     auto nxt_turn_val = rr(dst_buffs_list, prev_turn, 0, true);
+    //     // tmp_src_for_dst.insert(dst, nxt_turn_val);
+    //     // tmp_src_for_dst[dst] = nxt_turn_val;
+    //     tmp_src_for_dst.insert_or_assign(dst, nxt_turn_val);
+    //     // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+    // }
+    //
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     auto prev_turn = selected_dst_idx_for_src[src][t];
+    //     auto src_buffs = per_src[src];
+    //     vector<Buff *> src_buffs_list;
+    //     for (const auto &[src, buff]: src_buffs)
+    //         src_buffs_list.push_back(buff);
+    //     auto nxt_turn_val = rr(src_buffs_list, prev_turn, t + 1, false);
+    //     // tmp_dst_for_src[src] = nxt_turn_val;
+    //     tmp_dst_for_src.insert_or_assign(src, nxt_turn_val);
+    //     // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
+    // }
+    //
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     int dst = get<1>(key);
+    //     expr match = buff->B[t]
+    //                  && tmp_dst_for_src.at(src) == dst
+    //                  && tmp_src_for_dst.at(dst) == src;
+    //     expr e1 = (selected_dst_idx_for_src[src][t + 1] == ite(match, tmp_dst_for_src.at(src),
+    //                                                            selected_dst_idx_for_src[src][t]));
+    //     v.emplace_back(e1);
+    //     expr e2 = (selected_src_idx_for_dst[dst][t + 1] == ite(match, tmp_src_for_dst.at(dst),
+    //                                                            selected_src_idx_for_dst[dst][t]));
+    //     v.emplace_back(e2);
+    // }
+
+
+    //
+    // for (const auto &[dst, turn]: selected_src_idx_for_dst) {
+    //     vector<Buff *> src_buffs = get_buffs_for_src(dst);
+    //     vector<int> src_vals;
+    //     for (auto buff: src_buffs) {
+    //         src_vals.push_back(buff->src);
+    //     }
+    //     expr turn_val = slv.ctx.int_val(0);
+    //     for (int i = 1; i <= src_buffs.size(); ++i) {
+    //         int idx = ((src_buffs.size() - i) % src_buffs.size());
+    //         int val = src_vals[idx];
+    //         turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
+    //     }
+    //     res = res && (selected_src_idx_for_dst[dst][0] == turn_val);
+    // }
+    //
+    //
+    // for (const auto &[src, turn]: selected_dst_idx_for_src) {
+    //     vector<Buff *> dst_buffs = get_buffs_for_src(src);
+    //     vector<int> dst_vals;
+    //     for (auto buff: dst_buffs) {
+    //         dst_vals.push_back(buff->dst);
+    //     }
+    //     expr turn_val = slv.ctx.int_val(0);
+    //     for (int i = 1; i <= dst_buffs.size(); ++i) {
+    //         int idx = ((dst_buffs.size() - i) % dst_buffs.size());
+    //         int val = dst_vals[idx];
+    //         turn_val = ite(dst_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
+    //     }
+    //     res = res && (selected_dst_idx_for_src[src][0] == turn_val);
+    // }
+    // return {res};
 }
 
 template<typename V>
@@ -281,13 +485,19 @@ void LeafSts::print(model mod) {
         cout << str(buf->I, mod, ",").str() << endl;
         cout << "OUT:" << endl;
         cout << str(buf->O, mod, ",").str() << endl;
-        cout << "SELECETIONS:" << endl;
-        for (int t = 0; t < timesteps; ++t) {
-            cout << format("<{},{},",
-                           mod.eval(selected_src_idx_for_dst[dst][t]).get_numeral_int(),
-                           mod.eval(selected_dst_idx_for_src[src][t]).get_numeral_int()
-            ) << mod.eval(buf->B[t]) << ">,";
-        }
+        cout << "BL :" << endl;
+        cout << str(buf->B, mod).str() << endl;
+        cout << "DST Turn SRC =  " << src << endl << str(dst_turn_for_src[src], mod).str() << endl;
+        cout << "SRC Turn DST =  " << dst << endl << str(src_turn_for_dst[dst], mod).str() << endl;
+        cout << "Match:" << endl;
+        cout << str(matched[{src, dst}], mod).str() << endl;
+        // cout << "SELECETIONS:" << endl;
+        // for (int t = 0; t < timesteps; ++t) {
+        //     cout << format("<{},{},",
+        //                    mod.eval(selected_src_idx_for_dst[dst][t]).get_numeral_int(),
+        //                    mod.eval(selected_dst_idx_for_src[src][t]).get_numeral_int()
+        //     ) << mod.eval(buf->B[t]) << ">,";
+        // }
         cout << endl;
     }
 
@@ -380,7 +590,6 @@ vector<NamedExp> LeafSts::base_constrs() {
     return res;
 }
 
-
 vector<NamedExp> LeafSts::bl_size(const int i) const {
     const auto Ei = get_buff_list()[i]->E;
     const auto Bi = get_buff_list()[i]->B;
@@ -398,7 +607,7 @@ vector<NamedExp> LeafSts::bl_size(const int i) const {
         ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]));
         res.push_back(ne);
     }
-    return res;
+    return {merge(res, format("BL Size[{}]", i))};
 }
 
 std::vector<NamedExp> LeafSts::enqs(const int i) const {
@@ -419,9 +628,9 @@ std::vector<NamedExp> LeafSts::enqs(const int i) const {
         expr ej = lt_cap;
         res.emplace_back(ej);
     }
-    return res;
+    return {merge(res, format("Enqs[{}]", i))};
+    // return res;
 }
-
 
 std::vector<NamedExp> LeafSts::drops(int i) {
     const auto Di = get_buff_list()[i]->D;
@@ -443,7 +652,8 @@ std::vector<NamedExp> LeafSts::drops(int i) {
                       Di[j] == 0);
         res.emplace_back(dj);
     }
-    return res;
+    return {merge(res, format("Drops[{}]", i))};
+    // return res;
 }
 
 std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
@@ -462,9 +672,8 @@ std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
         // [13]
         res.emplace_back(ij);
     }
-    return res;
+    return {merge(res, format("EnqDropSum[{}]", i))};
 }
-
 
 vector<NamedExp> LeafSts::winds(int i) {
     const auto Oi = get_buff_list()[i]->O;
@@ -506,7 +715,7 @@ vector<NamedExp> LeafSts::winds(int i) {
         nes.emplace_back(constr);
         nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j]);
     }
-    return nes;
+    return {merge(nes, format("wins[{}]", i))};
 }
 
 vector<NamedExp> LeafSts::trs() {
@@ -515,12 +724,12 @@ vector<NamedExp> LeafSts::trs() {
     extend(res, nes);
     for (int i = 0; i < timesteps - 1; ++i) {
         nes = trs(i);
-        res.push_back(merge(nes, format("Trs({},{})", i, i + 1)));
+        if (nes.size() > 0)
+            res.push_back(merge(nes, format("Trs({},{})", i, i + 1)));
         // extend(res, nes, format("Trs({},{})", i, i + 1));
     }
     return res;
 }
-
 
 vector<NamedExp> LeafSts::out() {
     vector<NamedExp> res;
@@ -528,6 +737,6 @@ vector<NamedExp> LeafSts::out() {
         auto nes = out(j);
         extend(res, nes, format("@{}", j));
     }
-    return res;
-    // return {merge(res, "out")};
+    // return res;
+    return {merge(res, "out")};
 }

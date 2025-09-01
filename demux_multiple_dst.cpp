@@ -49,7 +49,7 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
                 int val = 0;
                 if (inp.contains({port, t, k})) {
                     val = inp[{port, t, k}];
-                    cout << "INCLUDES: " << port << "@" << t << " -> " << k << endl;
+                    // cout << "INCLUDES: " << port << "@" << t << " -> " << k << endl;
                 }
                 e = e && in_port[t][k] == val;
             }
@@ -81,8 +81,11 @@ int main(const int argc, const char *argv[]) {
     slv.add({constr, "inp"});
 
     auto base1 = s1->base_constrs();
-    auto base1_merged = merge(base1, "base1");
-    slv.add(base1_merged);
+    slv.add(base1);
+    // if (base1.size() > 0) {
+        // auto base1_merged = merge(base1, "base1");
+        // slv.add(base1_merged);
+    // }
 
     auto mod = slv.check_sat();
 

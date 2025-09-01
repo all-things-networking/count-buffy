@@ -19,7 +19,7 @@ DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<
                     if (dst != nxt_hop_dst_port) {
                         string constr_name = format("{}_[{}->{}@{}#{}] == 0", var_prefix, src, dst, t, k);
                         slv.add(buff->I[t][k] == 0, constr_name);
-                        cout << constr_name << endl;
+                        // cout << constr_name << endl;
                     }
                 }
             }
