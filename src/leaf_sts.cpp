@@ -295,16 +295,41 @@ vector<NamedExp> LeafSts::trs(int t) {
         // tmp_per_src[src].push_back(nxt_turn_val);
     }
 
+
+    for (const auto &[src, src_buffs_map]: per_src) {
+        expr m = slv.ctx.bool_val(false);
+        for (const auto &[dst, buff]: src_buffs_map) {
+            m = m || matched[{src, dst}][t];
+        }
+        expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
+        expr &prev_turn_for_src = dst_turn_for_src[src][t];
+        tmp_per_src[src].push_back(cur_turn_for_src);
+        dst_turn_for_src[src].push_back(ite(m, cur_turn_for_src, prev_turn_for_src));
+    }
+
+    for (const auto &[dst, dst_buffs_map]: per_dst) {
+        expr m = slv.ctx.bool_val(false);
+        for (const auto &[src, buff]: dst_buffs_map) {
+            m = m || matched[{src, dst}][t];
+        }
+        expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
+        expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
+        tmp_per_dst[dst].push_back(cur_turn_for_dst);
+        src_turn_for_dst[dst].push_back(ite(m, cur_turn_for_dst, prev_turn_for_dst));
+    }
+
     for (const auto &[key, buff]: buffs) {
         int src = get<0>(key);
         int dst = get<1>(key);
-        expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
+        // expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
+        // expr &prev_turn_for_src = dst_turn_for_src[src][t];
 
-        expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
+        // expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
+        // expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
 
         expr match = buff->B[t + 1]
-                     && cur_turn_for_src == dst
-                     && cur_turn_for_dst == src;
+                     && dst_turn_for_src.at(src)[t + 1] == dst
+                     && src_turn_for_dst.at(dst)[t + 1] == src;
         matched[{src, dst}].push_back(match);
         // dst_turn_for_src[src].push_back(ite(match, cur_turn_for_src, prev_turn_for_src));
         // src_turn_for_dst[dst].push_back(ite(match, cur_turn_for_dst, prev_turn_for_dst));
@@ -314,26 +339,6 @@ vector<NamedExp> LeafSts::trs(int t) {
         // expr e2 = (matched_src_for_dst[dst][t + 1] == ite(match, highest_prio_src_for_dst.at(dst),
         //                                                   matched_src_for_dst[dst][t]));
         // v.emplace_back(e2);
-    }
-
-    for (const auto &[src, src_buffs_map]: per_src) {
-        expr m = slv.ctx.bool_val(false);
-        for (const auto &[dst, buff]: src_buffs_map) {
-            m = m || matched[{src, dst}][t + 1];
-        }
-        expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
-        expr &prev_turn_for_src = dst_turn_for_src[src][t];
-        dst_turn_for_src[src].push_back(ite(m, cur_turn_for_src, prev_turn_for_src));
-    }
-
-    for (const auto &[dst, dst_buffs_map]: per_dst) {
-        expr m = slv.ctx.bool_val(false);
-        for (const auto &[src, buff]: dst_buffs_map) {
-            m = m || matched[{src, dst}][t + 1];
-        }
-        expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
-        expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
-        src_turn_for_dst[dst].push_back(ite(m, cur_turn_for_dst, prev_turn_for_dst));
     }
 
     return v;
@@ -356,6 +361,7 @@ vector<NamedExp> LeafSts::init() {
             x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);
         }
         src_turn_for_dst[dst].push_back(x);
+        tmp_per_dst[dst].push_back(x);
     }
 
     auto per_src = dst_map_per_src();
@@ -373,6 +379,7 @@ vector<NamedExp> LeafSts::init() {
             x = ite(dst_buffs_of_src[l]->B[0], slv.ctx.int_val(val), x);
         }
         dst_turn_for_src[src].push_back(x);
+        tmp_per_src[src].push_back(x);
     }
 
     // for (const auto &[src, dst_map]: per_src) {
@@ -521,6 +528,8 @@ void LeafSts::print(model mod) {
         cout << str(buf->B, mod).str() << endl;
         cout << "DST Turn SRC =  " << src << endl << str(dst_turn_for_src[src], mod).str() << endl;
         cout << "SRC Turn DST =  " << dst << endl << str(src_turn_for_dst[dst], mod).str() << endl;
+        cout << "TMP Turn SRC =  " << src << endl << str(tmp_per_src[src], mod).str() << endl;
+        cout << "TMP Turn DST =  " << dst << endl << str(tmp_per_dst[dst], mod).str() << endl;
         cout << "Match:" << endl;
         cout << str(matched[{src, dst}], mod).str() << endl;
         // cout << "SELECETIONS:" << endl;
