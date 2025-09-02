@@ -18,7 +18,7 @@ constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int NUM_PORTS = 3;
-constexpr int PKT_TYPES = 6;
+constexpr int PKT_TYPES = 12;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -84,7 +84,7 @@ int main(const int argc, const char *argv[]) {
         {3, 0},
         {3, 1}
     };
-    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2};
+    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
     l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
@@ -102,7 +102,7 @@ int main(const int argc, const char *argv[]) {
         {3, 0},
         {3, 1}
     };
-    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2};
+    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
@@ -120,7 +120,7 @@ int main(const int argc, const char *argv[]) {
         {3, 0},
         {3, 1}
     };
-    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1};
+    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
     l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
@@ -134,7 +134,7 @@ int main(const int argc, const char *argv[]) {
         {2, 0},
         {2, 1}
     };
-    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2};
+    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
@@ -148,7 +148,7 @@ int main(const int argc, const char *argv[]) {
         {2, 0},
         {2, 1}
     };
-    vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2};
+    vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
@@ -160,16 +160,16 @@ int main(const int argc, const char *argv[]) {
     slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "s1-l2");
     slv.add(link_ports(s1->get_out_port(2), l3->get_in_port(2)), "s1-l3");
 
-    slv.add(link_ports(l1->get_out_port(2), s2->get_in_port(0)), "l1-s2");
-    slv.add(link_ports(l2->get_out_port(2), s2->get_in_port(1)), "l2-s2");
-    slv.add(link_ports(l3->get_out_port(2), s2->get_in_port(2)), "l3-s2");
-    slv.add(link_ports(s2->get_out_port(0), l1->get_in_port(2)), "s2-l1");
-    slv.add(link_ports(s2->get_out_port(1), l2->get_in_port(2)), "s2-l2");
-    slv.add(link_ports(s2->get_out_port(2), l3->get_in_port(2)), "s2-l3");
+    slv.add(link_ports(l1->get_out_port(3), s2->get_in_port(0)), "l1-s2");
+    slv.add(link_ports(l2->get_out_port(3), s2->get_in_port(1)), "l2-s2");
+    slv.add(link_ports(l3->get_out_port(3), s2->get_in_port(2)), "l3-s2");
+    slv.add(link_ports(s2->get_out_port(0), l1->get_in_port(3)), "s2-l1");
+    slv.add(link_ports(s2->get_out_port(1), l2->get_in_port(3)), "s2-l2");
+    slv.add(link_ports(s2->get_out_port(2), l3->get_in_port(3)), "s2-l3");
 
     // in_port, time, type -> count
     map<tuple<int, int, int>, int> ins_l1 = {
-        {{0, 0, 4}, 2},
+        {{0, 0, 10}, 2},
     };
     auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
     slv.add({constr_l1, "l1-inp"});
