@@ -104,7 +104,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
     // for (int src: srcs) {
     // dst_turn_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
     // }
-    use_win = true;
+    use_win = false;
 }
 
 vector<Buff *> LeafSts::get_buff_list() const {
@@ -515,30 +515,24 @@ V LeafSts::get_voq_of_out_i(const V &all_ev, const int i) {
 }
 
 void LeafSts::print(model mod) {
+    cout << var_prefix << endl << "######################################################################" << endl;
     for (const auto &[src_dst, buf]: buffs) {
         int src = get<0>(src_dst);
         int dst = get<1>(src_dst);
-        cout << "-----------------------------" << endl;
+        cout << "--------------" << endl;
         cout << src << " -> " << dst << endl;
         cout << "IN :" << endl;
         cout << str(buf->I, mod, ",").str() << endl;
         cout << "OUT:" << endl;
         cout << str(buf->O, mod, ",").str() << endl;
-        cout << "BL :" << endl;
-        cout << str(buf->B, mod).str() << endl;
-        cout << "DST Turn SRC =  " << src << endl << str(dst_turn_for_src[src], mod).str() << endl;
-        cout << "SRC Turn DST =  " << dst << endl << str(src_turn_for_dst[dst], mod).str() << endl;
-        cout << "TMP Turn SRC =  " << src << endl << str(tmp_per_src[src], mod).str() << endl;
-        cout << "TMP Turn DST =  " << dst << endl << str(tmp_per_dst[dst], mod).str() << endl;
+        // cout << "BL :" << endl;
+        // cout << str(buf->B, mod).str() << endl;
+        // cout << "DST Turn SRC =  " << src << endl << str(dst_turn_for_src[src], mod).str() << endl;
+        // cout << "SRC Turn DST =  " << dst << endl << str(src_turn_for_dst[dst], mod).str() << endl;
+        // cout << "TMP Turn SRC =  " << src << endl << str(tmp_per_src[src], mod).str() << endl;
+        // cout << "TMP Turn DST =  " << dst << endl << str(tmp_per_dst[dst], mod).str() << endl;
         cout << "Match:" << endl;
         cout << str(matched[{src, dst}], mod).str() << endl;
-        // cout << "SELECETIONS:" << endl;
-        // for (int t = 0; t < timesteps; ++t) {
-        //     cout << format("<{},{},",
-        //                    mod.eval(selected_src_idx_for_dst[dst][t]).get_numeral_int(),
-        //                    mod.eval(selected_dst_idx_for_src[src][t]).get_numeral_int()
-        //     ) << mod.eval(buf->B[t]) << ">,";
-        // }
         cout << endl;
     }
 

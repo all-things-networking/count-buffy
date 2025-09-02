@@ -18,7 +18,7 @@ constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int NUM_PORTS = 3;
-constexpr int PKT_TYPES = 2;
+constexpr int PKT_TYPES = 6;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -39,9 +39,20 @@ expr link_ports(ev2 out, ev2 in) {
     return e;
 }
 
-expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
+expr merge_ports(vector<ev2> out_ports, ev2 in) {
+    auto e = out_ports[0][0][0].ctx().bool_val(true);
+    for (int t = 0; t < out_ports[0].size(); ++t) {
+        auto out = out_ports[0][t];
+        for (int i = 1; i < out_ports.size(); ++i) {
+            out = out + out_ports[i][t];
+        }
+        e = e && (out == in[t]);
+    }
+    return e;
+}
+
+expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp, set<int> in_ports) {
     expr e = sts->slv.ctx.bool_val(true);
-    auto in_ports = sts->get_in_ports();
     for (int port: in_ports) {
         auto in_port = sts->get_in_port(port);
         for (int t = 0; t < TIME_STEPS; ++t) {
@@ -129,18 +140,30 @@ int main(const int argc, const char *argv[]) {
     );
 
     slv.add(link_ports(l1->get_out_port(2), s1->get_in_port(0)), "l1-s1");
-    slv.add(link_ports(l2->get_out_port(2), s1->get_in_port(0)), "l2-s1");
-    slv.add(link_ports(l3->get_out_port(2), s1->get_in_port(0)), "l3-s1");
+    slv.add(link_ports(l2->get_out_port(2), s1->get_in_port(1)), "l2-s1");
+    slv.add(link_ports(l3->get_out_port(2), s1->get_in_port(2)), "l3-s1");
     slv.add(link_ports(s1->get_out_port(0), l1->get_in_port(2)), "s1-l1");
     slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "s1-l2");
     slv.add(link_ports(s1->get_out_port(2), l3->get_in_port(2)), "s1-l3");
 
     // in_port, time, type -> count
-    map<tuple<int, int, int>, int> ins = {
-        {{0, 0, 5}, 2},
+    map<tuple<int, int, int>, int> ins_l1 = {
+        {{0, 0, 4}, 2},
     };
-    auto constr = add_constr(l1, ins);
-    slv.add({constr, "inp"});
+    auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
+    slv.add({constr_l1, "l1-inp"});
+
+    map<tuple<int, int, int>, int> ins_l2 = {
+    };
+    auto constr_l2 = add_constr(l2, ins_l2, {0, 1});
+    slv.add({constr_l2, "l2-inp"});
+
+    map<tuple<int, int, int>, int> ins_l3 = {
+    };
+    auto constr_l3 = add_constr(l3, ins_l3, {0, 1});
+    slv.add({constr_l3, "l3-inp"});
+
+
     //
     auto base_l1 = l1->base_constrs();
     auto base_l1_merged = merge(base_l1, "base_l1");
@@ -161,12 +184,11 @@ int main(const int argc, const char *argv[]) {
     //
     auto mod = slv.check_sat();
     //
-    cout << "l1" << endl << "##################################" << endl;
     l1->print(mod);
 
-    cout << "S1" << endl << "##################################" << endl;
-    s1->print(mod);
-
-    cout << "l2" << endl << "##################################" << endl;
     l2->print(mod);
+
+    l3->print(mod);
+
+    s1->print(mod);
 }
