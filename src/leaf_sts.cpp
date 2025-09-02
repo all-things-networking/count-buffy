@@ -732,7 +732,7 @@ vector<NamedExp> LeafSts::winds(int i) {
         auto to = wnd_out_i[j - 1] + Oi[j];
         auto m = se <= to;
         auto constr = ite(m,
-                          wnd_enq_i[j] == wnd_enq_nxt_i[j] + sn
+                          wnd_enq_i[j] == wnd_enq_nxt_i[j - 1] + sn
                           && wnd_enq_nxt_i[j] == slv.const_vec(pkt_types, 0)
                           && wnd_out_i[j] == to - se
                           ,
