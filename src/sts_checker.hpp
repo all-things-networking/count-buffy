@@ -49,6 +49,8 @@ public:
 
     vector<NamedExp> winds_old(int i);
 
+    void print_stats();
+
     vector<NamedExp> inputs(int i);
 
     vector<NamedExp> winds(int i);

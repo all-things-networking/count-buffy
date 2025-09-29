@@ -331,3 +331,7 @@ vector<NamedExp> STSChecker::winds_old(int i) {
     return nes;
 }
 
+void STSChecker::print_stats() {
+    cout << "Bool vars: " << slv.bool_vars << endl;
+    cout << "Int vars: " << slv.int_vars << endl;
+}

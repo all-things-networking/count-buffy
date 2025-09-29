@@ -13,12 +13,16 @@ SmtSolver::SmtSolver(): s(ctx) {
     params p(ctx);
     p.set("random_seed", 600u);
     s.set(p);
+    bool_vars = 0;
+    int_vars = 0;
 }
 
 SmtSolver::SmtSolver(unsigned int random_seed): s(ctx) {
     params p(ctx);
     p.set("random_seed", random_seed);
     s.set(p);
+    bool_vars = 0;
+    int_vars = 0;
 }
 
 ev &SmtSolver::bv(const int k, const string &name) {
@@ -27,6 +31,7 @@ ev &SmtSolver::bv(const int k, const string &name) {
         string vname = name;
         vname += "_" + to_string(i);
         expr e = ctx.bool_const(vname.c_str());
+        bool_vars++;
         result->push_back(e);
     }
     return *result;
@@ -61,6 +66,7 @@ ev &SmtSolver::iv(const int k, const string &name) {
         vname += "_" + to_string(i);
         expr e = ctx.int_const(vname.c_str());
         result->push_back(e);
+        int_vars++;
     }
     return *result;
 }
@@ -143,10 +149,10 @@ model SmtSolver::check_sat() {
     switch (s.check()) {
         case sat:
             // cout << "Done!\n";
-            // cout << s.statistics() << endl;
+            cout << "STATS:" << endl << s.statistics() << endl;
             return s.get_model();
         default:
-            // cout << s.statistics() << endl;
+            cout << "STATS:" << endl << s.statistics() << endl;
             cout << s.unsat_core() << endl;
             throw runtime_error("Model is not SAT!");
     }
@@ -212,4 +218,9 @@ string SmtSolver::stats_str() {
     }
 
     return ss.str();
+}
+
+void SmtSolver::print_stats() {
+    cout << "Bool vars: " << bool_vars << endl;
+    cout << "Int vars: " << int_vars << endl;
 }

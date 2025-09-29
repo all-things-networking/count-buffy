@@ -4,19 +4,20 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# plt.rcParams["text.usetex"] = True
-# plt.rcParams["font.family"] = "serif"
+TC = "prio"
+
 plt.rcParams["font.size"] = 24
 plt.rcParams["font.weight"] = "bold"
 plt.rcParams["lines.linewidth"] = 3
-plt.rcParams["legend.fontsize"] = 14
+plt.rcParams["legend.fontsize"] = 8
+plt.rcParams['legend.title_fontsize'] = 16
+
 
 
 def add_buffy_df(tc, buf_size, dfs):
-    p = f"{tc}.{buf_size}.txt"
+    p = f"{tc}/Ours/{tc}.{buf_size}.txt"
     if os.path.exists(p):
         df = pd.read_csv(p)
-        df['test_case'] = tc
         df['model'] = 'buffy'
         df.columns = df.columns.str.strip()
         dfs.append(df)
@@ -24,7 +25,7 @@ def add_buffy_df(tc, buf_size, dfs):
 
 def add_fperf_df(tc, buf_size, dfs):
     rows = []
-    p = f"../wls/{tc}.{buf_size}.txt"
+    p = f"{tc}/FPerf/{tc}.{buf_size}.txt"
     if os.path.exists(p):
         with open(p, "r") as file:
             for line in file:
@@ -37,7 +38,6 @@ def add_fperf_df(tc, buf_size, dfs):
                     rows.append({
                         'time_millis': tm,
                         'buf_size': buf_size,
-                        'test_case': tc,
                         "model": "fperf"
                     })
         df = pd.DataFrame(rows)
@@ -45,24 +45,23 @@ def add_fperf_df(tc, buf_size, dfs):
 
 
 dfs = []
-for tc in ["prio"]:
-    for i in range(1000):
-        add_buffy_df(tc, i, dfs)
-        add_fperf_df(tc, i, dfs)
+for i in range(1000):
+    add_buffy_df(TC, i, dfs)
+    add_fperf_df(TC, i, dfs)
 
 df = pd.concat(dfs)
-df = df[['test_case', 'model', 'buf_size', 'time_millis']]
+df = df[['model', 'buf_size', 'time_millis']]
 
 sns.lineplot(data=df, x='buf_size', y='time_millis', hue='model', estimator="mean")
 
-mean_df = df.groupby(['test_case', 'buf_size', 'model'])['time_millis'].mean().reset_index()
-p95_df = df.groupby(['test_case', 'buf_size', 'model'])['time_millis'].quantile(0.95).reset_index()
-p95_df.rename(columns={'time_millis': 'time_millis_p95'}, inplace=True)
-merged = pd.merge(mean_df, p95_df, on=['test_case', 'buf_size', 'model'])
+mean_df = df.groupby(['buf_size', 'model'])['time_millis'].mean().reset_index()
+# p95_df = df.groupby(['buf_size', 'model'])['time_millis'].quantile(0.95).reset_index()
+# p95_df.rename(columns={'time_millis': 'time_millis_p95'}, inplace=True)
+# merged = pd.merge(mean_df, p95_df, on=['buf_size', 'model'])
 
 melted = pd.melt(
     merged,
-    id_vars=['test_case', 'buf_size', 'model'],
+    id_vars=['buf_size', 'model'],
     value_vars=['time_millis', 'time_millis_p95'],
     var_name='stat',
     value_name='value'
@@ -80,9 +79,9 @@ sns.lineplot(
     x='buf_size',
     y='value',
     hue='model',
-    style='stat',
-    markers=True,
-    dashes=True
+    # style='stat',
+    # markers=True,
+    # dashes=True
 )
 
 plt.title("Test Case: Prio")

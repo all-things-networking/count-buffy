@@ -20,6 +20,8 @@ class SmtSolver {
 public:
     context ctx;
     solver s;
+    int bool_vars;
+    int int_vars;
 
     SmtSolver();
 
@@ -60,6 +62,8 @@ public:
     void check_unsat();
 
     string stats_str();
+
+    void print_stats();
 };
 
 #endif //SMT_SOLVER_HPP
