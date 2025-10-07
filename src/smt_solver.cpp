@@ -149,10 +149,10 @@ model SmtSolver::check_sat() {
     switch (s.check()) {
         case sat:
             // cout << "Done!\n";
-            cout << "STATS:" << endl << s.statistics() << endl;
+            // cout << "STATS:" << endl << s.statistics() << endl;
             return s.get_model();
         default:
-            cout << "STATS:" << endl << s.statistics() << endl;
+            // cout << "STATS:" << endl << s.statistics() << endl;
             cout << s.unsat_core() << endl;
             throw runtime_error("Model is not SAT!");
     }

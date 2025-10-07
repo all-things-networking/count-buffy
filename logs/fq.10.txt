@@ -1,0 +1,5 @@
+scheduler, buf_size, wl_idx, time_millis, solver_res
+fq, 10, 0, 7601, SAT
+fq, 10, 1, 4326, SAT
+fq, 10, 2, 2592, UNSAT
+fq, 10, 3, 2680, UNSAT

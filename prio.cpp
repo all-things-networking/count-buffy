@@ -9,6 +9,7 @@
 #include "src/gen/constr_extractor.hpp"
 #include "src/gen/fperfLexer.h"
 #include "src/gen/fperfParser.h"
+#include "src/sts_runner.hpp"
 #include "src/gen/wl_parser.hpp"
 
 class fperfVisitor;
@@ -51,60 +52,15 @@ void print_mod(STSChecker *sts, model mod) {
 int main(const int argc, const char *argv[]) {
     if (argc < 5)
         return 1;
-    int n = atoi(argv[1]);
-    int m = atoi(argv[2]);
-    int k = atoi(argv[3]);
-    int c = atoi(argv[4]);
-    cout << "BUFFER SIZE: " << c << endl;
+    int num_buffers = atoi(argv[1]);
+    int timesteps = atoi(argv[2]);
+    int pkt_types = atoi(argv[3]);
+    int buf_cap = atoi(argv[4]);
     string model = "prio";
-    SmtSolver slv;
     PrioSTS *sts;
-    sts = new PrioSTS(slv, model, n, m, k, c, MAX_ENQ, MAX_DEQ);
-    // RRChecker *sts;
-    // sts = new RRChecker(slv, model, n, m, k, c, MAX_ENQ, MAX_DEQ);
-    string wl_file_path = format("./wls/{}.{}.txt", model, c);
-    vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./logs/{}.{}.txt", model, c);
-    ofstream out(out_file_path, ios::out);
-    out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
-    for (int i = 0; i < wls.size(); ++i) {
-        cout << "WL: " << i + 1 << "/" << wls.size() << endl;
-        WorkloadParser parser(sts->I, slv, n, m);
-        auto wl = wls[i];
-        slv.s.push();
-        slv.add(sts->base_constrs());
-        // slv.add(sts->base_wl());
-        // slv.add(sts->base_wl());
-        slv.add(merge(sts->query(4), "Query").negate());
-        // slv.add(merge(sts->query(5), "Query"));
-        // auto e = sts->B[2][2] && sts->B[2][3] && sts->B[2][4] && sts->B[2][5] && sts->B[2][6];
-        // e = e && sts->O[2][2] == 0 && sts->O[2][3] == 0 && sts->O[2][4] == 0 && sts->O[2][5] == 0 && sts->O[2][6] == 0;
-        // slv.add(e, "tmp");
-        string res_stat = wl[0];
-        wl.erase(wl.begin());
-        parser.parse(wl);
-
-        auto start_t = chrono::high_resolution_clock::now();
-        // auto mod = slv.check_sat();
-        if (res_stat == "SAT")
-            slv.check_sat();
-        else if (res_stat == "UNSAT") {
-            try {
-                slv.check_unsat();
-            } catch (runtime_error e) {
-                cout << "ERRRRRRRRRRRRRRRRRRRRRRROR, model is SAT!!!!!!" << endl;
-                auto mod = slv.check_sat();
-                print_mod(sts, mod);
-                exit(1);
-            }
-        }
-        auto end_t = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-        out << "prio, " << c << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
-        slv.s.pop();
-        continue;
-    }
-    out.close();
-
-    return 0;
+    SmtSolver slv;
+    sts = new PrioSTS(slv, model, num_buffers, timesteps, pkt_types, buf_cap, MAX_ENQ, MAX_DEQ);
+    sts->use_win = true;
+    StsRunner runner(sts, model, buf_cap);
+    runner.run(num_buffers, timesteps);
 }

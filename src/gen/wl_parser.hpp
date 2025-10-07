@@ -19,6 +19,8 @@ public:
 
     void parse(vector<string> wl);
 
+    void parse_file();
+
 private:
     int n;
     int m;

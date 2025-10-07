@@ -13,6 +13,9 @@ FqChecker::FqChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int
     tmp = slv.bvv(n, m, "tmp");
     ipn = slv.bvv(n, m, "ipn");
     ipo = slv.bvv(n, m, "ipo");
+
+    // slv.add_bound(oq, -10, n);
+    // slv.add_bound(nq, -10, n);
 }
 
 
@@ -63,15 +66,12 @@ vector<NamedExp> FqChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
         oq_tp.push_back(oq_t[i]);
     }
 
-    // Remove empties
     for (int i = 0; i < num_bufs; ++i) {
         for (int j = 0; j < num_bufs; ++j) {
-            // if not backlogged and exists in oq/nq we decrease index
-            nq_tp[j] = ite(!bp[i] && nq_t[i] >= 0, nq_tp[j] - 1, nq_tp[j]);
+            nq_tp[j] = ite(!bp[i] && nq_tp[i] >= 0, nq_tp[j] - 1, nq_tp[j]);
             oq_tp[j] = ite(!bp[i] && oq_tp[i] >= 0, oq_tp[j] - 1, oq_tp[j]);
         }
     }
-
 
     //Pop from nq
     expr pop_from_nq = slv.ctx.bool_val(false);

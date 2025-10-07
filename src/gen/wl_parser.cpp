@@ -3,6 +3,7 @@
 //
 
 #include "wl_parser.hpp"
+#include "../utils.hpp"
 
 #include <ANTLRInputStream.h>
 #include <vector>

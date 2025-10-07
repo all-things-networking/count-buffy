@@ -40,7 +40,6 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
             for (int t = 0; t < TIME_STEPS; ++t) {
                 expr e = sum(ins[i], t) >= t + 1;
                 res.emplace_back(e);
-                // res.emplace_back(sum(ins[i], t) >= t + 1, format("sum(wl[{}][{}]) >= 1", i, t));
             }
         }
     }
@@ -48,21 +47,26 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
 }
 
 int main(const int argc, const char *argv[]) {
+    if (argc < 2)
+        return 1;
+    int c = atoi(argv[1]);
     SmtSolver slv;
     FqChecker sts(slv, "fq", NUM_BUFS, TIME_STEPS, PKT_TYPES, BUF_CAP, MAX_ENQ, MAX_DEQ);
-    sts.use_win = false;
-    string wl_file_path = "../wls/fq.txt";
-    vector<vector<string> > wls = read_wl_file(wl_file_path);
+    sts.use_win = true;
     slv.add(sts.base_constrs());
+    string model = "fq";
+    string wl_file_path = format("./wls/{}.{}.txt", model, c);
+    vector<vector<string> > wls = read_wl_file(wl_file_path);
 
+    string out_file_path = format("./logs/{}.{}.txt", model, c);
+    ofstream out(out_file_path, ios::out);
+    out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     auto bwl = base_wl(slv, sts.I);
     slv.add(bwl);
 
-    // slv.add(query(slv, sts.O));
-
     slv.add(merge(query(slv, sts.O), "not query").negate());
-    // slv.add(merge(query(slv, sts.O), "query"));
     for (int i = 0; i < wls.size(); ++i) {
+        cout << "WL: " << i + 1 << "/" << wls.size() << endl;
         slv.s.push();
         WorkloadParser parser(sts.I, slv, NUM_BUFS, TIME_STEPS);
         auto wl = wls[i];
@@ -70,71 +74,23 @@ int main(const int argc, const char *argv[]) {
         wl.erase(wl.begin());
         parser.parse(wl);
 
+        auto start_t = chrono::high_resolution_clock::now();
         if (res_stat == "SAT")
             slv.check_sat();
         else if (res_stat == "UNSAT") {
             try {
                 slv.check_unsat();
             } catch (runtime_error e) {
-                cout << "ERRRRRRRRRRRRRRRRRRRRRRROR, model is SAT!!!!!!" << endl;
+                cout << "model is SAT!!!!!!" << endl;
                 auto mod = slv.check_sat();
                 exit(1);
             }
         }
-        cout << "fq, " <<  i << ", " << res_stat << endl;
+        auto end_t = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
+        out << "fq, " << c << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
+        cout << duration.count() << ", " << res_stat << endl;
         slv.s.pop();
     }
-    // for (int j = 0; j < NUM_BUFS; ++j) {
-    //     if (j == 1) {
-    //         continue;
-    //     }
-    //     for (int i = 0; i < TIME_STEPS; ++i) {
-    //         if (i == 0 || i == 1 || i == 2) {
-    //             slv.add(sts.B[j][i]);
-    //         } else {
-    //             slv.add(!sts.B[j][i]);
-    //         }
-    //     }
-    // }
-
-    // auto mod = slv.check_sat();
-
-    // cout << "I:" << endl;
-    // cout << str(sts.I, mod).str();
     return 0;
-    // cout << "B:" << endl;
-    // cout << str(sts.B, mod, "\n").str();
-    // cout << "E:" << endl;
-    // cout << str(sts.E, mod).str();
-    // cout << "OQ:" << endl;
-    // cout << str(sts.oq, mod, "\n").str();
-    // cout << "NQ:" << endl;
-    // cout << str(sts.nq, mod, "\n").str();
-    // cout << "Tmp:" << endl;
-    // cout << str(sts.tmp, mod, "\n").str() << endl;
-    // cout << "IPN:" << endl;
-    // cout << str(sts.ipn, mod, "\n").str() << endl;
-    // cout << "IPO:" << endl;
-    // cout << str(sts.ipo, mod, "\n").str() << endl;
-    // cout << "O:" << endl;
-    // cout << str(sts.O, mod).str();
-    // cout << "B:" << endl;
-    // cout << str(sts.B, mod, "\n").str();
-    // cout << "I:" << endl;
-    // cout << str(sts.I, mod).str();
-    // cout << "E:" << endl;
-    // cout << str(sts.E, mod).str();
-    // cout << "O:" << endl;
-    // cout << str(sts.O, mod).str();
-
-
-    // context *ctx = &slv.ctx;
-    // IntSeq is(ctx);
-    // expr s = is.create("bar");
-    // expr sp = is.push_back(s, 1);
-    // slv.add(is.length(s) == 0);
-    // slv.add(is.at(s, 0) == 7);
-    //
-    // auto mod = slv.check_sat();
-    // cout << seq_str(sp, mod).str() << endl;
 }
