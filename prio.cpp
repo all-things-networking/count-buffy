@@ -1,53 +1,17 @@
 #include <iostream>
-#include<vector>
 
 #include "antlr4-runtime.h"
 #include"z3++.h"
+#include "src/params.hpp"
 #include "src/prio_sts.hpp"
 #include "src/rr_checker.hpp"
-#include "src/utils.hpp"
 #include "src/gen/constr_extractor.hpp"
-#include "src/gen/fperfLexer.h"
-#include "src/gen/fperfParser.h"
 #include "src/sts_runner.hpp"
-#include "src/gen/wl_parser.hpp"
 
-class fperfVisitor;
 using namespace std;
 using namespace z3;
 using namespace antlr4;
 
-constexpr int MAX_ENQ = 4;
-constexpr int MAX_DEQ = 1;
-
-expr constr(SmtSolver &slv, const ev2 &ev, const vector<int> &v) {
-    assert(ev.size() == v.size());
-    auto res = slv.ctx.bool_val(true);
-    for (int i = 0; i < ev.size(); ++i)
-        res = res & (ev[i] == v[i]);
-    return res;
-}
-
-expr constr(SmtSolver &slv, const ev2 &ev, const vector<vector<int> > &v) {
-    assert(ev.size() == v.size());
-    auto res = slv.ctx.bool_val(true);
-    for (int i = 0; i < ev.size(); ++i)
-        res = res & (ev[i] == v[i]);
-    return res;
-}
-
-void print_mod(STSChecker *sts, model mod) {
-    cout << "I:" << endl;
-    cout << str(sts->I, mod).str();
-    cout << "E:" << endl;
-    cout << str(sts->E, mod).str();
-    // cout << "B:" << endl;
-    // cout << str(sts->B, mod, "\n").str();
-    // cout << "S:" << endl;
-    // cout << str(sts->S_int, mod, "\n").str();
-    cout << "O:" << endl;
-    cout << str(sts->O, mod).str();
-}
 
 int main(const int argc, const char *argv[]) {
     if (argc < 5)
