@@ -2,12 +2,12 @@
 #include <set>
 
 #include"z3++.h"
-#include "src/classifier.hpp"
-#include "src/rr_checker.hpp"
-#include "src/merger.hpp"
-#include "src/prio_sts.hpp"
-#include "src/utils.hpp"
-#include "src/gen/wl_parser.hpp"
+#include "../src/classifier.hpp"
+#include "../src/rr_checker.hpp"
+#include "../src/merger.hpp"
+#include "../src/prio_sts.hpp"
+#include "../src/utils.hpp"
+#include "../src/gen/wl_parser.hpp"
 
 using namespace std;
 using namespace z3;

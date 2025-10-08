@@ -21,7 +21,8 @@ void StsRunner::run(int num_buffers, int timesteps) {
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     slv.add(sts->base_constrs());
-    slv.add(merge(sts->query(4), "Query").negate());
+    slv.add(sts->base_wl());
+    slv.add(merge(sts->query(), "Query").negate());
     for (int i = 0; i < wls.size(); ++i) {
         WorkloadParser parser(sts->I, slv, num_buffers, timesteps);
         auto wl = wls[i];
@@ -35,7 +36,16 @@ void StsRunner::run(int num_buffers, int timesteps) {
         if (res_stat == "SAT")
             slv.check_sat();
         else if (res_stat == "UNSAT") {
-            slv.check_unsat();
+            try {
+                slv.check_unsat();
+            } catch (runtime_error &e) {
+                auto m = slv.check_sat();
+                cout << "E:" << endl << str(sts->E, m).str();
+                cout << "O:" << endl << str(sts->O, m).str();
+                cout << "B:" << endl << str(sts->B, m, "\n").str();
+                cout << "---------------" << endl;
+                exit(1);
+            }
         }
         auto end_t = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);

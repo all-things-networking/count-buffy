@@ -158,7 +158,7 @@ expr max(const expr &a, const expr &b) {
     return ite(a >= b, a, b);
 }
 
-vector<NamedExp> FqChecker::query(int m) {
+vector<NamedExp> FqChecker::query() {
     vector<NamedExp> res;
     return res;
 }

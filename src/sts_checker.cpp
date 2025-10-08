@@ -274,6 +274,10 @@ vector<NamedExp> STSChecker::out() {
     // return {merge(res, "out")};
 }
 
+vector<NamedExp> STSChecker::base_wl() {
+    return {};
+}
+
 //
 vector<NamedExp> STSChecker::winds_old(int i) {
     vector<NamedExp> nes;

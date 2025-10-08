@@ -1,12 +1,12 @@
 #include <iostream>
 
 #include"z3++.h"
-#include "src/classifier.hpp"
-#include "src/rr_checker.hpp"
-#include "src/merger.hpp"
-#include "src/prio_sts.hpp"
-#include "src/utils.hpp"
-#include "src/gen/wl_parser.hpp"
+#include "../src/classifier.hpp"
+#include "../src/rr_checker.hpp"
+#include "../src/merger.hpp"
+#include "../src/prio_sts.hpp"
+#include "../src/utils.hpp"
+#include "../src/gen/wl_parser.hpp"
 
 using namespace std;
 using namespace z3;
@@ -52,16 +52,26 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
     for (int t = 0; t < ins[0].size(); ++t) {
         expr s0 = slv.ctx.int_val(0);
         expr s1 = slv.ctx.int_val(0);
+        expr s2 = slv.ctx.int_val(0);
         for (int i = 0; i < ins.size(); ++i) {
             if (i % 3 == 0) {
                 s0 = s0 + sum(ins[i], t);
-            } else {
+            } else if (i % 3 == 1) {
                 s1 = s1 + sum(ins[i], t);
+            } else {
+                s2 = s2 + sum(ins[i], t);
             }
         }
         // res.emplace_back(s0 >= t + 1, format("I[s0][{}] >= t", t));
-        res.emplace_back(s0 >= t + 1);
-        res.emplace_back(s1 >= t + 1, format("I[s1][{}] >= t", t));
+        res.emplace_back(s0 >= t + 1, format("I%0 >= t @{}", t));
+        res.emplace_back(s1 >= t + 1, format("I%1 >= t @{}", t));
+    }
+
+    for (int t = 0; t < ins[0].size(); ++t) {
+        for (int i = 0; i < ins.size(); ++i) {
+            if (i % 3 == 2)
+                res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
+        }
     }
 
     return res;
@@ -138,19 +148,26 @@ public:
         slv.add(bwl);
         auto O = prio->O[0] + prio->O[1];
 
-        vector<vector<string> > wls = read_wl_file("../wls/loom.txt");
-        WorkloadParser parser(I, slv, I.size(), I[0].size());
-        auto wl = wls[0];
-        string res_stat = wl[0];
-        wl.erase(wl.begin());
-        parser.parse(wl);
-        // auto mwl = wl(I);
-        // slv.add(merge(mwl, "wl"));
-        slv.add(merge(query(slv, O), "not query").negate());
-        // slv.add(merge(query(slv, O), "query"));
+        vector<vector<string> > wls = read_wl_file("../wls/loom.nonmem.txt");
+        for (int i = 0; i < wls.size(); ++i) {
+            auto wl = wls[i];
+            slv.s.push();
+            WorkloadParser parser(I, slv, I.size(), I[0].size());
+            string res_stat = wl[0];
+            wl.erase(wl.begin());
+            parser.parse(wl);
 
-        auto m = slv.check_sat();
-        print(m);
+            slv.add(merge(query(slv, O), "not query").negate());
+            // slv.add(merge(query(slv, O), "query"));
+            auto start_t = chrono::high_resolution_clock::now();
+            auto m = slv.check_sat();
+            print(m);
+            slv.s.pop();
+            auto end_t = chrono::high_resolution_clock::now();
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
+            cout << "loom " << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
+            cout << "WL " << i << " Done!" << endl;
+        }
     }
 
     void print(model m) {

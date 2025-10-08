@@ -22,7 +22,7 @@ vector<NamedExp> Merger::init(ev const &b0, ev const &s0) {
     return res;
 }
 
-vector<NamedExp> Merger::query(int m) {
+vector<NamedExp> Merger::query() {
     vector<NamedExp> res;
     return res;
 }

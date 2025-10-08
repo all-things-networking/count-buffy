@@ -42,11 +42,13 @@ vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &
 }
 
 
-vector<NamedExp> PrioSTS::query(const int p) {
+constexpr int QUERY_TRESH = 6;
+
+vector<NamedExp> PrioSTS::query() {
     expr res = slv.ctx.bool_val(false);
-    for (int i = 0; i < timesteps - p; ++i) {
+    for (int i = 0; i < timesteps - QUERY_TRESH + 1; ++i) {
         expr part = slv.ctx.bool_val(true);
-        for (int j = 0; j < p + 1; ++j) {
+        for (int j = 0; j < QUERY_TRESH; ++j) {
             part = part && B[2][i + j];
             part = part && (O[2][i + j] == 0);
         }

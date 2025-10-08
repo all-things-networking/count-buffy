@@ -2,6 +2,8 @@
 #include <cmath>
 #include "lib.hpp"
 
+constexpr int PERIOD = 5;
+
 vector<NamedExp> RRChecker::workload() {
     expr base_wl = slv.ctx.bool_val(true);
     int period = 5;
@@ -25,6 +27,7 @@ vector<NamedExp> RRChecker::workload() {
     }
     return {NamedExp(base_wl && wl, "workload")};
 }
+
 
 vector<NamedExp> RRChecker::base_wl() {
     expr base_wl = slv.ctx.bool_val(true);
@@ -131,9 +134,10 @@ vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev
     return {NamedExp(next_turn && max_deq)};
 }
 
-vector<NamedExp> RRChecker::query(int m) {
+vector<NamedExp> RRChecker::query() {
     expr res = slv.ctx.bool_val(true);
-    for (int i = m; i < timesteps; ++i) {
+    // The following is based on FPerf not the FPerf paper
+    for (int i = timesteps - PERIOD; i < timesteps; ++i) {
         res = res && (sum(O[2], i) - sum(O[1], i) >= 3);
     }
     return {NamedExp(res)};

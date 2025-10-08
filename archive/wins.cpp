@@ -1,9 +1,9 @@
 #include <iostream>
 #include<vector>
 #include"z3++.h"
-#include "src/prio_sts.hpp"
-#include "src/rr_checker.hpp"
-#include "src/trivial_sts.hpp"
+#include "../src/prio_sts.hpp"
+#include "../src/rr_checker.hpp"
+#include "../src/trivial_sts.hpp"
 
 using namespace std;
 using namespace z3;

@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 
 #include"z3++.h"
@@ -52,26 +53,16 @@ vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
     for (int t = 0; t < ins[0].size(); ++t) {
         expr s0 = slv.ctx.int_val(0);
         expr s1 = slv.ctx.int_val(0);
-        expr s2 = slv.ctx.int_val(0);
         for (int i = 0; i < ins.size(); ++i) {
             if (i % 3 == 0) {
                 s0 = s0 + sum(ins[i], t);
-            } else if (i % 3 == 1) {
-                s1 = s1 + sum(ins[i], t);
             } else {
-                s2 = s2 + sum(ins[i], t);
+                s1 = s1 + sum(ins[i], t);
             }
         }
         // res.emplace_back(s0 >= t + 1, format("I[s0][{}] >= t", t));
-        res.emplace_back(s0 >= t + 1, format("I%0 >= t @{}", t));
-        res.emplace_back(s1 >= t + 1, format("I%1 >= t @{}", t));
-    }
-
-    for (int t = 0; t < ins[0].size(); ++t) {
-        for (int i = 0; i < ins.size(); ++i) {
-            if (i % 3 == 2)
-                res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
-        }
+        res.emplace_back(s0 >= t + 1);
+        res.emplace_back(s1 >= t + 1, format("I[s1][{}] >= t", t));
     }
 
     return res;
@@ -113,6 +104,8 @@ class Composed {
 
 public:
     Composed(int buffer_size, unsigned int random_seed): slv(random_seed) {
+        this->buffer_size = buffer_size;
+        this->random_seed = random_seed;
         I = slv.ivvv(4 * PKT_TYPES, TIME_STEPS, PKT_TYPES, "INS");
         slv.add_bound(I, 0, MAX_ENQ);
 
@@ -147,8 +140,11 @@ public:
         auto bwl = base_wl(slv, I);
         slv.add(bwl);
         auto O = prio->O[0] + prio->O[1];
-
-        vector<vector<string> > wls = read_wl_file("../wls/loom.nonmem.txt");
+        string wl_file = format("wls/loom.mem.{}.txt", buffer_size);
+        vector<vector<string> > wls = read_wl_file(wl_file);
+        string out_file_path = format("logs/loom.mem.{}.txt", buffer_size);
+        ofstream out(out_file_path, ios::out);
+        out << "scheduler,buf_size,wl_idx,time_millis,solver_res" << endl;
         for (int i = 0; i < wls.size(); ++i) {
             auto wl = wls[i];
             slv.s.push();
@@ -160,13 +156,15 @@ public:
             slv.add(merge(query(slv, O), "not query").negate());
             // slv.add(merge(query(slv, O), "query"));
             auto start_t = chrono::high_resolution_clock::now();
-            auto m = slv.check_sat();
-            print(m);
+            if (res_stat == "SAT")
+                slv.check_sat();
+            else if (res_stat == "UNSAT")
+                slv.check_unsat();
             slv.s.pop();
             auto end_t = chrono::high_resolution_clock::now();
             auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-            cout << "loom " << ", " << i << ", " << duration.count() << ", " << res_stat << endl;
-            cout << "WL " << i << " Done!" << endl;
+            cout << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
+            out << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
         }
     }
 

@@ -3,11 +3,11 @@
 
 #include "antlr4-runtime.h"
 #include"z3++.h"
-#include "src/DemuxSwitch.hpp"
-#include "src/leaf_sts.hpp"
-#include "src/prio_sts.hpp"
-#include "src/gen/constr_extractor.hpp"
-#include "src/gen/wl_parser.hpp"
+#include "../src/DemuxSwitch.hpp"
+#include "../src/leaf_sts.hpp"
+#include "../src/prio_sts.hpp"
+#include "../src/gen/constr_extractor.hpp"
+#include "../src/gen/wl_parser.hpp"
 
 class fperfVisitor;
 using namespace std;

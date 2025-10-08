@@ -59,13 +59,15 @@ public:
 
     virtual vector<NamedExp> workload() = 0;
 
+    virtual vector<NamedExp> base_wl();
+
     virtual vector<NamedExp> out(const ev &bv, const ev &sv, const ev2 &ov, int t) = 0;
 
     virtual vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) = 0;
 
     virtual vector<NamedExp> init(ev const &b0, ev const &s0) = 0;
 
-    virtual vector<NamedExp> query(int m) = 0;
+    virtual vector<NamedExp> query() = 0;
 
     virtual ev2 get_state() const;
 

@@ -27,7 +27,7 @@ public:
 
     vector<NamedExp> workload() override;
 
-    vector<NamedExp> query(int m) override;
+    vector<NamedExp> query() override;
 
     ev2 get_state() const override;
 

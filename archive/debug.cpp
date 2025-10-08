@@ -1,4 +1,4 @@
-#include "src/smt_solver.hpp"
+#include "../src/smt_solver.hpp"
 
 int main() {
     SmtSolver slv;

@@ -15,7 +15,7 @@ public:
 
     vector<NamedExp> init(ev const &b0, ev const &s0) override;
 
-    vector<NamedExp> query(int m) override;
+    vector<NamedExp> query() override;
 
     vector<NamedExp> workload() override;
 };

@@ -16,7 +16,7 @@ public:
 
     vector<NamedExp> trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) override;
 
-    vector<NamedExp> query(int p) override;
+    vector<NamedExp> query() override;
 
     vector<NamedExp> init(const ev &b0, const ev &s0) override;
 };

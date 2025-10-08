@@ -1,10 +1,10 @@
 #include "antlr4-runtime.h"
-#include "src/gen/fperfLexer.h"
-#include "src/gen/fperfParser.h"
-#include "src/gen/constr_extractor.hpp"
+#include "../src/gen/fperfLexer.h"
+#include "../src/gen/fperfParser.h"
+#include "../src/gen/constr_extractor.hpp"
 #include <iostream>
 
-#include "src/utils.hpp"
+#include "../src/utils.hpp"
 
 using namespace std;
 using namespace antlr4;

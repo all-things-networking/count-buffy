@@ -2,8 +2,8 @@
 #include <set>
 
 #include"z3++.h"
-#include "src/rr_checker.hpp"
-#include "src/merger.hpp"
+#include "../src/rr_checker.hpp"
+#include "../src/merger.hpp"
 
 using namespace std;
 using namespace z3;

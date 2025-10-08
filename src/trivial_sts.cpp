@@ -23,7 +23,7 @@ vector<NamedExp> TrivialSts::trs(const ev &b, const ev &s, const ev &bp, const e
     return {NamedExp(res, "trs")};
 }
 
-vector<NamedExp> TrivialSts::query(int m) {
+vector<NamedExp> TrivialSts::query() {
     expr res = slv.ctx.bool_val(true);
     return {NamedExp(res, "query")};
 }
