@@ -1,5 +1,5 @@
 scheduler, buf_size, wl_idx, time_millis, solver_res
-fq,10, 0, 7203, SAT
-fq,10, 1, 4075, SAT
-fq,10, 2, 2168, UNSAT
-fq,10, 3, 1772, UNSAT
+fq,10, 0, 7625, SAT
+fq,10, 1, 4362, SAT
+fq,10, 2, 2487, UNSAT
+fq,10, 3, 2009, UNSAT
