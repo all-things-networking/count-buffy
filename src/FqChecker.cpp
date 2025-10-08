@@ -154,12 +154,29 @@ vector<NamedExp> FqChecker::workload() {
     return res;
 }
 
+vector<NamedExp> FqChecker::base_wl() {
+    vector<NamedExp> res;
+    cout << I.size() << endl;
+    for (int i = 0; i < num_bufs; ++i) {
+        if (i < num_bufs - 1) {
+            for (int t = 0; t < timesteps; ++t) {
+                expr e = sum(I[i], t) >= t + 1;
+                res.emplace_back(e);
+            }
+        }
+    }
+    return res;
+}
+
 expr max(const expr &a, const expr &b) {
     return ite(a >= b, a, b);
 }
 
 vector<NamedExp> FqChecker::query() {
+    unsigned int query_thresh = (timesteps / num_bufs) + 3;
     vector<NamedExp> res;
+    expr e = (sum(O[num_bufs - 1], timesteps - 1) >= slv.ctx.int_val(query_thresh));
+    res.emplace_back(e);
     return res;
 }
 

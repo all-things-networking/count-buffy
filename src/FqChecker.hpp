@@ -27,6 +27,8 @@ public:
 
     vector<NamedExp> workload() override;
 
+    vector<NamedExp> base_wl() override;
+
     vector<NamedExp> query() override;
 
     ev2 get_state() const override;
