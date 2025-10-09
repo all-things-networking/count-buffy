@@ -9,19 +9,22 @@ Download and install Z3 v4.8.11 [link](https://github.com/Z3Prover/z3/releases/t
 
 ### Build 
 Target is one of the following:
-- `RR`
-- `Prio`
-- `Loom`
-- `FQ`
-- `Leaf`
+- `rr`
+- `prio`
+- `loom`
+- `fq`
+- `leaf`
 
 ```shell
 cmake 
 cmake --build . --target $TARGET -- -j6
 ```
 ### Run
-
 ```shell
+
 ./$TARGET $BUF_SIZE
 ```
+
+`wls` directory includes workloads extracted from FPerf.
+File names have the following format: `$TARGET.$BUF_SIZE.txt`
 

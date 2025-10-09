@@ -1,5 +1,6 @@
 #include <iostream>
 #include<vector>
+#include "src/leaf_utils.hpp"
 
 #include "antlr4-runtime.h"
 #include"z3++.h"
@@ -16,7 +17,7 @@ using namespace antlr4;
 
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
-constexpr int TIME_STEPS = 10;
+constexpr int TIMESTEPS = 10;
 constexpr int NUM_PORTS = 3;
 constexpr int PKT_TYPES = 12;
 constexpr int BUFF_CAP = 10;
@@ -55,7 +56,7 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp, set<int> in_po
     expr e = sts->slv.ctx.bool_val(true);
     for (int port: in_ports) {
         auto in_port = sts->get_in_port(port);
-        for (int t = 0; t < TIME_STEPS; ++t) {
+        for (int t = 0; t < TIMESTEPS; ++t) {
             for (int k = 0; k < PKT_TYPES; ++k) {
                 int val = 0;
                 if (inp.contains({port, t, k})) {
@@ -69,8 +70,19 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp, set<int> in_po
     return e;
 }
 
+
 int main(const int argc, const char *argv[]) {
     SmtSolver slv;
+    int num_spines = 2;
+    int num_leafs = 3;
+    int host_per_leaf = 2;
+    int num_in_bufs = num_leafs * host_per_leaf;
+    auto m = slv.check_sat();
+    ev3 I;
+    // = slv.ivvv(num_in_bufs, TIMESTEPS, num_in_bufs * num_spines, format("III"));
+    // exit(0);
+
+
     LeafSts *l1;
     vector<tuple<int, int> > l1_ports = {
         {0, 1},
@@ -85,9 +97,11 @@ int main(const int argc, const char *argv[]) {
         {3, 1}
     };
     vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
-    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
+    I.push_back(l1->get_in_port(0));
+    I.push_back(l1->get_in_port(1));
 
     LeafSts *l2;
     vector<tuple<int, int> > l2_ports = {
@@ -103,9 +117,11 @@ int main(const int argc, const char *argv[]) {
         {3, 1}
     };
     vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
-    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
+    I.push_back(l2->get_in_port(0));
+    I.push_back(l2->get_in_port(1));
 
     LeafSts *l3;
     vector<tuple<int, int> > l3_ports = {
@@ -121,9 +137,11 @@ int main(const int argc, const char *argv[]) {
         {3, 1}
     };
     vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
-    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
+    I.push_back(l3->get_in_port(0));
+    I.push_back(l3->get_in_port(1));
 
     LeafSts *s1;
     vector<tuple<int, int> > s1_ports = {
@@ -135,7 +153,7 @@ int main(const int argc, const char *argv[]) {
         {2, 1}
     };
     vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
 
@@ -149,7 +167,7 @@ int main(const int argc, const char *argv[]) {
         {2, 1}
     };
     vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
 
@@ -168,24 +186,22 @@ int main(const int argc, const char *argv[]) {
     slv.add(link_ports(s2->get_out_port(2), l3->get_in_port(3)), "s2-l3");
 
     // in_port, time, type -> count
-    map<tuple<int, int, int>, int> ins_l1 = {
-        {{0, 0, 10}, 2},
-    };
-    auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
-    slv.add({constr_l1, "l1-inp"});
+    // map<tuple<int, int, int>, int> ins_l1 = {
+        // {{0, 0, 10}, 2},
+    // };
+    // auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
+    // slv.add({constr_l1, "l1-inp"});
 
-    map<tuple<int, int, int>, int> ins_l2 = {
-    };
-    auto constr_l2 = add_constr(l2, ins_l2, {0, 1});
-    slv.add({constr_l2, "l2-inp"});
+    // map<tuple<int, int, int>, int> ins_l2 = {
+    // };
+    // auto constr_l2 = add_constr(l2, ins_l2, {0, 1});
+    // slv.add({constr_l2, "l2-inp"});
 
-    map<tuple<int, int, int>, int> ins_l3 = {
-    };
-    auto constr_l3 = add_constr(l3, ins_l3, {0, 1});
-    slv.add({constr_l3, "l3-inp"});
+    // map<tuple<int, int, int>, int> ins_l3 = {
+    // };
+    // auto constr_l3 = add_constr(l3, ins_l3, {0, 1});
+    // slv.add({constr_l3, "l3-inp"});
 
-
-    //
     auto base_l1 = l1->base_constrs();
     auto base_l1_merged = merge(base_l1, "base_l1");
 
@@ -206,6 +222,8 @@ int main(const int argc, const char *argv[]) {
     slv.add(base_l3_merged);
     slv.add(base_s1_merged);
     slv.add(base_s2_merged);
+
+    add_workload(slv, I, num_spines, num_leafs, host_per_leaf, TIMESTEPS);
     //
     auto mod = slv.check_sat();
     //

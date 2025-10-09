@@ -1,8 +1,9 @@
 grammar fperf;
 
 con : interval ':' lhs comp_op rhs ;
-lhs : m '(' q ', t)' | 'SUM_[q in' set ']' m '(q ,t)';
+lhs : m '(' q ', t)' | mm '(' q ', t)' | 'SUM_[q in' set ']' m '(q ,t)';
 m : 'cenq' | 'aipg';
+mm: 'ecmp' | 'dst';
 q : INT ;
 rhs : INT | 't' | INT 't' ;
 interval     : '[' INT ',' INT ']';

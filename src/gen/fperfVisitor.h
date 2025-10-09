@@ -25,6 +25,8 @@ public:
 
     virtual std::any visitM(fperfParser::MContext *context) = 0;
 
+    virtual std::any visitMm(fperfParser::MmContext *context) = 0;
+
     virtual std::any visitQ(fperfParser::QContext *context) = 0;
 
     virtual std::any visitRhs(fperfParser::RhsContext *context) = 0;

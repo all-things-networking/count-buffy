@@ -14,13 +14,13 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, ID = 20, 
-    INT = 21, WS = 22
+    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
+    T__20 = 21, ID = 22, INT = 23, WS = 24
   };
 
   enum {
-    RuleCon = 0, RuleLhs = 1, RuleM = 2, RuleQ = 3, RuleRhs = 4, RuleInterval = 5, 
-    RuleSet = 6, RuleComp_op = 7
+    RuleCon = 0, RuleLhs = 1, RuleM = 2, RuleMm = 3, RuleQ = 4, RuleRhs = 5, 
+    RuleInterval = 6, RuleSet = 7, RuleComp_op = 8
   };
 
   explicit fperfParser(antlr4::TokenStream *input);
@@ -43,6 +43,7 @@ public:
   class ConContext;
   class LhsContext;
   class MContext;
+  class MmContext;
   class QContext;
   class RhsContext;
   class IntervalContext;
@@ -71,6 +72,7 @@ public:
     virtual size_t getRuleIndex() const override;
     MContext *m();
     QContext *q();
+    MmContext *mm();
     SetContext *set();
 
 
@@ -91,6 +93,18 @@ public:
   };
 
   MContext* m();
+
+  class  MmContext : public antlr4::ParserRuleContext {
+  public:
+    MmContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  MmContext* mm();
 
   class  QContext : public antlr4::ParserRuleContext {
   public:

@@ -25,9 +25,6 @@ expr binop(const expr &left, const std::string &op, const expr &right) {
     throw std::invalid_argument("Unknown comparison operator: " + op);
 }
 
-
-using namespace std;
-
 ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
     IT = slv.ivv(n, m, "Workload");
     for (int i = 0; i < IT.size(); ++i) {
@@ -36,7 +33,19 @@ ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
         auto aipgs_i = get_aipgs_for_buf(IT[i]);
         aipgs.push_back(aipgs_i);
     }
+    // DST = slv.ivv(n, m, "Dest");
+    // ECMP = slv.ivv(n, m, "Dest");
 }
+
+void ConstrExtractor::print(model m) const {
+    cout << "IT:" << endl;
+    cout << str(IT, m, "\n").str();
+    // cout << "ECMP:" << endl;
+    // cout << str(ECMP, m, "\n").str();
+    // cout << "DST:" << endl;
+    // cout << str(DST, m, "\n").str();
+}
+
 
 ev ConstrExtractor::get_cenqs_for_buff(ev it) {
     ev cenqs_i;
@@ -107,6 +116,29 @@ void ConstrExtractor::parse_aipg() {
     }
 }
 
+void ConstrExtractor::parse_dst() {
+    assert(begin > 0);
+    for (int t = begin; t <= end; ++t) {
+        int t_index = t - 1;
+        assert(tmp_ids.size() == 1);
+        assert(!rhs_linear);
+        int buf_index = tmp_ids[0];
+        DST[buf_index][t_index] = rhs;
+    }
+}
+
+void ConstrExtractor::parse_ecmp() {
+    assert(begin > 0);
+    for (int t = begin; t <= end; ++t) {
+        int t_index = t - 1;
+        assert(tmp_ids.size() == 1);
+        assert(!rhs_linear);
+        int buf_index = tmp_ids[0];
+        ECMP[buf_index][t_index] = rhs;
+        // Need to store as expression
+    }
+}
+
 
 any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
     auto result = visitChildren(ctx);
@@ -119,6 +151,16 @@ any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
         parse_aipg();
         return result;
     }
+
+    if (metric == "dst") {
+        parse_dst();
+        return result;
+    }
+
+    if (metric == "ecmp") {
+        parse_ecmp();
+        return result;
+    }
     return result;
 }
 
@@ -127,6 +169,11 @@ any ConstrExtractor::visitLhs(fperfParser::LhsContext *ctx) {
 }
 
 any ConstrExtractor::visitM(fperfParser::MContext *ctx) {
+    metric = ctx->getText();
+    return visitChildren(ctx);
+}
+
+any ConstrExtractor::visitMm(fperfParser::MmContext *ctx) {
     metric = ctx->getText();
     return visitChildren(ctx);
 }

@@ -27,6 +27,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitMm(fperfParser::MmContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitQ(fperfParser::QContext *ctx) override {
     return visitChildren(ctx);
   }

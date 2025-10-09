@@ -52,38 +52,41 @@ void fperfParserInitialize() {
 #endif
   auto staticData = std::make_unique<FperfParserStaticData>(
     std::vector<std::string>{
-      "con", "lhs", "m", "q", "rhs", "interval", "set", "comp_op"
+      "con", "lhs", "m", "mm", "q", "rhs", "interval", "set", "comp_op"
     },
     std::vector<std::string>{
       "", "':'", "'('", "', t)'", "'SUM_[q in'", "']'", "'(q ,t)'", "'cenq'", 
-      "'aipg'", "'t'", "'['", "','", "'{'", "'}'", "'>='", "'<='", "'>'", 
-      "'<'", "'=='", "'!='"
+      "'aipg'", "'ecmp'", "'dst'", "'t'", "'['", "','", "'{'", "'}'", "'>='", 
+      "'<='", "'>'", "'<'", "'=='", "'!='"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-      "", "", "", "ID", "INT", "WS"
+      "", "", "", "", "", "ID", "INT", "WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,22,70,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
-  	7,7,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  	1,3,1,34,8,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,1,4,3,4,44,8,4,1,5,1,5,1,5,1,
-  	5,1,5,1,5,1,6,1,6,1,6,1,6,5,6,56,8,6,10,6,12,6,59,9,6,3,6,61,8,6,1,6,
-  	3,6,64,8,6,1,6,1,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,2,1,0,7,8,1,
-  	0,14,19,67,0,16,1,0,0,0,2,33,1,0,0,0,4,35,1,0,0,0,6,37,1,0,0,0,8,43,1,
-  	0,0,0,10,45,1,0,0,0,12,51,1,0,0,0,14,67,1,0,0,0,16,17,3,10,5,0,17,18,
-  	5,1,0,0,18,19,3,2,1,0,19,20,3,14,7,0,20,21,3,8,4,0,21,1,1,0,0,0,22,23,
-  	3,4,2,0,23,24,5,2,0,0,24,25,3,6,3,0,25,26,5,3,0,0,26,34,1,0,0,0,27,28,
-  	5,4,0,0,28,29,3,12,6,0,29,30,5,5,0,0,30,31,3,4,2,0,31,32,5,6,0,0,32,34,
-  	1,0,0,0,33,22,1,0,0,0,33,27,1,0,0,0,34,3,1,0,0,0,35,36,7,0,0,0,36,5,1,
-  	0,0,0,37,38,5,21,0,0,38,7,1,0,0,0,39,44,5,21,0,0,40,44,5,9,0,0,41,42,
-  	5,21,0,0,42,44,5,9,0,0,43,39,1,0,0,0,43,40,1,0,0,0,43,41,1,0,0,0,44,9,
-  	1,0,0,0,45,46,5,10,0,0,46,47,5,21,0,0,47,48,5,11,0,0,48,49,5,21,0,0,49,
-  	50,5,5,0,0,50,11,1,0,0,0,51,60,5,12,0,0,52,57,5,21,0,0,53,54,5,11,0,0,
-  	54,56,5,21,0,0,55,53,1,0,0,0,56,59,1,0,0,0,57,55,1,0,0,0,57,58,1,0,0,
-  	0,58,61,1,0,0,0,59,57,1,0,0,0,60,52,1,0,0,0,60,61,1,0,0,0,61,63,1,0,0,
-  	0,62,64,5,11,0,0,63,62,1,0,0,0,63,64,1,0,0,0,64,65,1,0,0,0,65,66,5,13,
-  	0,0,66,13,1,0,0,0,67,68,7,1,0,0,68,15,1,0,0,0,5,33,43,57,60,63
+  	4,1,24,79,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+  	7,7,2,8,7,8,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,41,8,1,1,2,1,2,1,3,1,3,1,4,1,4,1,5,
+  	1,5,1,5,1,5,3,5,53,8,5,1,6,1,6,1,6,1,6,1,6,1,6,1,7,1,7,1,7,1,7,5,7,65,
+  	8,7,10,7,12,7,68,9,7,3,7,70,8,7,1,7,3,7,73,8,7,1,7,1,7,1,8,1,8,1,8,0,
+  	0,9,0,2,4,6,8,10,12,14,16,0,3,1,0,7,8,1,0,9,10,1,0,16,21,76,0,18,1,0,
+  	0,0,2,40,1,0,0,0,4,42,1,0,0,0,6,44,1,0,0,0,8,46,1,0,0,0,10,52,1,0,0,0,
+  	12,54,1,0,0,0,14,60,1,0,0,0,16,76,1,0,0,0,18,19,3,12,6,0,19,20,5,1,0,
+  	0,20,21,3,2,1,0,21,22,3,16,8,0,22,23,3,10,5,0,23,1,1,0,0,0,24,25,3,4,
+  	2,0,25,26,5,2,0,0,26,27,3,8,4,0,27,28,5,3,0,0,28,41,1,0,0,0,29,30,3,6,
+  	3,0,30,31,5,2,0,0,31,32,3,8,4,0,32,33,5,3,0,0,33,41,1,0,0,0,34,35,5,4,
+  	0,0,35,36,3,14,7,0,36,37,5,5,0,0,37,38,3,4,2,0,38,39,5,6,0,0,39,41,1,
+  	0,0,0,40,24,1,0,0,0,40,29,1,0,0,0,40,34,1,0,0,0,41,3,1,0,0,0,42,43,7,
+  	0,0,0,43,5,1,0,0,0,44,45,7,1,0,0,45,7,1,0,0,0,46,47,5,23,0,0,47,9,1,0,
+  	0,0,48,53,5,23,0,0,49,53,5,11,0,0,50,51,5,23,0,0,51,53,5,11,0,0,52,48,
+  	1,0,0,0,52,49,1,0,0,0,52,50,1,0,0,0,53,11,1,0,0,0,54,55,5,12,0,0,55,56,
+  	5,23,0,0,56,57,5,13,0,0,57,58,5,23,0,0,58,59,5,5,0,0,59,13,1,0,0,0,60,
+  	69,5,14,0,0,61,66,5,23,0,0,62,63,5,13,0,0,63,65,5,23,0,0,64,62,1,0,0,
+  	0,65,68,1,0,0,0,66,64,1,0,0,0,66,67,1,0,0,0,67,70,1,0,0,0,68,66,1,0,0,
+  	0,69,61,1,0,0,0,69,70,1,0,0,0,70,72,1,0,0,0,71,73,5,13,0,0,72,71,1,0,
+  	0,0,72,73,1,0,0,0,73,74,1,0,0,0,74,75,5,15,0,0,75,15,1,0,0,0,76,77,7,
+  	2,0,0,77,17,1,0,0,0,5,40,52,66,69,72
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -180,15 +183,15 @@ fperfParser::ConContext* fperfParser::con() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(16);
-    interval();
-    setState(17);
-    match(fperfParser::T__0);
     setState(18);
-    lhs();
+    interval();
     setState(19);
-    comp_op();
+    match(fperfParser::T__0);
     setState(20);
+    lhs();
+    setState(21);
+    comp_op();
+    setState(22);
     rhs();
    
   }
@@ -213,6 +216,10 @@ fperfParser::MContext* fperfParser::LhsContext::m() {
 
 fperfParser::QContext* fperfParser::LhsContext::q() {
   return getRuleContext<fperfParser::QContext>(0);
+}
+
+fperfParser::MmContext* fperfParser::LhsContext::mm() {
+  return getRuleContext<fperfParser::MmContext>(0);
 }
 
 fperfParser::SetContext* fperfParser::LhsContext::set() {
@@ -244,34 +251,48 @@ fperfParser::LhsContext* fperfParser::lhs() {
     exitRule();
   });
   try {
-    setState(33);
+    setState(40);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case fperfParser::T__6:
       case fperfParser::T__7: {
         enterOuterAlt(_localctx, 1);
-        setState(22);
-        m();
-        setState(23);
-        match(fperfParser::T__1);
         setState(24);
-        q();
+        m();
         setState(25);
+        match(fperfParser::T__1);
+        setState(26);
+        q();
+        setState(27);
+        match(fperfParser::T__2);
+        break;
+      }
+
+      case fperfParser::T__8:
+      case fperfParser::T__9: {
+        enterOuterAlt(_localctx, 2);
+        setState(29);
+        mm();
+        setState(30);
+        match(fperfParser::T__1);
+        setState(31);
+        q();
+        setState(32);
         match(fperfParser::T__2);
         break;
       }
 
       case fperfParser::T__3: {
-        enterOuterAlt(_localctx, 2);
-        setState(27);
+        enterOuterAlt(_localctx, 3);
+        setState(34);
         match(fperfParser::T__3);
-        setState(28);
+        setState(35);
         set();
-        setState(29);
+        setState(36);
         match(fperfParser::T__4);
-        setState(30);
+        setState(37);
         m();
-        setState(31);
+        setState(38);
         match(fperfParser::T__5);
         break;
       }
@@ -323,11 +344,66 @@ fperfParser::MContext* fperfParser::m() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(35);
+    setState(42);
     _la = _input->LA(1);
     if (!(_la == fperfParser::T__6
 
     || _la == fperfParser::T__7)) {
+    _errHandler->recoverInline(this);
+    }
+    else {
+      _errHandler->reportMatch(this);
+      consume();
+    }
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- MmContext ------------------------------------------------------------------
+
+fperfParser::MmContext::MmContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+
+size_t fperfParser::MmContext::getRuleIndex() const {
+  return fperfParser::RuleMm;
+}
+
+
+std::any fperfParser::MmContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<fperfVisitor*>(visitor))
+    return parserVisitor->visitMm(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+fperfParser::MmContext* fperfParser::mm() {
+  MmContext *_localctx = _tracker.createInstance<MmContext>(_ctx, getState());
+  enterRule(_localctx, 6, fperfParser::RuleMm);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(44);
+    _la = _input->LA(1);
+    if (!(_la == fperfParser::T__8
+
+    || _la == fperfParser::T__9)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -370,7 +446,7 @@ std::any fperfParser::QContext::accept(tree::ParseTreeVisitor *visitor) {
 
 fperfParser::QContext* fperfParser::q() {
   QContext *_localctx = _tracker.createInstance<QContext>(_ctx, getState());
-  enterRule(_localctx, 6, fperfParser::RuleQ);
+  enterRule(_localctx, 8, fperfParser::RuleQ);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -381,7 +457,7 @@ fperfParser::QContext* fperfParser::q() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(37);
+    setState(46);
     match(fperfParser::INT);
    
   }
@@ -419,7 +495,7 @@ std::any fperfParser::RhsContext::accept(tree::ParseTreeVisitor *visitor) {
 
 fperfParser::RhsContext* fperfParser::rhs() {
   RhsContext *_localctx = _tracker.createInstance<RhsContext>(_ctx, getState());
-  enterRule(_localctx, 8, fperfParser::RuleRhs);
+  enterRule(_localctx, 10, fperfParser::RuleRhs);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -429,29 +505,29 @@ fperfParser::RhsContext* fperfParser::rhs() {
     exitRule();
   });
   try {
-    setState(43);
+    setState(52);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(39);
+      setState(48);
       match(fperfParser::INT);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(40);
-      match(fperfParser::T__8);
+      setState(49);
+      match(fperfParser::T__10);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(41);
+      setState(50);
       match(fperfParser::INT);
-      setState(42);
-      match(fperfParser::T__8);
+      setState(51);
+      match(fperfParser::T__10);
       break;
     }
 
@@ -498,7 +574,7 @@ std::any fperfParser::IntervalContext::accept(tree::ParseTreeVisitor *visitor) {
 
 fperfParser::IntervalContext* fperfParser::interval() {
   IntervalContext *_localctx = _tracker.createInstance<IntervalContext>(_ctx, getState());
-  enterRule(_localctx, 10, fperfParser::RuleInterval);
+  enterRule(_localctx, 12, fperfParser::RuleInterval);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -509,15 +585,15 @@ fperfParser::IntervalContext* fperfParser::interval() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(45);
-    match(fperfParser::T__9);
-    setState(46);
+    setState(54);
+    match(fperfParser::T__11);
+    setState(55);
     match(fperfParser::INT);
-    setState(47);
-    match(fperfParser::T__10);
-    setState(48);
+    setState(56);
+    match(fperfParser::T__12);
+    setState(57);
     match(fperfParser::INT);
-    setState(49);
+    setState(58);
     match(fperfParser::T__4);
    
   }
@@ -559,7 +635,7 @@ std::any fperfParser::SetContext::accept(tree::ParseTreeVisitor *visitor) {
 
 fperfParser::SetContext* fperfParser::set() {
   SetContext *_localctx = _tracker.createInstance<SetContext>(_ctx, getState());
-  enterRule(_localctx, 12, fperfParser::RuleSet);
+  enterRule(_localctx, 14, fperfParser::RuleSet);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -572,40 +648,40 @@ fperfParser::SetContext* fperfParser::set() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(51);
-    match(fperfParser::T__11);
     setState(60);
+    match(fperfParser::T__13);
+    setState(69);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == fperfParser::INT) {
-      setState(52);
+      setState(61);
       match(fperfParser::INT);
-      setState(57);
+      setState(66);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 2, _ctx);
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
-          setState(53);
-          match(fperfParser::T__10);
-          setState(54);
+          setState(62);
+          match(fperfParser::T__12);
+          setState(63);
           match(fperfParser::INT); 
         }
-        setState(59);
+        setState(68);
         _errHandler->sync(this);
         alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 2, _ctx);
       }
     }
-    setState(63);
+    setState(72);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == fperfParser::T__10) {
-      setState(62);
-      match(fperfParser::T__10);
+    if (_la == fperfParser::T__12) {
+      setState(71);
+      match(fperfParser::T__12);
     }
-    setState(65);
-    match(fperfParser::T__12);
+    setState(74);
+    match(fperfParser::T__14);
    
   }
   catch (RecognitionException &e) {
@@ -638,7 +714,7 @@ std::any fperfParser::Comp_opContext::accept(tree::ParseTreeVisitor *visitor) {
 
 fperfParser::Comp_opContext* fperfParser::comp_op() {
   Comp_opContext *_localctx = _tracker.createInstance<Comp_opContext>(_ctx, getState());
-  enterRule(_localctx, 14, fperfParser::RuleComp_op);
+  enterRule(_localctx, 16, fperfParser::RuleComp_op);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -650,10 +726,10 @@ fperfParser::Comp_opContext* fperfParser::comp_op() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(67);
+    setState(76);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1032192) != 0))) {
+      ((1ULL << _la) & 4128768) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {

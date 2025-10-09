@@ -1,5 +1,4 @@
 #include "rr_checker.hpp"
-#include <cmath>
 #include "lib.hpp"
 
 constexpr int PERIOD = 5;
@@ -82,7 +81,7 @@ expr turn_transition(context &ctx, const vector<expr> &cur_b, const expr &cur_s,
     return transition_expr;
 }
 
-expr RRChecker::bar(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
+vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
     assert(b.size() == num_bufs);
     assert(s.size() == num_bufs);
 
@@ -96,42 +95,7 @@ expr RRChecker::bar(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp
         e = e && implies(s[0] == i, sp[0] == x);
     }
 
-    return e;
-}
-
-vector<NamedExp> RRChecker::trs(const ev &b, const ev &s, const ev &bp, const ev &sp, int tp) {
-    return {bar(b, s, bp, sp, tp)};
-    assert(b.size() == num_bufs);
-    assert(s.size() == num_bufs);
-
-    const expr &state = sp[0];
-
-    expr next_turn = slv.ctx.bool_val(true);
-    for (int i = 0; i < num_bufs; ++i) {
-        expr not_until = slv.ctx.bool_val(true);
-        expr next_backlogged = slv.ctx.bool_val(true);
-        for (int j = 1; j < num_bufs; ++j) {
-            const int l = (i + j) % num_bufs;
-            next_backlogged = next_backlogged && implies((s[0] == i) && not_until && bp[l], state == l);
-            not_until = not_until && !bp[l];
-        }
-        next_backlogged = next_backlogged && implies(not_until, sp[0] == i);
-        next_turn = next_turn && implies(s[0] == i, next_backlogged);
-        // expr not_until = slv.ctx.bool_val(true);
-        // expr first_backlog = slv.ctx.bool_val(true);
-        // for (int l = 1; l <= num_bufs; ++l) {
-        // const int j = (i + l) % num_bufs;
-        // first_backlog = first_backlog && ite(not_until && bp[j], sp[j], !sp[j]);
-        // not_until = not_until && !bp[j];
-        // }
-        // next_turn = next_turn && implies(s[i], first_backlog);
-    }
-
-    expr max_deq = slv.ctx.bool_val(true);
-    // for (int i = 0; i < num_bufs; ++i) {
-    // max_deq = max_deq && implies(!s[i], implies(b[i], bp[i]));
-    // }
-    return {NamedExp(next_turn && max_deq)};
+    return {e};
 }
 
 vector<NamedExp> RRChecker::query() {
