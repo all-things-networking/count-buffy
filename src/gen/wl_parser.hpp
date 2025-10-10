@@ -15,15 +15,15 @@ class WorkloadParser {
 public:
     WorkloadParser(ev3 &I, SmtSolver &slv, int n, int m);
 
-    expr parse(string prefix, string wl_line);
+    vector<NamedExp> parse(string prefix, string wl_line);
 
     void parse(vector<string> wl);
 
     void parse_file();
 
 private:
-    int n;
-    int m;
+    int num_buffs;
+    int timesteps;
     ev3 I;
     SmtSolver &slv;
 };

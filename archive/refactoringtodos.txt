@@ -1,2 +1,0 @@
-- Redo the expirements with ceqn + aipg on in the fperf
-- Merge the leafspine with sts checker

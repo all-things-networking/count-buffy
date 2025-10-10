@@ -7,7 +7,40 @@
 #include "../lib.hpp"
 #include "constr_extractor.hpp"
 
+#include "../utils.hpp"
+#include "../leaf_utils.hpp"
+
 using namespace std;
+
+ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps): slv(slv), num_buffs(num_bufs),
+    timesteps(timesteps), I(I) {
+    IT = slv.ivv(num_bufs, timesteps, "Workload");
+    for (int i = 0; i < IT.size(); ++i) {
+        auto cenqs_i = get_cenqs_for_buff(IT[i]);
+        cenqs.push_back(cenqs_i);
+        auto aipgs_i = get_aipgs_for_buf(IT[i]);
+        aipgs.push_back(aipgs_i);
+    }
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     ev buf_ev;
+    //     for (int t = 0; t < timesteps; ++t) {
+    //         buf_ev.push_back(dst_val(I, slv, i, t, num_buffs));
+    //     }
+    //     dsts.push_back(buf_ev);
+    // }
+    //
+    // for (int i = 0; i < num_bufs; ++i) {
+    //     ev buf_ev;
+    //     for (int t = 0; t < timesteps; ++t) {
+    //         buf_ev.push_back(ecmp_val(I, slv, i, t, num_buffs));
+    //     }
+    //     ecmps.push_back(buf_ev);
+    // }
+    // constrs.emplace_back(uniq(I, slv, num_buffs, timesteps));
+    // constrs.emplace_back(same(I, slv, num_buffs, timesteps));
+    // DST = slv.ivv(n, m, "Dest");
+    // ECMP = slv.ivv(n, m, "Dest");
+}
 
 expr binop(const expr &left, const std::string &op, const expr &right) {
     if (op == "<")
@@ -25,17 +58,6 @@ expr binop(const expr &left, const std::string &op, const expr &right) {
     throw std::invalid_argument("Unknown comparison operator: " + op);
 }
 
-ConstrExtractor::ConstrExtractor(SmtSolver &slv, int n, int m): slv(slv) {
-    IT = slv.ivv(n, m, "Workload");
-    for (int i = 0; i < IT.size(); ++i) {
-        auto cenqs_i = get_cenqs_for_buff(IT[i]);
-        cenqs.push_back(cenqs_i);
-        auto aipgs_i = get_aipgs_for_buf(IT[i]);
-        aipgs.push_back(aipgs_i);
-    }
-    // DST = slv.ivv(n, m, "Dest");
-    // ECMP = slv.ivv(n, m, "Dest");
-}
 
 void ConstrExtractor::print(model m) const {
     cout << "IT:" << endl;
@@ -93,7 +115,8 @@ void ConstrExtractor::parse_cenq() {
         } else {
             e = binop(s, op, slv.ctx.int_val(rhs));
         }
-        constrs.push_back(e);
+        string constr_name = format("CENQ[{},{}] {} {}", join_vec(tmp_ids), t_index, op, rhs);
+        constrs.emplace_back(e, constr_name);
         // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
     }
 }
@@ -123,7 +146,9 @@ void ConstrExtractor::parse_dst() {
         assert(tmp_ids.size() == 1);
         assert(!rhs_linear);
         int buf_index = tmp_ids[0];
-        DST[buf_index][t_index] = rhs;
+        expr e = binop(dsts[buf_index][t_index], op, slv.ctx.int_val(rhs));
+        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
+                             format("DST[{}][{}] {} {}", t_index, buf_index, op, rhs));
     }
 }
 
@@ -134,8 +159,9 @@ void ConstrExtractor::parse_ecmp() {
         assert(tmp_ids.size() == 1);
         assert(!rhs_linear);
         int buf_index = tmp_ids[0];
-        ECMP[buf_index][t_index] = rhs;
-        // Need to store as expression
+        expr e = binop(ecmps[buf_index][t_index], op, slv.ctx.int_val(rhs));
+        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
+                             format("ECMP[{}][{}] {} {}", t_index, buf_index, op, rhs));
     }
 }
 

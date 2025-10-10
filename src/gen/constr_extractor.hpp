@@ -30,14 +30,17 @@ class ConstrExtractor : public fperfBaseVisitor {
     bool rhs_linear;
     ev2 cenqs;
     ev2 aipgs;
+    int num_buffs;
+    int timesteps;
 
 public:
-    vector<expr> constrs;
+    vector<NamedExp> constrs;
     ev2 IT;
-    map<int, map<int, int> > DST;
-    map<int, map<int, int> > ECMP;
+    ev3 I;
+    ev2 dsts;
+    ev2 ecmps;
 
-    ConstrExtractor(SmtSolver &slv, int n, int m);
+    ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps);
 
     void print(model m) const;
 

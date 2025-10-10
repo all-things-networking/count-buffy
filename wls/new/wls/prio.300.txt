@@ -1,0 +1,146 @@
+### - Time: 1097 Res: SAT
+[1, 6]: cenq(1, t) <= 0
+[1, 6]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[7, 7]: cenq(0, t) == 2t
+
+### - Time: 1194 Res: SAT
+[1, 1]: cenq(1, t) <= 0
+[1, 1]: cenq(3, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[2, 7]: cenq(0, t) == 2t
+
+### - Time: 1160 Res: SAT
+[1, 1]: cenq(1, t) <= 0
+[1, 1]: cenq(3, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[2, 7]: cenq(0, t) == 3t
+
+### - Time: 1248 Res: SAT
+[1, 1]: cenq(3, t) <= 0
+[1, 1]: cenq(1, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(2, t) == 3t
+
+### - Time: 1187 Res: SAT
+[1, 1]: cenq(1, t) <= 0
+[1, 1]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(2, t) == 3
+
+### - Time: 1106 Res: SAT
+[1, 1]: cenq(3, t) <= 0
+[1, 1]: cenq(1, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(2, t) == t
+
+### - Time: 1189 Res: SAT
+[1, 1]: cenq(3, t) <= 0
+[1, 1]: cenq(1, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(0, t) == t
+
+### - Time: 1163 Res: SAT
+[1, 1]: cenq(1, t) <= 0
+[1, 1]: cenq(3, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[2, 7]: cenq(0, t) == 4t
+
+### - Time: 1244 Res: SAT
+[1, 1]: cenq(3, t) <= 0
+[1, 1]: cenq(1, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(2, t) == 4t
+
+### - Time: 1150 Res: SAT
+[1, 1]: cenq(3, t) <= 0
+[1, 1]: cenq(1, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[2, 7]: cenq(2, t) == 4
+
+### - Time: 1103 Res: SAT
+[1, 7]: cenq(2, t) == 4
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+
+### - Time: 416 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[1, 6]: cenq(1, t) <= 0
+[1, 6]: cenq(3, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+[7, 7]: cenq(2, t) == 4
+
+### - Time: 419 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[1, 6]: cenq(3, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+[7, 7]: cenq(2, t) == 4
+
+### - Time: 1612 Res: SAT
+[1, 6]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[1, 7]: cenq(3, t) <= 0
+[7, 7]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+
+### - Time: 393 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[1, 7]: cenq(3, t) <= 0
+[1, 7]: cenq(1, t) <= 0
+[7, 7]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+
+### - Time: 495 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[1, 7]: cenq(1, t) <= 0
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+[7, 7]: cenq(2, t) == 4
+
+### - Time: 551 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[7, 7]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+
+### - Time: 1329 Res: SAT
+[1, 6]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+
+### - Time: 1173 Res: SAT
+[1, 6]: cenq(2, t) == 4
+[7, 7]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 3t
+
+### - Time: 1250 Res: SAT
+[1, 6]: SUM_[q in {1, 2, }] cenq(q ,t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+[7, 7]: cenq(2, t) == 4
+
+### - Time: 404 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {1, 2, }] cenq(q ,t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+
+### - Time: 1183 Res: SAT
+[1, 6]: SUM_[q in {2, 3, }] cenq(q ,t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+[7, 7]: SUM_[q in {1, 2, }] cenq(q ,t) == 4
+
+### - Time: 425 Res: UNSAT
+[1, 6]: cenq(2, t) == 4
+[7, 7]: SUM_[q in {1, 2, 3, }] cenq(q ,t) == 4
+[7, 7]: SUM_[q in {0, 2, }] cenq(q ,t) >= 4t
+

@@ -187,7 +187,7 @@ int main(const int argc, const char *argv[]) {
 
     // in_port, time, type -> count
     // map<tuple<int, int, int>, int> ins_l1 = {
-        // {{0, 0, 10}, 2},
+    // {{0, 0, 10}, 2},
     // };
     // auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
     // slv.add({constr_l1, "l1-inp"});
@@ -217,23 +217,26 @@ int main(const int argc, const char *argv[]) {
     auto base_s2 = s2->base_constrs();
     auto base_s2_merged = merge(base_s2, "base_s2");
 
+
+    add_workload(slv, I, num_spines, num_leafs, host_per_leaf, TIMESTEPS);
+
     slv.add(base_l1_merged);
     slv.add(base_l2_merged);
     slv.add(base_l3_merged);
     slv.add(base_s1_merged);
     slv.add(base_s2_merged);
-
-    add_workload(slv, I, num_spines, num_leafs, host_per_leaf, TIMESTEPS);
     //
     auto mod = slv.check_sat();
     //
-    l1->print(mod);
+    // l1->print(mod);
 
-    l2->print(mod);
+    // l2->print(mod);
 
-    l3->print(mod);
+    // l3->print(mod);
 
-    s1->print(mod);
+    // s1->print(mod);
 
-    s2->print(mod);
+    // s2->print(mod);
+
+    cout << str(I, mod).str() << endl;
 }

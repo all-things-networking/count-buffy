@@ -1,100 +1,28 @@
 #include <fstream>
-#include <iostream>
 
 #include"z3++.h"
 #include "src/classifier.hpp"
+#include "src/loom_sts_runner.hpp"
 #include "src/rr_checker.hpp"
 #include "src/merger.hpp"
+#include "src/params.hpp"
 #include "src/prio_sts.hpp"
-#include "src/utils.hpp"
-#include "src/gen/wl_parser.hpp"
 
 using namespace std;
 using namespace z3;
-
-constexpr int MAX_ENQ = 4;
-constexpr int MAX_DEQ = 1;
 
 const int TIME_STEPS = 10;
 const int RR_IN_BUFS = 2;
 const int PKT_TYPES = 3;
 
-vector<NamedExp> query(SmtSolver &slv, ev2 &out) {
-    vector<NamedExp> res;
-    ev s = out[0];
-    for (int i = 1; i < out.size(); ++i)
-        s = s + out[i];
-    return {{(s[1] + s[2] - s[0]) > 3, "Query"}};
-}
-
-vector<NamedExp> wl(const ev3 &ins) {
-    vector<NamedExp> res;
-    for (int i = 0; i < ins.size(); ++i) {
-        for (int t = 0; t < ins[i].size(); ++t) {
-            if (i == 1 || i == 4 || i == 7 || i == 10 || i == 9)
-                res.emplace_back(sum(ins[i], t) >= t + 1, format("sum(wl[{}][{}]) >= 1", i, t));
-            else
-                res.emplace_back(sum(ins[i], t) == 0, format("sum(wl[{}][{}]) == 0", i, t));
-        }
-    }
-    return res;
-}
-
-vector<NamedExp> base_wl(SmtSolver &slv, const ev3 &ins) {
-    vector<NamedExp> res;
-    for (int t = 0; t < ins[0].size(); ++t) {
-        for (int i = 0; i < ins.size(); ++i) {
-            for (int k = 0; k < ins[0][0].size(); ++k) {
-                if (i % 3 != k)
-                    res.emplace_back(ins[i][t][k] == 0, format("bse_wl: I[{}][{}][{}] == 0", i, t, k));
-            }
-        }
-    }
-    for (int t = 0; t < ins[0].size(); ++t) {
-        expr s0 = slv.ctx.int_val(0);
-        expr s1 = slv.ctx.int_val(0);
-        for (int i = 0; i < ins.size(); ++i) {
-            if (i % 3 == 0) {
-                s0 = s0 + sum(ins[i], t);
-            } else {
-                s1 = s1 + sum(ins[i], t);
-            }
-        }
-        // res.emplace_back(s0 >= t + 1, format("I[s0][{}] >= t", t));
-        res.emplace_back(s0 >= t + 1);
-        res.emplace_back(s1 >= t + 1, format("I[s1][{}] >= t", t));
-    }
-
-    return res;
-
-
-    // expr t1 = sum(ins[0][0]) + sum(ins[3][0]) + sum(ins[6][0]) + sum(ins[9][0]);
-    // expr t2 = sum(ins[1][0]) + sum(ins[4][0]) + sum(ins[7][0]) + sum(ins[10][0]);
-    // res.emplace_back(t1 >= 1, format("I[t1][{}] >= t", 0));
-    // res.emplace_back(t2 >= 1, format("I[t2][{}] >= t", 0));
-    // for (int t = 1; t < ins[0].size(); ++t) {
-    // t1 = t1 + sum(ins[0][t]) + sum(ins[3][t]) + sum(ins[6][t]) + sum(ins[9][t]);
-    // t2 = t2 + sum(ins[1][t]) + sum(ins[4][t]) + sum(ins[7][t]) + sum(ins[10][t]);
-    // res.emplace_back(t1 >= t + 1, format("I[t1][{}] >= t", t));
-    // res.emplace_back(t2 >= t + 1, format("I[t2][{}] >= t", t));
-    // }
-
-    // for (int t = 0; t < ins[0].size(); ++t) {
-    // for (int i = 0; i < ins.size(); ++i) {
-    // if (i % 3 == 2)
-    // res.emplace_back(sum(ins[i][t]) == 0, format("I[{}][{}] == 0", i, t));
-    // }
-    // }
-    return res;
-}
-
 class Composed {
+public:
     ev3 I;
+    ev2 O;
     STSChecker *rr1;
     STSChecker *rr2;
     STSChecker *rr3;
     STSChecker *rr4;
-    STSChecker *rrt;
     STSChecker *prio;
     STSChecker *merger;
     Classifier *classifier;
@@ -134,71 +62,14 @@ public:
         prio->I[0] = classifier->O[0];
         prio->I[1] = classifier->O[1];
         slv.add(merge(prio->base_constrs(), "prio_base"));
-    }
 
-    void run() {
-        auto bwl = base_wl(slv, I);
-        slv.add(bwl);
-        auto O = prio->O[0] + prio->O[1];
-        string wl_file = format("wls/loom.mem.{}.txt", buffer_size);
-        vector<vector<string> > wls = read_wl_file(wl_file);
-        string out_file_path = format("logs/loom.mem.{}.txt", buffer_size);
-        ofstream out(out_file_path, ios::out);
-        out << "scheduler,buf_size,wl_idx,time_millis,solver_res" << endl;
-        for (int i = 0; i < wls.size(); ++i) {
-            auto wl = wls[i];
-            slv.s.push();
-            WorkloadParser parser(I, slv, I.size(), I[0].size());
-            string res_stat = wl[0];
-            wl.erase(wl.begin());
-            parser.parse(wl);
-
-            slv.add(merge(query(slv, O), "not query").negate());
-            // slv.add(merge(query(slv, O), "query"));
-            auto start_t = chrono::high_resolution_clock::now();
-            if (res_stat == "SAT")
-                slv.check_sat();
-            else if (res_stat == "UNSAT")
-                slv.check_unsat();
-            slv.s.pop();
-            auto end_t = chrono::high_resolution_clock::now();
-            auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-            cout << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
-            out << "Loom[mem]," << buffer_size << "," << i << "," << duration.count() << "," << res_stat << endl;
-        }
-    }
-
-    void print(model m) {
-        cout << "I:" << endl << str(I, m).str() << endl;
-        vector rrs = {rr1, rr2, rr3, rr4};
-        for (int i = 0; i < rrs.size(); ++i) {
-            auto rr = rrs[i];
-            cout << "------------------------------------" << endl;
-            cout << "RR" << i << endl;
-            cout << str(rr->I, m).str() << endl;
-            cout << "*******" << endl;
-            cout << str(rr->O, m).str() << endl;
-            cout << "------------------------------------" << endl;
-        }
-        cout << "------------------------------------" << endl;
-        cout << "Merger:" << endl;
-        cout << "In:" << endl << str(merger->I, m).str() << endl;
-        cout << "Out:" << endl << str(merger->O, m).str() << endl;
-        cout << "------------------------------------" << endl;
-        cout << "Classifier:" << endl;
-        cout << "In:" << endl << str(classifier->I, m).str() << endl;
-        cout << "Out:" << endl << str(classifier->O, m).str() << endl;
-        cout << "------------------------------------" << endl;
-        cout << "Priority:" << endl;
-        cout << "In:" << endl << str(prio->I, m).str() << endl;
-        cout << "Out:" << endl << str(prio->O, m).str() << endl;
-        cout << "------------------------------------" << endl;
+        O = prio->O[0] + prio->O[1];
     }
 };
 
 int main(const int argc, const char *argv[]) {
-    int buffer_size = stoi(argv[1]);
-    int random_seed = stoi(argv[2]);
-    Composed c(buffer_size, random_seed);
-    c.run();
+    int buff_cap = stoi(argv[1]);
+    Composed c(buff_cap, 50000);
+    LoomStsRunner runner(c.slv, c.I, c.O, "loom_mem", buff_cap);
+    runner.run();
 }

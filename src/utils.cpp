@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -42,4 +43,13 @@ vector<vector<string> > read_wl_file(string file_path) {
     }
 
     return sections;
+}
+
+string join_vec(const vector<int> &v) {
+    ostringstream oss;
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i > 0) oss << ",";
+        oss << v[i];
+    }
+    return oss.str();
 }
