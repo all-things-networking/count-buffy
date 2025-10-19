@@ -18,10 +18,11 @@ class fperfVisitor;
 using namespace std;
 using namespace z3;
 using namespace antlr4;
+using namespace chrono;
 
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
-constexpr int TIME_STEPS = 5;
+constexpr int TIME_STEPS = 10;
 constexpr int NUM_PORTS = 3;
 constexpr int PKT_TYPES = 2;
 constexpr int BUFF_CAP = 10;
@@ -61,6 +62,15 @@ expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
         }
     }
     return e;
+}
+
+expr query(SmtSolver &slv, ev3 &O) {
+    expr s = slv.s.ctx().int_val(0);
+    int i = 1;
+    for (int t = 0; t < TIME_STEPS; ++t)
+        s = s + sum(O[i][t]);
+    expr q = s < 6;
+    return q;
 }
 
 int main(const int argc, const char *argv[]) {
@@ -122,22 +132,39 @@ int main(const int argc, const char *argv[]) {
     I.push_back(s1->get_in_port(0));
     I.push_back(s1->get_in_port(1));
 
+    ev3 O;
+    O.push_back(s3->get_out_port(0));
+    O.push_back(s3->get_out_port(1));
+
     map<int, int> pkt_type_to_dst = {{0, 2}, {1, 3}};
     map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}};
 
     map<int, vector<int> > dst_to_pkt_type;
-    for (auto &[pkt_type,dst]: pkt_type_to_dst) {
+    for (auto &[pkt_type,dst]: pkt_type_to_dst)
         dst_to_pkt_type[dst].push_back(pkt_type);
-    }
 
     map<int, vector<int> > ecmp_to_pkt_type;
-    for (auto &[pkt_type,ecmp]: pkt_type_to_ecmp) {
+    for (auto &[pkt_type,ecmp]: pkt_type_to_ecmp)
         ecmp_to_pkt_type[ecmp].push_back(pkt_type);
-    }
 
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
 
+
+    slv.s.push();
+    slv.add(NamedExp(query(slv, O), "query").negate());
+    auto start_t = high_resolution_clock::now();
+    slv.check_unsat();
+    auto end_t = high_resolution_clock::now();
+    auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
+    slv.s.pop();
+
+    slv.s.push();
+    slv.add({query(slv, O), "query"});
+
+    start_t = high_resolution_clock::now();
     auto mod = slv.check_sat();
+    end_t = high_resolution_clock::now();
+    auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
 
     cout << "DST" << endl;
     for (int i = 0; i < I.size(); ++i) {
@@ -148,6 +175,21 @@ int main(const int argc, const char *argv[]) {
         cout << endl;
     }
 
+    cout << "ECMP" << endl;
+    for (int i = 0; i < I.size(); ++i) {
+        for (int t = 0; t < I[0].size(); ++t) {
+            expr e = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
+            cout << mod.eval(e) << ", ";
+        }
+        cout << endl;
+    }
+
+    cout << "Input" << endl;
+    cout << str(I, mod).str() << endl << endl;
+
+    cout << "Output" << endl;
+    cout << str(O, mod).str() << endl << endl;
+
     cout << "S1" << endl << "##################################" << endl;
     s1->print(mod);
 
@@ -156,4 +198,8 @@ int main(const int argc, const char *argv[]) {
 
     cout << "S3" << endl << "##################################" << endl;
     s3->print(mod);
+
+    cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
+    cout << "SAT VTIME: " << sat_duration.count() << endl;
+    slv.s.pop();
 }

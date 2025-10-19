@@ -54,55 +54,14 @@ vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
         nes.push_back(constr.prefix(prefix));
 
     // CENQ
-    // for (int i = 0; i < I.size(); ++i) {
-    // for (int j = 0; j < timesteps; ++j) {
-    // wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
-    // }
-    // }
-    // nes.emplace_back(wl_expr, format("{}: IT = sum(I)", prefix));
-
-    // for (int i = 0; i < num_buffs; ++i) {
-    // for (int t = 0; t < timesteps; ++t) {
-    // int dst = visitor->DST[i][t];
-    // dst_val(i, t) == dst
-    // auto pkt_types = dst_to_pkt_type[dst];
-    // for (auto pt: pkt_types) {
-    //     if (ranges::find(pkt_types, pt) != pkt_types.end()) {
-    //         auto expr = I[i][j][pt] == 0;
-    //         constrs.emplace_back(expr, format("DST_{}_{}_{}_{}", i, j, dst, pt));
-    //     }
-    // }
-    // }
-    // }
+    for (int i = 0; i < I.size(); ++i) {
+        for (int j = 0; j < timesteps; ++j) {
+            wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
+        }
+    }
+    nes.emplace_back(wl_expr, format("{}: IT = sum(I)", prefix));
 
     return nes;
-
-    //
-    // if (DEBUG) {
-    //     slv.s.push();
-    //     slv.add({wl_expr, "WL"});
-    //     auto m = slv.check_sat();
-    //     slv.s.pop();
-    //     visitor->print(m);
-    // }
-    // return wl_expr;
-    // return wl_expr;
-
-    // for (int i = 0; i < num_buffs; ++i) {
-    //     for (int j = 0; j < timesteps; ++j) {
-    //         int ecmp = visitor->ECMP[i][j];
-    //         auto pkt_types = ecmp_to_pkt_type[ecmp];
-    //         for (auto pt: pkt_types) {
-    //             if (ranges::find(pkt_types, pt) != pkt_types.end()) {
-    //                 auto expr = I[i][j][pt] == 0;
-    //                 constrs.emplace_back(expr, format("ECMP_{}_{}_{}_{}", i, j, ecmp, pt));
-    //             }
-    //         }
-    //     }
-    // }
-
-    // wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
-    // return wl_expr;
 }
 
 void LeafWorkloadParser::parse(vector<string> wl) {

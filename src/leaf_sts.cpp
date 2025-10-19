@@ -719,8 +719,8 @@ vector<NamedExp> LeafSts::winds(int i) {
     nes.emplace_back(wnd_out_i[0] == Oi[0]);
     nes.emplace_back(wnd_enq_nxt_i[0] == 0);
     for (int j = 1; j < timesteps; ++j) {
-        const auto& se = tmp_wnd_enq_i[j];
-        const auto& sn = tmp_wnd_enq_nxt_i[j];
+        const auto &se = tmp_wnd_enq_i[j];
+        const auto &sn = tmp_wnd_enq_nxt_i[j];
         nes.emplace_back(wnd_enq_i[j - 1] + Ei[j] == se + sn);
 
         auto to = wnd_out_i[j - 1] + Oi[j];

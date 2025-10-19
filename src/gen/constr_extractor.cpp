@@ -39,9 +39,6 @@ ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps, map<int,
         ecmps.push_back(buf_ev);
     }
     num_buffs = IT.size();
-    // constrs.emplace_back(same(I, slv, num_buffs, timesteps));
-    // DST = slv.ivv(n, m, "Dest");
-    // ECMP = slv.ivv(n, m, "Dest");
 }
 
 expr binop(const expr &left, const std::string &op, const expr &right) {
