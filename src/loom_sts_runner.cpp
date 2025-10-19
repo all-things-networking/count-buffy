@@ -59,7 +59,7 @@ void LoomStsRunner::run() {
     for (int i = 0; i < wls.size(); ++i) {
         auto wl = wls[i];
         slv.s.push();
-        WorkloadParser parser(I, slv, I.size(), I[0].size());
+        WorkloadParser parser(I, slv, I[0].size());
         string res_stat = wl[0];
         wl.erase(wl.begin());
         parser.parse(wl);

@@ -32,6 +32,8 @@ class ConstrExtractor : public fperfBaseVisitor {
     ev2 aipgs;
     int num_buffs;
     int timesteps;
+    map<int, vector<int> > dst_to_pkt_type;
+    map<int, vector<int> > ecmp_to_pkt_type;
 
 public:
     vector<NamedExp> constrs;
@@ -40,7 +42,9 @@ public:
     ev2 dsts;
     ev2 ecmps;
 
-    ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps);
+    ConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps,
+                    map<int, vector<int> > dst_to_pkt_type,
+                    map<int, vector<int> > ecmp_to_pkt_type);
 
     void print(model m) const;
 

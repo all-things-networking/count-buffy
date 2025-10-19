@@ -13,16 +13,13 @@ class LeafWorkloadParser {
 public:
     SmtSolver &slv;
     int timesteps;
-    int num_buffs;
-    int num_spines;
-    int num_leafs;
-    int host_per_leaf;
     map<int, vector<int> > dst_to_pkt_type;
     map<int, vector<int> > ecmp_to_pkt_type;
     vector<int> all_pkt_types;
     ev3 I;
 
-    LeafWorkloadParser(SmtSolver &slv, ev3 &I, int num_spines, int num_leafs, int host_per_leaf, int timesteps);
+    LeafWorkloadParser(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
+                       map<int, int> pkt_type_to_ecmp);
 
     vector<NamedExp> parse(string prefix, string wl_line);
 

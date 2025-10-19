@@ -9,6 +9,8 @@
 
 class DemuxSwitch : public LeafSts {
 public:
+    void add_some_constraint(SmtSolver &slv, const string &var_prefix, int pkt_types, vector<int> pkt_type_to_nxt_hop);
+
     DemuxSwitch(SmtSolver &slv,
                 const string &var_prefix,
                 vector<tuple<int, int> > port_list,

@@ -12,31 +12,33 @@
 
 using namespace std;
 
-ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps): slv(slv), num_buffs(num_bufs),
-    timesteps(timesteps), I(I) {
-    IT = slv.ivv(num_bufs, timesteps, "Workload");
+ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps, map<int, vector<int> > dst_to_pkt_type,
+                                 map<int, vector<int> > ecmp_to_pkt_type): slv(slv), timesteps(timesteps), I(I),
+                                                                           dst_to_pkt_type(dst_to_pkt_type),
+                                                                           ecmp_to_pkt_type(ecmp_to_pkt_type) {
+    IT = slv.ivv(I.size(), timesteps, "Workload");
     for (int i = 0; i < IT.size(); ++i) {
         auto cenqs_i = get_cenqs_for_buff(IT[i]);
         cenqs.push_back(cenqs_i);
         auto aipgs_i = get_aipgs_for_buf(IT[i]);
         aipgs.push_back(aipgs_i);
     }
-    // for (int i = 0; i < num_bufs; ++i) {
-    //     ev buf_ev;
-    //     for (int t = 0; t < timesteps; ++t) {
-    //         buf_ev.push_back(dst_val(I, slv, i, t, num_buffs));
-    //     }
-    //     dsts.push_back(buf_ev);
-    // }
-    //
-    // for (int i = 0; i < num_bufs; ++i) {
-    //     ev buf_ev;
-    //     for (int t = 0; t < timesteps; ++t) {
-    //         buf_ev.push_back(ecmp_val(I, slv, i, t, num_buffs));
-    //     }
-    //     ecmps.push_back(buf_ev);
-    // }
-    // constrs.emplace_back(uniq(I, slv, num_buffs, timesteps));
+    for (int i = 0; i < I.size(); ++i) {
+        ev buf_ev;
+        for (int t = 0; t < timesteps; ++t) {
+            buf_ev.push_back(dst_val(I, slv, dst_to_pkt_type, i, t));
+        }
+        dsts.push_back(buf_ev);
+    }
+
+    for (int i = 0; i < I.size(); ++i) {
+        ev buf_ev;
+        for (int t = 0; t < timesteps; ++t) {
+            buf_ev.push_back(ecmp_val(I, slv, ecmp_to_pkt_type, i, t));
+        }
+        ecmps.push_back(buf_ev);
+    }
+    num_buffs = IT.size();
     // constrs.emplace_back(same(I, slv, num_buffs, timesteps));
     // DST = slv.ivv(n, m, "Dest");
     // ECMP = slv.ivv(n, m, "Dest");
@@ -146,9 +148,10 @@ void ConstrExtractor::parse_dst() {
         assert(tmp_ids.size() == 1);
         assert(!rhs_linear);
         int buf_index = tmp_ids[0];
-        expr e = binop(dsts[buf_index][t_index], op, slv.ctx.int_val(rhs));
-        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
-                             format("DST[{}][{}] {} {}", t_index, buf_index, op, rhs));
+        expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
+        expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
+        constrs.emplace_back(valid_meta(I, slv, buf_index, t_index), format("DST[{}][{}] valid", buf_index, t_index));
+        constrs.emplace_back(e, format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs));
     }
 }
 
@@ -159,9 +162,10 @@ void ConstrExtractor::parse_ecmp() {
         assert(tmp_ids.size() == 1);
         assert(!rhs_linear);
         int buf_index = tmp_ids[0];
-        expr e = binop(ecmps[buf_index][t_index], op, slv.ctx.int_val(rhs));
+        expr ecmp_value = ecmp_val(I, slv, ecmp_to_pkt_type, buf_index, t_index);
+        expr e = binop(ecmp_value, op, slv.ctx.int_val(rhs));
         constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
-                             format("ECMP[{}][{}] {} {}", t_index, buf_index, op, rhs));
+                             format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
     }
 }
 

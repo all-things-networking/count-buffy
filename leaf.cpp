@@ -103,140 +103,16 @@ int main(const int argc, const char *argv[]) {
     I.push_back(l1->get_in_port(0));
     I.push_back(l1->get_in_port(1));
 
-    LeafSts *l2;
-    vector<tuple<int, int> > l2_ports = {
-        {0, 1},
-        {0, 2},
-        {0, 3},
-        {1, 0},
-        {1, 2},
-        {1, 3},
-        {2, 0},
-        {2, 1},
-        {3, 0},
-        {3, 1}
-    };
-    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
-    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         l2_pkt_type_to_nxt_hop
-    );
-    I.push_back(l2->get_in_port(0));
-    I.push_back(l2->get_in_port(1));
-
-    LeafSts *l3;
-    vector<tuple<int, int> > l3_ports = {
-        {0, 1},
-        {0, 2},
-        {0, 3},
-        {1, 0},
-        {1, 2},
-        {1, 3},
-        {2, 0},
-        {2, 1},
-        {3, 0},
-        {3, 1}
-    };
-    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
-    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         l3_pkt_type_to_nxt_hop
-    );
-    I.push_back(l3->get_in_port(0));
-    I.push_back(l3->get_in_port(1));
-
-    LeafSts *s1;
-    vector<tuple<int, int> > s1_ports = {
-        {0, 1},
-        {0, 2},
-        {1, 0},
-        {1, 2},
-        {2, 0},
-        {2, 1}
-    };
-    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s1_pkt_type_to_nxt_hop
-    );
-
-    LeafSts *s2;
-    vector<tuple<int, int> > s2_ports = {
-        {0, 1},
-        {0, 2},
-        {1, 0},
-        {1, 2},
-        {2, 0},
-        {2, 1}
-    };
-    vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIMESTEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s2_pkt_type_to_nxt_hop
-    );
-
-    slv.add(link_ports(l1->get_out_port(2), s1->get_in_port(0)), "l1-s1");
-    slv.add(link_ports(l2->get_out_port(2), s1->get_in_port(1)), "l2-s1");
-    slv.add(link_ports(l3->get_out_port(2), s1->get_in_port(2)), "l3-s1");
-    slv.add(link_ports(s1->get_out_port(0), l1->get_in_port(2)), "s1-l1");
-    slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "s1-l2");
-    slv.add(link_ports(s1->get_out_port(2), l3->get_in_port(2)), "s1-l3");
-
-    slv.add(link_ports(l1->get_out_port(3), s2->get_in_port(0)), "l1-s2");
-    slv.add(link_ports(l2->get_out_port(3), s2->get_in_port(1)), "l2-s2");
-    slv.add(link_ports(l3->get_out_port(3), s2->get_in_port(2)), "l3-s2");
-    slv.add(link_ports(s2->get_out_port(0), l1->get_in_port(3)), "s2-l1");
-    slv.add(link_ports(s2->get_out_port(1), l2->get_in_port(3)), "s2-l2");
-    slv.add(link_ports(s2->get_out_port(2), l3->get_in_port(3)), "s2-l3");
-
-    // in_port, time, type -> count
-    // map<tuple<int, int, int>, int> ins_l1 = {
-    // {{0, 0, 10}, 2},
-    // };
-    // auto constr_l1 = add_constr(l1, ins_l1, {0, 1});
-    // slv.add({constr_l1, "l1-inp"});
-
-    // map<tuple<int, int, int>, int> ins_l2 = {
-    // };
-    // auto constr_l2 = add_constr(l2, ins_l2, {0, 1});
-    // slv.add({constr_l2, "l2-inp"});
-
-    // map<tuple<int, int, int>, int> ins_l3 = {
-    // };
-    // auto constr_l3 = add_constr(l3, ins_l3, {0, 1});
-    // slv.add({constr_l3, "l3-inp"});
 
     auto base_l1 = l1->base_constrs();
     auto base_l1_merged = merge(base_l1, "base_l1");
 
-    auto base_l2 = l2->base_constrs();
-    auto base_l2_merged = merge(base_l2, "base_l2");
-
-    auto base_l3 = l3->base_constrs();
-    auto base_l3_merged = merge(base_l3, "base_l3");
-
-    auto base_s1 = s1->base_constrs();
-    auto base_s1_merged = merge(base_s1, "base_s1");
-
-    auto base_s2 = s2->base_constrs();
-    auto base_s2_merged = merge(base_s2, "base_s2");
-
-
-    add_workload(slv, I, num_spines, num_leafs, host_per_leaf, TIMESTEPS);
+    // add_workload(slv, I, num_spines, num_leafs, host_per_leaf, TIMESTEPS);
 
     slv.add(base_l1_merged);
-    slv.add(base_l2_merged);
-    slv.add(base_l3_merged);
-    slv.add(base_s1_merged);
-    slv.add(base_s2_merged);
-    //
+
     auto mod = slv.check_sat();
-    //
     // l1->print(mod);
-
-    // l2->print(mod);
-
-    // l3->print(mod);
-
-    // s1->print(mod);
-
-    // s2->print(mod);
 
     cout << str(I, mod).str() << endl;
 }

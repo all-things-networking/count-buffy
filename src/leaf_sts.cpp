@@ -1,10 +1,13 @@
 #include "leaf_sts.hpp"
 
 #include <map>
+#include <ranges>
 
 #include "Buff.hpp"
 #include "prio_sts.hpp"
 #include <set>
+
+using namespace views;
 
 const int MAX_I = 10;
 
@@ -82,10 +85,8 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
 ): slv(slv), var_prefix(move(var_prefix)),
    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
    max_deq(max_deq) {
-    set<int> dsts;
-    set<int> srcs;
-    vector<Buff *> bar;
-    // tmp = slv.iv(time_steps, "TMP");
+    // set<int> dsts;
+    // set<int> srcs;
 
     for (auto src_dst: port_list) {
         int src = get<0>(src_dst);
@@ -93,8 +94,8 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
         Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
                               pkt_types, max_enq, max_deq, buff_cap, src, dst);
         buffs[{src, dst}] = buff;
-        dsts.insert(dst);
-        srcs.insert(src);
+        // dsts.insert(dst);
+        // srcs.insert(src);
     }
 
     // for (int dst: dsts) {
@@ -108,10 +109,10 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
 }
 
 vector<Buff *> LeafSts::get_buff_list() const {
-    std::vector<Buff *> result;
-    for (const auto &[key, buffPtr]: buffs) {
+    vector<Buff *> result;
+    result.reserve(buffs.size());
+    for (const auto buffPtr: values(buffs))
         result.push_back(buffPtr);
-    }
     return result;
 }
 
@@ -525,6 +526,7 @@ void LeafSts::print(model mod) {
         cout << str(buf->I, mod, ",").str() << endl;
         cout << "OUT:" << endl;
         cout << str(buf->O, mod, ",").str() << endl;
+        cout << "DST" << endl;
         // cout << "BL :" << endl;
         // cout << str(buf->B, mod).str() << endl;
         // cout << "DST Turn SRC =  " << src << endl << str(dst_turn_for_src[src], mod).str() << endl;
@@ -645,13 +647,13 @@ vector<NamedExp> LeafSts::bl_size(const int i) const {
     return {merge(res, format("BL Size[{}]", i))};
 }
 
-std::vector<NamedExp> LeafSts::enqs(const int i) const {
+vector<NamedExp> LeafSts::enqs(const int i) const {
     const auto Ei = get_buff_list()[i]->E;
     const auto Bi = get_buff_list()[i]->B;
     const auto Ci = get_buff_list()[i]->C;
     const auto Oi = get_buff_list()[i]->O;
 
-    std::vector<NamedExp> res;
+    vector<NamedExp> res;
 
     // [9]
     expr e0 = (Ei[0] <= buff_cap) && (Bi[0] == (Ei[0] > 0));
@@ -667,44 +669,37 @@ std::vector<NamedExp> LeafSts::enqs(const int i) const {
     // return res;
 }
 
-std::vector<NamedExp> LeafSts::drops(int i) {
+vector<NamedExp> LeafSts::drops(int i) {
     const auto Di = get_buff_list()[i]->D;
     const auto Ei = get_buff_list()[i]->E;
     const auto Bi = get_buff_list()[i]->B;
     const auto Ci = get_buff_list()[i]->C;
 
-    std::vector<NamedExp> res;
+    vector<NamedExp> res;
 
-    // [11]
     expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == buff_cap), Di[0] == 0);
     res.emplace_back(d0);
 
-    // timesteps 1..m-1
     for (int j = 1; j < timesteps; ++j) {
-        // [12]
         expr dj = ite(Bi[j],
                       implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == buff_cap),
                       Di[j] == 0);
         res.emplace_back(dj);
     }
     return {merge(res, format("Drops[{}]", i))};
-    // return res;
 }
 
-std::vector<NamedExp> LeafSts::enq_deq_sum(int i) {
+vector<NamedExp> LeafSts::enq_deq_sum(int i) {
     const auto Ii = get_buff_list()[i]->I;
     const auto Di = get_buff_list()[i]->D;
     const auto Ei = get_buff_list()[i]->E;
 
-    std::vector<NamedExp> res;
+    vector<NamedExp> res;
 
-    // timestep 0
     res.emplace_back(Ii[0] == (Ei[0] + Di[0]));
 
-    // timesteps 1..m-1
     for (int j = 1; j < timesteps; ++j) {
         expr ij = (Ii[j] == (Ei[j] + Di[j]));
-        // [13]
         res.emplace_back(ij);
     }
     return {merge(res, format("EnqDropSum[{}]", i))};
@@ -720,13 +715,12 @@ vector<NamedExp> LeafSts::winds(int i) {
     const auto tmp_wnd_enq_nxt_i = get_buff_list()[i]->tmp_wnd_enq_nxt;
 
     vector<NamedExp> nes;
-    // [14]
     nes.emplace_back(wnd_enq_i[0] == Ei[0]);
     nes.emplace_back(wnd_out_i[0] == Oi[0]);
     nes.emplace_back(wnd_enq_nxt_i[0] == 0);
     for (int j = 1; j < timesteps; ++j) {
-        auto se = tmp_wnd_enq_i[j];
-        auto sn = tmp_wnd_enq_nxt_i[j];
+        const auto& se = tmp_wnd_enq_i[j];
+        const auto& sn = tmp_wnd_enq_nxt_i[j];
         nes.emplace_back(wnd_enq_i[j - 1] + Ei[j] == se + sn);
 
         auto to = wnd_out_i[j - 1] + Oi[j];
@@ -759,9 +753,8 @@ vector<NamedExp> LeafSts::trs() {
     extend(res, nes);
     for (int i = 0; i < timesteps - 1; ++i) {
         nes = trs(i);
-        if (nes.size() > 0)
+        if (!nes.empty())
             res.push_back(merge(nes, format("Trs({},{})", i, i + 1)));
-        // extend(res, nes, format("Trs({},{})", i, i + 1));
     }
     return res;
 }
@@ -772,6 +765,5 @@ vector<NamedExp> LeafSts::out() {
         auto nes = out(j);
         extend(res, nes, format("@{}", j));
     }
-    // return res;
     return {merge(res, "out")};
 }

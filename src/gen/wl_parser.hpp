@@ -13,7 +13,7 @@ using namespace std;
 
 class WorkloadParser {
 public:
-    WorkloadParser(ev3 &I, SmtSolver &slv, int n, int m);
+    WorkloadParser(ev3 &I, SmtSolver &slv, int timesteps);
 
     vector<NamedExp> parse(string prefix, string wl_line);
 

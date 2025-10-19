@@ -15,27 +15,29 @@ using namespace antlr4;
 
 #define DEBUG false
 
-LeafWorkloadParser::LeafWorkloadParser(SmtSolver &slv, ev3 &I, int num_spines, int num_leafs, int host_per_leaf,
-                                       int timesteps): slv(slv),
-                                                       timesteps(timesteps),
-                                                       num_spines(num_spines),
-                                                       num_leafs(num_leafs),
-                                                       host_per_leaf(host_per_leaf),
-                                                       I(I) {
-    this->num_buffs = num_leafs * host_per_leaf;
-    int host_per_spine = host_per_leaf * num_leafs;
-    for (int i = 0; i < num_spines; ++i) {
-        for (int j = 0; j < num_leafs; ++j) {
-            for (int k = 0; k < host_per_leaf; ++k) {
-                int buf_idx = j * host_per_leaf + k;
-                int pkt_type = i * host_per_spine + buf_idx;
-                // cout << i << " " << j << " " << k << " " << pkt_type << endl;
-                ecmp_to_pkt_type[i].push_back(pkt_type);
-                dst_to_pkt_type[buf_idx].push_back(pkt_type);
-                all_pkt_types.push_back(pkt_type);
-            }
-        }
+LeafWorkloadParser::LeafWorkloadParser(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
+                                       map<int, int> pkt_type_to_ecmp): slv(slv),
+                                                                        timesteps(timesteps),
+                                                                        I(I) {
+    for (auto &[pkt_type,dst]: pkt_type_to_dst) {
+        dst_to_pkt_type[dst].push_back(pkt_type);
     }
+
+    for (auto &[pkt_type,ecmp]: pkt_type_to_ecmp) {
+        ecmp_to_pkt_type[ecmp].push_back(pkt_type);
+    }
+    // for (int i = 0; i < num_spines; ++i) {
+    //     for (int j = 0; j < num_leafs; ++j) {
+    //         for (int k = 0; k < host_per_leaf; ++k) {
+    //             int buf_idx = j * host_per_leaf + k;
+    //             int pkt_type = i * host_per_spine + buf_idx;
+    //             // cout << i << " " << j << " " << k << " " << pkt_type << endl;
+    //             ecmp_to_pkt_type[i].push_back(pkt_type);
+    //             dst_to_pkt_type[buf_idx].push_back(pkt_type);
+    //             all_pkt_types.push_back(pkt_type);
+    //         }
+    //     }
+    // }
 }
 
 vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
@@ -45,19 +47,19 @@ vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
     CommonTokenStream tokens(&lexer);
     fperfParser parser(&tokens);
     auto tree = parser.con();
-    ConstrExtractor *visitor = new ConstrExtractor(slv, I, num_buffs, timesteps);
+    ConstrExtractor *visitor = new ConstrExtractor(slv, I, timesteps, dst_to_pkt_type, ecmp_to_pkt_type);
     visitor->visit(tree);
     vector<NamedExp> nes;
     for (auto &constr: visitor->constrs)
         nes.push_back(constr.prefix(prefix));
 
     // CENQ
-    for (int i = 0; i < num_buffs; ++i) {
-        for (int j = 0; j < timesteps; ++j) {
-            wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
-        }
-    }
-    nes.emplace_back(wl_expr, format("{}: IT = sum(I)", prefix));
+    // for (int i = 0; i < I.size(); ++i) {
+    // for (int j = 0; j < timesteps; ++j) {
+    // wl_expr = wl_expr && (sum(I[i][j]) == visitor->IT[i][j]);
+    // }
+    // }
+    // nes.emplace_back(wl_expr, format("{}: IT = sum(I)", prefix));
 
     // for (int i = 0; i < num_buffs; ++i) {
     // for (int t = 0; t < timesteps; ++t) {
@@ -111,8 +113,9 @@ void LeafWorkloadParser::parse(vector<string> wl) {
         auto nes = parse(prefix, line);
         slv.add(nes);
     }
-    slv.add(uniq(I, slv, num_buffs, timesteps));
-    slv.add(same(I, slv, num_buffs, timesteps));
+    int num_buffs = I.size();
+    slv.add(uniq(I, slv, dst_to_pkt_type, num_buffs, timesteps));
+    slv.add(same(I, slv, dst_to_pkt_type, num_buffs, timesteps));
 }
 
 expr LeafWorkloadParser::base_wl() {

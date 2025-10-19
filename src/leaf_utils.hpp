@@ -3,18 +3,21 @@
 //
 
 
+#include <map>
+
 #include "smt_solver.hpp"
 using namespace std;
 
-void add_workload(SmtSolver &slv, ev3& I, int num_spines, int leaf_per_spine, int host_per_leaf, int timesteps);
+void add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst, map<int, int> pkt_type_to_ecmp);
 
 expr valid_meta(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx);
 
-expr dst_val(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx, int num_buffs);
+expr dst_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int buf_idx, int time_idx);
 
-expr ecmp_val(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx, int num_buffs);
+expr ecmp_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > ecmp_to_pkt_type, int buf_idx, int time_idx);
 
-expr uniq(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps);
+expr uniq(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps);
 
-expr same(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps);
+expr same(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps);
+
 // void add_workload(Am);

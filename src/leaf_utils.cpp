@@ -13,14 +13,15 @@
 
 using namespace std;
 
-void add_workload(SmtSolver &slv, ev3 &I, int num_spines, int num_leafs, int host_per_leaf, int timesteps) {
-    string wl_file_path = format("./wls/leaf.10.txt");
+void add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
+                  map<int, int> pkt_type_to_ecmp) {
+    string wl_file_path = format("./leaf.txt");
     vector<vector<string> > wls = read_wl_file(wl_file_path);
     int i = 0;
     auto wl = wls[i];
     string res_stat = wl[0];
     cout << "WL: " << i + 1 << "/" << wls.size() << " " << res_stat << endl;
-    LeafWorkloadParser parser(slv, I, num_spines, num_leafs, host_per_leaf, timesteps);
+    LeafWorkloadParser parser(slv, I, timesteps, pkt_type_to_dst, pkt_type_to_ecmp);
     wl.erase(wl.begin());
     parser.parse(wl);
 }
@@ -28,29 +29,49 @@ void add_workload(SmtSolver &slv, ev3 &I, int num_spines, int num_leafs, int hos
 
 expr valid_meta(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx) {
     ev buf = I[buf_idx][time_idx];
+    int pkt_types = buf.size();
+    // All empty
     expr e = slv.ctx.bool_val(true);
-    for (int i = 0; i < buf.size(); ++i)
-        e = e || buf[i] == sum(buf);
+    for (int j = 0; j < pkt_types; ++j) {
+        e = e && (buf[j] == 0);
+    }
+    for (int i = 0; i < pkt_types; ++i) {
+        expr others_empty = slv.ctx.bool_val(true);
+        for (int j = 0; j < pkt_types; ++j) {
+            if (i == j)
+                continue;
+            others_empty = others_empty && (buf[j] == 0);
+        }
+        e = ite(buf[i] > 0, others_empty, e);
+    }
     return e;
 }
 
-expr dst_val(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx, int num_buffs) {
+expr dst_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int buf_idx, int time_idx) {
     ev buf = I[buf_idx][time_idx];
     expr e = slv.ctx.int_val(-1);
-    for (int i = 0; i < buf.size(); ++i)
-        e = ite(buf[i] > 0, slv.ctx.int_val(i % num_buffs), e);
+    for (auto &[d, dst_pkt_types]: dst_to_pkt_type) {
+        expr dst_is_d = slv.ctx.bool_val(false);
+        for (int k: dst_pkt_types)
+            dst_is_d = dst_is_d || buf[k] > 0;
+        e = ite(dst_is_d, slv.ctx.int_val(d), e);
+    }
     return e;
 }
 
-expr ecmp_val(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx, int num_buffs) {
+expr ecmp_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > ecmp_to_pkt_type, int buf_idx, int time_idx) {
     ev buf = I[buf_idx][time_idx];
     expr e = slv.ctx.int_val(-1);
-    for (int i = 0; i < buf.size(); ++i)
-        e = ite(buf[i] > 0, slv.ctx.int_val(i / num_buffs), e);
+    for (auto &[d, ecmp_pkt_types]: ecmp_to_pkt_type) {
+        expr dst_is_d = slv.ctx.bool_val(false);
+        for (int k: ecmp_pkt_types)
+            dst_is_d = dst_is_d || k > 0;
+        e = ite(dst_is_d, slv.ctx.int_val(d), e);
+    }
     return e;
 }
 
-expr uniq(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) {
+expr uniq(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps) {
     expr res = slv.ctx.bool_val(true);
     for (int t = 0; t < timesteps; ++t) {
         for (int i = 0; i < num_buffs; ++i) {
@@ -59,8 +80,11 @@ expr uniq(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) {
                     continue;
                 expr valid_i = valid_meta(I, slv, i, t);
                 expr valid_j = valid_meta(I, slv, j, t);
-                expr e = implies(valid_i && valid_j,
-                                 dst_val(I, slv, i, t, num_buffs) != dst_val(I, slv, i, j, num_buffs));
+                // expr e = implies(valid_i && valid_j,
+                //                  dst_val(I, slv, dst_to_pkt_type, i, t) !=
+                //                  dst_val(I, slv, dst_to_pkt_type, j, t));
+                expr e = (dst_val(I, slv, dst_to_pkt_type, i, t) !=
+                          dst_val(I, slv, dst_to_pkt_type, j, t));
                 res = res && e;
             }
         }
@@ -68,13 +92,13 @@ expr uniq(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) {
     return res;
 }
 
-expr same(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) {
+expr same(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps) {
     expr res = slv.ctx.bool_val(true);
     for (int i = 0; i < num_buffs; ++i) {
-        expr init_val = dst_val(I, slv, i, 0, num_buffs);
+        expr init_val = dst_val(I, slv, dst_to_pkt_type, i, 0);
         res = res && valid_meta(I, slv, i, 0);
         for (int t = 1; t < timesteps; ++t) {
-            res = res && ((init_val == dst_val(I, slv, i, t, num_buffs)) && valid_meta(I, slv, i, t));
+            res = res && ((init_val == dst_val(I, slv, dst_to_pkt_type, i, t)) && valid_meta(I, slv, i, t));
         }
     }
     return res;

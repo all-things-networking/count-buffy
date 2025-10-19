@@ -4,12 +4,8 @@
 
 #include "DemuxSwitch.hpp"
 
-DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list, int time_steps,
-                         int pkt_types, int buf_cap, int max_enq, int max_deq,
-                         vector<int> pkt_type_to_nxt_hop): LeafSts(
-                                                               slv, var_prefix, port_list, time_steps, pkt_types,
-                                                               buf_cap, max_enq, max_deq),
-                                                           pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
+void DemuxSwitch::add_some_constraint(SmtSolver &slv, const string &var_prefix, int pkt_types,
+                                      vector<int> pkt_type_to_nxt_hop) {
     for (int src: get_in_ports()) {
         auto dst_buffs = get_dst_map(src);
         for (const auto &[dst, buff]: dst_buffs) {
@@ -19,12 +15,20 @@ DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<
                     if (dst != nxt_hop_dst_port) {
                         string constr_name = format("{}_[{}->{}@{}#{}] == 0", var_prefix, src, dst, t, k);
                         slv.add(buff->I[t][k] == 0, constr_name);
-                        // cout << constr_name << endl;
                     }
                 }
             }
         }
     }
+}
+
+DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list, int time_steps,
+                         int pkt_types, int buf_cap, int max_enq, int max_deq,
+                         vector<int> pkt_type_to_nxt_hop): LeafSts(
+                                                               slv, var_prefix, port_list, time_steps, pkt_types,
+                                                               buf_cap, max_enq, max_deq),
+                                                           pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
+    add_some_constraint(slv, var_prefix, pkt_types, pkt_type_to_nxt_hop);
 }
 
 map<int, Buff *> DemuxSwitch::get_dst_map(int src) {

@@ -15,8 +15,8 @@
 using namespace antlr4;
 
 
-WorkloadParser::WorkloadParser(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) : I(I), slv(slv),
-    num_buffs(num_buffs), timesteps(timesteps) {
+WorkloadParser::WorkloadParser(ev3 &I, SmtSolver &slv, int timesteps) : I(I), slv(slv),
+                                                                        timesteps(timesteps) {
 }
 
 
@@ -26,7 +26,7 @@ vector<NamedExp> WorkloadParser::parse(string prefix, string wl_line) {
     CommonTokenStream tokens(&lexer);
     fperfParser parser(&tokens);
     auto tree = parser.con();
-    ConstrExtractor *visitor = new ConstrExtractor(slv, I, num_buffs, timesteps);
+    ConstrExtractor *visitor = new ConstrExtractor(slv, I, timesteps, {}, {});
     visitor->visit(tree);
     vector<NamedExp> nes;
     for (auto &constr: visitor->constrs)

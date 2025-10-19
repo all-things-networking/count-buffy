@@ -24,7 +24,7 @@ void StsRunner::run(int num_buffers, int timesteps) {
     slv.add(sts->base_wl());
     slv.add(merge(sts->query(), "Query").negate());
     for (int i = 0; i < wls.size(); ++i) {
-        WorkloadParser parser(sts->I, slv, num_buffers, timesteps);
+        WorkloadParser parser(sts->I, slv, timesteps);
         auto wl = wls[i];
         slv.s.push();
         string res_stat = wl[0];
