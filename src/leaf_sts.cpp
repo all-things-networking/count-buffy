@@ -105,7 +105,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
     // for (int src: srcs) {
     // dst_turn_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
     // }
-    use_win = false;
+    use_win = true;
 }
 
 vector<Buff *> LeafSts::get_buff_list() const {
