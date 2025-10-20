@@ -504,17 +504,6 @@ vector<NamedExp> LeafSts::init() {
     // return {res};
 }
 
-template<typename V>
-V LeafSts::get_voq_of_out_i(const V &all_ev, const int i) {
-    V ev;
-    int dst = i;
-    for (int src = 0; src < num_ports; ++src) {
-        int idx = src * num_ports + dst;
-        ev.push_back(all_ev[idx]);
-    }
-    return ev;
-}
-
 void LeafSts::print(model mod) {
     cout << var_prefix << endl << "######################################################################" << endl;
     for (const auto &[src_dst, buf]: buffs) {
@@ -607,9 +596,10 @@ vector<NamedExp> LeafSts::inputs(const int i) {
     extend(res, enqs(i));
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
-    // extend(res, winds_old(i));
-    if (this->use_win)
-        extend(res, winds(i));
+    if (this->use_win) {
+        extend(res, winds_old(i));
+        // extend(res, winds(i));
+    }
     return res;
 }
 
@@ -766,4 +756,70 @@ vector<NamedExp> LeafSts::out() {
         extend(res, nes, format("@{}", j));
     }
     return {merge(res, "out")};
+}
+
+//
+vector<NamedExp> LeafSts::winds_old(int i) {
+    const auto Oi = get_buff_list()[i]->O;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto wnd_enq_i = get_buff_list()[i]->wnd_enq;
+    const auto wnd_out_i = get_buff_list()[i]->wnd_out;
+    const auto wnd_enq_nxt_i = get_buff_list()[i]->wnd_enq_nxt;
+    const auto tmp_wnd_enq_i = get_buff_list()[i]->tmp_wnd_enq;
+    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i]->tmp_wnd_enq_nxt;
+    const auto Ci = get_buff_list()[i]->C;
+    vector<NamedExp> nes;
+
+    int cap = buff_cap;
+    // [14]
+    nes.emplace_back(wnd_enq_i[0] == Ei[0], format("WndEnq[{}]@{}", i, 0));
+    nes.emplace_back(wnd_out_i[0] == Oi[0], format("WndOut[{}]@{}", i, 0));
+    nes.emplace_back(wnd_enq_nxt_i[0] == 0, format("WndNxt[{}]@{}", i, 0));
+    for (int j = 1; j < timesteps; ++j) {
+        auto te = tmp_wnd_enq_i[j];
+        auto tn = tmp_wnd_enq_nxt_i[j];
+        // auto to = tmp_wnd_out[i][j];
+        // auto m = match[i][j];
+
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] + E[i][j] <= cap, te == wnd_enq[i][j - 1] + E[i][j] && sum(tn) == 0),
+        // format("WndEnq[{}]@{}", i, j));
+        //
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] <= cap && sum(wnd_enq[i][j - 1] + E[i][j]) > cap,
+        // te == cap && sum(tn) == sum(
+        // wnd_enq[i][j - 1] + E[i][j] + wnd_enq_nxt[i][j - 1]) - cap),
+        // format("WndEnqNxt[{}]@{}", i, j));
+        // nes.emplace_back(
+        // implies(sum(wnd_enq[i][j]) > cap, te == wnd_enq[i][j - 1] && tn == wnd_enq_nxt[i][j - 1] + E[i][j]),
+        // format("next_wnd_enq[{}]@{}", i, j));
+
+        // [15]
+        ev total_sum = wnd_enq_i[j - 1] + wnd_enq_nxt_i[j - 1] + Ei[j];
+        // auto te = ite(total_sum <= c, total_sum, c);
+
+
+        nes.emplace_back((te + tn) == total_sum, format("Update te + tn[{}]@{}", i, j));
+        // [16], [17], [18], [19]
+        nes.emplace_back((!(te < cap && tn > 0)) && (te <= cap) && (tn <= cap) && (wnd_enq_i[j - 1] <= te),
+                         format("Overflow mechanism[{}]@{}", i, j));
+        // [20]
+        // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
+
+        auto to = wnd_out_i[j - 1] + Oi[j];
+        // [21]
+        // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
+        auto m = te <= to;
+        // [22]
+        nes.emplace_back(
+            ite(m, wnd_enq_i[j] == tn, ite(total_sum <= cap, wnd_enq_i[j] == total_sum, wnd_enq_i[j] == total_sum)),
+            format("Update WE[{}]@{}", i, j));
+        // [23]
+        nes.emplace_back(ite(m, wnd_enq_nxt_i[j] == 0, wnd_enq_nxt_i[j] == tn), format("Update WN[{}]@{}", i, j));
+        // [24]
+        nes.emplace_back(ite(m, wnd_out_i[j] == to - te, wnd_out_i[j] == to), format("Update WO[{}]@{}", i, j));
+        // [25]
+        nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j], format("WndOut <= WndEnq[{}]@{}", i, j));
+
+        nes.emplace_back(Ci[j] == wnd_enq_i[j] + wnd_enq_nxt_i[j] - wnd_out_i[j], format("equity[{}]@{}", i, j));
+    }
+    return nes;
 }

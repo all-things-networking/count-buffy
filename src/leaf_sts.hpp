@@ -77,6 +77,8 @@ public:
 
     vector<NamedExp> out();
 
+    vector<NamedExp> winds_old(int i);
+
     vector<NamedExp> trs();
 
     virtual ev2 get_in_port(int src);
@@ -86,9 +88,6 @@ public:
     vector<int> get_out_ports();
 
     ev2 get_out_port(int dst);
-
-    template<class V>
-    V get_voq_of_out_i(const V &all_ev, int i);
 
     void print(model m);
 

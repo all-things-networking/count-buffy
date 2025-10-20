@@ -69,7 +69,7 @@ expr query(SmtSolver &slv, ev3 &O) {
     int i = 1;
     for (int t = 0; t < TIME_STEPS; ++t)
         s = s + sum(O[i][t]);
-    expr q = s <= TIME_STEPS/2;
+    expr q = s <= TIME_STEPS / 2;
     return q;
 }
 
@@ -148,6 +148,19 @@ int main(const int argc, const char *argv[]) {
         ecmp_to_pkt_type[ecmp].push_back(pkt_type);
 
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
+
+    if (true) {
+        expr_vector v(slv.ctx);
+        for (int i = 0; i < I.size(); ++i) {
+            for (int t = 0; t < I[0].size(); ++t) {
+                expr e = dst_val(I, slv, dst_to_pkt_type, i, t);
+                v.push_back((e == 2 || e == 3 || e == -1));
+                e = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
+                v.push_back((e == 0 || e == -1));
+            }
+        }
+        slv.add(mk_and(v));
+    }
 
 
     slv.s.push();
