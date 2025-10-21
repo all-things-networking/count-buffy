@@ -23,7 +23,7 @@ using namespace chrono;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
-constexpr int PKT_TYPES = 4;
+constexpr int PKT_TYPES = 8;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -73,46 +73,58 @@ expr query(SmtSolver &slv, ev3 &O) {
 }
 
 int main(const int argc, const char *argv[]) {
-    map<int, int> pkt_type_to_dst = {{0, 0}, {1, 1}, {2, 2}, {3, 3}};
-    map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};
+    map<int, int> pkt_type_to_dst = {{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 0}, {5, 1}, {6, 2}, {7, 3}};
+    map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}};
 
     SmtSolver slv;
     LeafSts *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
-        {{0, 2}, {2}},
-        {{1, 2}, {3}},
+        {{0, 2}, {2, 6}},
+        {{1, 2}, {3, 7}},
+        {{2, 0}, {0, 4}},
+        {{2, 1}, {1, 5}},
     };
 
     // vector<tuple<int, int> > s1_ports = {
-    // {0, 2},
-    // {1, 2},
+    //     {0, 2},
+    //     {1, 2},
+    //     {2, 0},
+    //     {2, 1}
     // };
 
-    vector s1_pkt_type_to_nxt_hop = {2, 2, 2, 2};
+    vector s1_pkt_type_to_nxt_hop = {2, 2, 2, 2, 2, 2, 2, 2};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
 
     LeafSts *s2;
-    vector<tuple<int, int> > s2_ports = {
-        {0, 1}
+    map<tuple<int, int>, vector<int> > s2_ports = {
+    {{0, 1}, {0, 1, 2, 3}}
     };
-    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1};
+
+    // vector<tuple<int, int> > s2_ports = {
+        // {0, 1}
+    // };
+    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1};
     s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
 
     LeafSts *s3;
     map<tuple<int, int>, vector<int> > s3_ports = {
-        {{2, 0}, {2}},
-        {{2, 1}, {3}}
+        {{2, 0}, {2, 6}},
+        {{2, 1}, {3, 7}},
+        {{0, 2}, {0, 4}},
+        {{1, 2}, {1, 5}}
     };
 
     // vector<tuple<int, int> > s3_ports = {
     //     {2, 0},
-    //     {2, 1}
+    //     {2, 1},
+    //     {0, 2},
+    //     {1, 2}
     // };
-    vector s3_pkt_type_to_nxt_hop = {0, 1, 0, 1};
+    vector s3_pkt_type_to_nxt_hop = {0, 1, 0, 1, 0, 1, 0, 1};
     s3 = new DemuxSwitch(slv, "s3", s3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s3_pkt_type_to_nxt_hop
     );
@@ -173,20 +185,20 @@ int main(const int argc, const char *argv[]) {
     }
 
 
-    // slv.s.push();
-    // slv.add(NamedExp(query(slv, O), "query").negate());
-    // auto start_t = high_resolution_clock::now();
-    // slv.check_unsat();
-    // auto end_t = high_resolution_clock::now();
-    // auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-    // slv.s.pop();
+    slv.s.push();
+    slv.add(NamedExp(query(slv, O), "query").negate());
+    auto start_t = high_resolution_clock::now();
+    slv.check_unsat();
+    auto end_t = high_resolution_clock::now();
+    auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
+    slv.s.pop();
 
     slv.s.push();
-    // slv.add({query(slv, O), "query"});
+    slv.add({query(slv, O), "query"});
 
-    auto start_t = high_resolution_clock::now();
+    start_t = high_resolution_clock::now();
     auto mod = slv.check_sat();
-    auto end_t = high_resolution_clock::now();
+    end_t = high_resolution_clock::now();
     auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
 
     cout << "DST" << endl;
@@ -222,7 +234,7 @@ int main(const int argc, const char *argv[]) {
     cout << "S3" << endl << "##################################" << endl;
     s3->print(mod);
 
-    // cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
+    cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
     cout << "SAT VTIME: " << sat_duration.count() << endl;
     slv.s.pop();
 }
