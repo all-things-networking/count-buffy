@@ -85,26 +85,34 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
 ): slv(slv), var_prefix(move(var_prefix)),
    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
    max_deq(max_deq) {
-    // set<int> dsts;
-    // set<int> srcs;
-
     for (auto src_dst: port_list) {
         int src = get<0>(src_dst);
         int dst = get<1>(src_dst);
         Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
                               pkt_types, max_enq, max_deq, buff_cap, src, dst);
         buffs[{src, dst}] = buff;
-        // dsts.insert(dst);
-        // srcs.insert(src);
     }
+    use_win = true;
+}
 
-    // for (int dst: dsts) {
-    // src_turn_for_dst[dst] = slv.iv(time_steps, format("TURN_DST_{}", dst));
-    // }
-
-    // for (int src: srcs) {
-    // dst_turn_for_src[src] = slv.iv(time_steps, format("TURN_SRC_{}", src));
-    // }
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
+                 const int time_steps,
+                 const int pkt_types,
+                 const int buff_cap,
+                 const int max_enq,
+                 const int max_deq
+): slv(slv), var_prefix(move(var_prefix)),
+   timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
+   max_deq(max_deq) {
+    for (auto src_dst_pkt_type: port_list) {
+        auto src_dst = get<0>(src_dst_pkt_type);
+        auto used_pkt_types = get<1>(src_dst_pkt_type);
+        int src = get<0>(src_dst);
+        int dst = get<1>(src_dst);
+        Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
+                              pkt_types, max_enq, max_deq, buff_cap, src, dst, used_pkt_types);
+        buffs[{src, dst}] = buff;
+    }
     use_win = true;
 }
 

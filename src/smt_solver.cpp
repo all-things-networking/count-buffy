@@ -71,6 +71,21 @@ ev &SmtSolver::iv(const int k, const string &name) {
     return *result;
 }
 
+ev &SmtSolver::iv(const int k, const string &name, vector<int> pkt_types) {
+    auto *result = new vector<expr>[k];
+    for (int i = 0; i < k; i++) {
+        string vname = name;
+        vname += "_" + to_string(i);
+        expr e = ctx.int_val(0);
+        if (ranges::find(pkt_types, i) != pkt_types.end()) {
+            e = ctx.int_const(vname.c_str());
+        }
+        result->push_back(e);
+        int_vars++;
+    }
+    return *result;
+}
+
 ev &SmtSolver::sv(const int k, const string &name) {
     IntSeq is(&ctx);
 
@@ -101,6 +116,17 @@ ev2 &SmtSolver::ivv(const int m, const int k, const string &name) {
         string vname = name;
         vname += "_" + to_string(i);
         auto v = iv(k, vname);
+        result->push_back(v);
+    }
+    return *result;
+}
+
+ev2 &SmtSolver::ivv(const int m, const int k, const string &name, vector<int> pkt_types) {
+    const auto result = new vector<ev>[m];
+    for (int i = 0; i < m; i++) {
+        string vname = name;
+        vname += "_" + to_string(i);
+        auto v = iv(k, vname, pkt_types);
         result->push_back(v);
     }
     return *result;

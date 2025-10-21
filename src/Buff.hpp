@@ -4,6 +4,8 @@
 
 #ifndef BUFF_HPP
 #define BUFF_HPP
+#include <map>
+
 #include "lib.hpp"
 #include "smt_solver.hpp"
 
@@ -12,6 +14,9 @@ class Buff {
 public:
     Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int max_enq, int max_deq,
          int buf_cap, int src, int dst);
+
+    Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int max_enq, int max_deq, int buf_cap,
+         int src, int dst, vector<int> used_pkt_types);
 
     SmtSolver &slv;
     ev2 I;

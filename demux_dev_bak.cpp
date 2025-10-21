@@ -23,7 +23,8 @@ using namespace chrono;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
-constexpr int PKT_TYPES = 4;
+constexpr int NUM_PORTS = 3;
+constexpr int PKT_TYPES = 2;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -73,48 +74,34 @@ expr query(SmtSolver &slv, ev3 &O) {
 }
 
 int main(const int argc, const char *argv[]) {
-    map<int, int> pkt_type_to_dst = {{0, 0}, {1, 1}, {2, 2}, {3, 3}};
-    map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}, {2, 0}, {3, 0}};
-
     SmtSolver slv;
-    LeafSts *s1;
-    map<tuple<int, int>, vector<int> > s1_ports = {
-        {{0, 2}, {2}},
-        {{1, 2}, {3}},
+    LeafSts *l1;
+    map<tuple<int, int>, vector<int> > l1_ports = {
+        {{0, 2}, {0}},
+        {{1, 2}, {1}},
     };
+    vector l1_pkt_type_to_nxt_hop = {2, 2};
+    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         l1_pkt_type_to_nxt_hop
+    );
 
-    // vector<tuple<int, int> > s1_ports = {
-    // {0, 2},
-    // {1, 2},
-    // };
-
-    vector s1_pkt_type_to_nxt_hop = {2, 2, 2, 2};
+    LeafSts *s1;
+    vector<tuple<int, int> > s1_ports = {
+        {0, 1}
+    };
+    vector s1_pkt_type_to_nxt_hop = {1, 1};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
 
-    LeafSts *s2;
-    vector<tuple<int, int> > s2_ports = {
-        {0, 1}
+    LeafSts *l2;
+    map<tuple<int, int>, vector<int> > l2_ports = {
+        {{2, 0}, {0}},
+        {{2, 1}, {1}}
     };
-    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s2_pkt_type_to_nxt_hop
-    );
-
-    LeafSts *s3;
-    map<tuple<int, int>, vector<int> > s3_ports = {
-        {{2, 0}, {2}},
-        {{2, 1}, {3}}
-    };
-
-    // vector<tuple<int, int> > s3_ports = {
-    //     {2, 0},
-    //     {2, 1}
-    // };
-    vector s3_pkt_type_to_nxt_hop = {0, 1, 0, 1};
-    s3 = new DemuxSwitch(slv, "s3", s3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s3_pkt_type_to_nxt_hop
+    vector l2_pkt_type_to_nxt_hop = {0, 1};
+    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         l2_pkt_type_to_nxt_hop
     );
 
 
@@ -123,31 +110,34 @@ int main(const int argc, const char *argv[]) {
         {{0, 0, 1}, 2},
         {{1, 3, 0}, 2},
     };
-    auto constr = add_constr(s1, ins);
+    auto constr = add_constr(l1, ins);
     // slv.add({constr, "inp"});
 
-    auto base1 = s1->base_constrs();
+    auto base1 = l1->base_constrs();
     auto base1_merged = merge(base1, "base1");
     slv.add(base1_merged);
 
-    auto base2 = s2->base_constrs();
+    auto base2 = s1->base_constrs();
     auto base2_merged = merge(base2, "base2");
     slv.add(base2_merged);
 
-    auto base3 = s3->base_constrs();
+    auto base3 = l2->base_constrs();
     auto base3_merged = merge(base3, "base3");
     slv.add(base3_merged);
 
 
-    slv.add(link_ports(s1->get_out_port(2), s2->get_in_port(0)), "link1");
-    slv.add(link_ports(s2->get_out_port(1), s3->get_in_port(2)), "link2");
+    slv.add(link_ports(l1->get_out_port(2), s1->get_in_port(0)), "link1");
+    slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "link2");
     ev3 I;
-    I.push_back(s1->get_in_port(0));
-    I.push_back(s1->get_in_port(1));
+    I.push_back(l1->get_in_port(0));
+    I.push_back(l1->get_in_port(1));
 
     ev3 O;
-    O.push_back(s3->get_out_port(0));
-    O.push_back(s3->get_out_port(1));
+    O.push_back(l2->get_out_port(0));
+    O.push_back(l2->get_out_port(1));
+
+    map<int, int> pkt_type_to_dst = {{0, 2}, {1, 3}};
+    map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}};
 
     map<int, vector<int> > dst_to_pkt_type;
     for (auto &[pkt_type,dst]: pkt_type_to_dst)
@@ -159,7 +149,7 @@ int main(const int argc, const char *argv[]) {
 
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
 
-    if (false) {
+    if (true) {
         expr_vector v(slv.ctx);
         for (int i = 0; i < I.size(); ++i) {
             for (int t = 0; t < I[0].size(); ++t) {
@@ -173,20 +163,20 @@ int main(const int argc, const char *argv[]) {
     }
 
 
-    // slv.s.push();
-    // slv.add(NamedExp(query(slv, O), "query").negate());
-    // auto start_t = high_resolution_clock::now();
-    // slv.check_unsat();
-    // auto end_t = high_resolution_clock::now();
-    // auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-    // slv.s.pop();
+    slv.s.push();
+    slv.add(NamedExp(query(slv, O), "query").negate());
+    auto start_t = high_resolution_clock::now();
+    slv.check_unsat();
+    auto end_t = high_resolution_clock::now();
+    auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
+    slv.s.pop();
 
     slv.s.push();
-    // slv.add({query(slv, O), "query"});
+    slv.add({query(slv, O), "query"});
 
-    auto start_t = high_resolution_clock::now();
+    start_t = high_resolution_clock::now();
     auto mod = slv.check_sat();
-    auto end_t = high_resolution_clock::now();
+    end_t = high_resolution_clock::now();
     auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
 
     cout << "DST" << endl;
@@ -213,16 +203,16 @@ int main(const int argc, const char *argv[]) {
     cout << "Output" << endl;
     cout << str(O, mod).str() << endl << endl;
 
-    cout << "S1" << endl << "##################################" << endl;
+    cout << "l1" << endl << "##################################" << endl;
+    l1->print(mod);
+
+    cout << "s1" << endl << "##################################" << endl;
     s1->print(mod);
 
-    cout << "S2" << endl << "##################################" << endl;
-    s2->print(mod);
+    cout << "l2" << endl << "##################################" << endl;
+    l2->print(mod);
 
-    cout << "S3" << endl << "##################################" << endl;
-    s3->print(mod);
-
-    // cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
+    cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
     cout << "SAT VTIME: " << sat_duration.count() << endl;
     slv.s.pop();
 }
