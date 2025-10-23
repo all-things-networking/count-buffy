@@ -63,10 +63,10 @@ expr ecmp_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > ecmp_to_pkt_type, i
     ev buf = I[buf_idx][time_idx];
     expr e = slv.ctx.int_val(-1);
     for (auto &[d, ecmp_pkt_types]: ecmp_to_pkt_type) {
-        expr dst_is_d = slv.ctx.bool_val(false);
+        expr ecmp_is_d = slv.ctx.bool_val(false);
         for (int k: ecmp_pkt_types)
-            dst_is_d = dst_is_d || k > 0;
-        e = ite(dst_is_d, slv.ctx.int_val(d), e);
+            ecmp_is_d = ecmp_is_d || buf[k] > 0;
+        e = ite(ecmp_is_d, slv.ctx.int_val(d), e);
     }
     return e;
 }

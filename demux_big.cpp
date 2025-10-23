@@ -126,8 +126,8 @@ int main(const int argc, const char *argv[]) {
     slv.add(base3_merged);
 
 
-    slv.add(link_ports(s1->get_out_port(2), s2->get_in_port(0)), "link1");
-    slv.add(link_ports(s2->get_out_port(1), s3->get_in_port(2)), "link2");
+    slv.add({link_ports(s1->get_out_port(2), s2->get_in_port(0)), format("Link: {} -> {}", "s1_2", "s2_0")});
+    slv.add({link_ports(s2->get_out_port(1), s3->get_in_port(2)), format("Link: {} -> {}", "s2_1", "s3_2")});
     ev3 I;
     I.push_back(s1->get_in_port(0));
     I.push_back(s1->get_in_port(1));

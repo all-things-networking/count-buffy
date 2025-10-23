@@ -23,7 +23,7 @@ using namespace chrono;
 constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
-constexpr int PKT_TYPES = 8;
+constexpr int PKT_TYPES = 12;
 constexpr int BUFF_CAP = 10;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
@@ -73,18 +73,24 @@ expr query(SmtSolver &slv, ev3 &O) {
 }
 
 int main(const int argc, const char *argv[]) {
-    map<int, int> pkt_type_to_dst = {{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 0}, {5, 1}, {6, 2}, {7, 3}};
-    map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}};
+    map<int, int> pkt_type_to_dst = {
+        {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5},
+        {6, 0}, {7, 1}, {8, 2}, {9, 3}, {10, 4}, {11, 5}
+    };
+    map<int, int> pkt_type_to_ecmp = {
+        {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0},
+        {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}
+    };
 
     SmtSolver slv;
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {2, 6}},
-        {{1, 2}, {3, 7}},
+        {{0, 2}, {5, 11}},
+        {{1, 2}, {}},
         {{1, 0}, {}},
-        {{2, 0}, {0, 4}},
-        {{2, 1}, {1, 5}},
+        {{2, 0}, {}},
+        {{2, 1}, {}},
     };
 
     // vector<tuple<int, int> > l1_ports = {
@@ -94,7 +100,7 @@ int main(const int argc, const char *argv[]) {
     //     {2, 1}
     // };
 
-    vector l1_pkt_type_to_nxt_hop = {2, 2, 2, 2, 2, 2, 2, 2};
+    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2};
     l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
@@ -102,44 +108,39 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
         {{0, 1}, {}},
-        {{2, 0}, {2, 6}},
-        {{2, 1}, {3, 7}},
+        {{2, 0}, {}},
+        {{2, 1}, {}},
         {{1, 0}, {}},
-        {{0, 2}, {0, 4}},
-        {{1, 2}, {1, 5}}
+        {{0, 2}, {}},
+        {{1, 2}, {}}
     };
-
-    // vector<tuple<int, int> > l2_ports = {
-    //     {2, 0},
-    //     {2, 1},
-    //     {0, 2},
-    //     {1, 2}
-    // };
-    vector l2_pkt_type_to_nxt_hop = {0, 1, 0, 1, 0, 1, 0, 1};
+    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 2, 2, 0, 1, 2, 2};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
 
+    LeafSts *l3;
+    map<tuple<int, int>, vector<int> > l3_ports = {
+        {{0, 1}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {5, 11}},
+        {{1, 0}, {}},
+        {{0, 2}, {}},
+        {{1, 2}, {}}
+    };
+    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 0, 1};
+    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         l3_pkt_type_to_nxt_hop
+    );
+
     LeafSts *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
-        {{0, 1}, {0, 1, 2, 3}}
+        {{0, 1}, {0, 1, 2, 3, 4, 5}}
     };
-
-    // vector<tuple<int, int> > s1_ports = {
-    // {0, 1}
-    // };
-    vector s1_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1};
+    vector s1_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
-
-    // in_port, time, type -> count
-    map<tuple<int, int, int>, int> ins = {
-        {{0, 0, 1}, 2},
-        {{1, 3, 0}, 2},
-    };
-    auto constr = add_constr(l1, ins);
-    // slv.add({constr, "inp"});
 
     auto base1 = l1->base_constrs();
     auto base1_merged = merge(base1, "base1");
@@ -154,8 +155,8 @@ int main(const int argc, const char *argv[]) {
     slv.add(base3_merged);
 
 
-    slv.add(link_ports(l1->get_out_port(2), s1->get_in_port(0)), "link1");
-    slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "link2");
+    slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
+    slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
     ev3 I;
     I.push_back(l1->get_in_port(0));
     I.push_back(l1->get_in_port(1));

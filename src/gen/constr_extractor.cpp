@@ -161,8 +161,10 @@ void ConstrExtractor::parse_ecmp() {
         int buf_index = tmp_ids[0];
         expr ecmp_value = ecmp_val(I, slv, ecmp_to_pkt_type, buf_index, t_index);
         expr e = binop(ecmp_value, op, slv.ctx.int_val(rhs));
-        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
-                             format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        // constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
+        // format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        // constrs.emplace_back(e, format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        constrs.emplace_back(NamedExp(e).prefix(format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs)));
     }
 }
 
