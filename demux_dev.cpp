@@ -86,7 +86,7 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {}},
+        {{0, 2}, {5}},
         {{0, 3}, {11}},
         {{1, 2}, {}},
         {{1, 3}, {}},
