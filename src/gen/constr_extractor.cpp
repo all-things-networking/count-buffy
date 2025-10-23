@@ -148,7 +148,7 @@ void ConstrExtractor::parse_dst() {
         expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
         expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
         constrs.emplace_back(valid_meta(I, slv, buf_index, t_index), format("DST[{}][{}] valid", buf_index, t_index));
-        constrs.emplace_back(e, format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs));
+        constrs.emplace_back(NamedExp(e).prefix(format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs)));
     }
 }
 

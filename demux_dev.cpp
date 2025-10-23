@@ -86,11 +86,13 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {5, 11}},
+        {{0, 2}, {}},
+        {{0, 3}, {11}},
         {{1, 2}, {}},
+        {{1, 3}, {}},
         {{1, 0}, {}},
         {{2, 0}, {}},
-        {{2, 1}, {}},
+        {{2, 1}, {}}
     };
 
     // vector<tuple<int, int> > l1_ports = {
@@ -100,7 +102,7 @@ int main(const int argc, const char *argv[]) {
     //     {2, 1}
     // };
 
-    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2};
+    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
     l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
@@ -108,13 +110,15 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
         {{0, 1}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
-        {{1, 0}, {}},
         {{0, 2}, {}},
-        {{1, 2}, {}}
+        {{0, 3}, {}},
+        {{1, 0}, {}},
+        {{1, 2}, {}},
+        {{1, 3}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {}}
     };
-    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 2, 2, 0, 1, 2, 2};
+    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
@@ -122,13 +126,16 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l3;
     map<tuple<int, int>, vector<int> > l3_ports = {
         {{0, 1}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {5, 11}},
-        {{1, 0}, {}},
         {{0, 2}, {}},
-        {{1, 2}, {}}
+        {{0, 3}, {}},
+        {{1, 0}, {}},
+        {{1, 2}, {}},
+        {{1, 3}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {5}},
+        {{3, 1}, {11}}
     };
-    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 0, 1};
+    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
     l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
@@ -140,6 +147,15 @@ int main(const int argc, const char *argv[]) {
     vector s1_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
+    );
+
+    LeafSts *s2;
+    map<tuple<int, int>, vector<int> > s2_ports = {
+        {{0, 1}, {6, 7, 8, 9, 10, 11}}
+    };
+    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         s2_pkt_type_to_nxt_hop
     );
 
     auto base1 = l1->base_constrs();
@@ -156,7 +172,9 @@ int main(const int argc, const char *argv[]) {
 
 
     slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
+    slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
     slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
+    slv.add({link_ports(s2->get_out_port(1), l3->get_in_port(3)), format("Link: {} -> {}", "s2_1", "l3_3")});
     ev3 I;
     I.push_back(l1->get_in_port(0));
     I.push_back(l1->get_in_port(1));
