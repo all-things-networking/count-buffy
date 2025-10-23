@@ -77,89 +77,92 @@ int main(const int argc, const char *argv[]) {
     map<int, int> pkt_type_to_ecmp = {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}};
 
     SmtSolver slv;
-    LeafSts *s1;
-    map<tuple<int, int>, vector<int> > s1_ports = {
+    LeafSts *l1;
+    map<tuple<int, int>, vector<int> > l1_ports = {
+        {{0, 1}, {}},
         {{0, 2}, {2, 6}},
         {{1, 2}, {3, 7}},
+        {{1, 0}, {}},
         {{2, 0}, {0, 4}},
         {{2, 1}, {1, 5}},
     };
 
-    // vector<tuple<int, int> > s1_ports = {
+    // vector<tuple<int, int> > l1_ports = {
     //     {0, 2},
     //     {1, 2},
     //     {2, 0},
     //     {2, 1}
     // };
 
-    vector s1_pkt_type_to_nxt_hop = {2, 2, 2, 2, 2, 2, 2, 2};
-    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s1_pkt_type_to_nxt_hop
+    vector l1_pkt_type_to_nxt_hop = {2, 2, 2, 2, 2, 2, 2, 2};
+    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         l1_pkt_type_to_nxt_hop
     );
 
-    LeafSts *s2;
-    map<tuple<int, int>, vector<int> > s2_ports = {
-    {{0, 1}, {0, 1, 2, 3}}
-    };
-
-    // vector<tuple<int, int> > s2_ports = {
-        // {0, 1}
-    // };
-    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s2_pkt_type_to_nxt_hop
-    );
-
-    LeafSts *s3;
-    map<tuple<int, int>, vector<int> > s3_ports = {
+    LeafSts *l2;
+    map<tuple<int, int>, vector<int> > l2_ports = {
+        {{0, 1}, {}},
         {{2, 0}, {2, 6}},
         {{2, 1}, {3, 7}},
+        {{1, 0}, {}},
         {{0, 2}, {0, 4}},
         {{1, 2}, {1, 5}}
     };
 
-    // vector<tuple<int, int> > s3_ports = {
+    // vector<tuple<int, int> > l2_ports = {
     //     {2, 0},
     //     {2, 1},
     //     {0, 2},
     //     {1, 2}
     // };
-    vector s3_pkt_type_to_nxt_hop = {0, 1, 0, 1, 0, 1, 0, 1};
-    s3 = new DemuxSwitch(slv, "s3", s3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
-                         s3_pkt_type_to_nxt_hop
+    vector l2_pkt_type_to_nxt_hop = {0, 1, 0, 1, 0, 1, 0, 1};
+    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         l2_pkt_type_to_nxt_hop
     );
 
+    LeafSts *s1;
+    map<tuple<int, int>, vector<int> > s1_ports = {
+        {{0, 1}, {0, 1, 2, 3}}
+    };
+
+    // vector<tuple<int, int> > s1_ports = {
+    // {0, 1}
+    // };
+    vector s1_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1};
+    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+                         s1_pkt_type_to_nxt_hop
+    );
 
     // in_port, time, type -> count
     map<tuple<int, int, int>, int> ins = {
         {{0, 0, 1}, 2},
         {{1, 3, 0}, 2},
     };
-    auto constr = add_constr(s1, ins);
+    auto constr = add_constr(l1, ins);
     // slv.add({constr, "inp"});
 
-    auto base1 = s1->base_constrs();
+    auto base1 = l1->base_constrs();
     auto base1_merged = merge(base1, "base1");
     slv.add(base1_merged);
 
-    auto base2 = s2->base_constrs();
+    auto base2 = s1->base_constrs();
     auto base2_merged = merge(base2, "base2");
     slv.add(base2_merged);
 
-    auto base3 = s3->base_constrs();
+    auto base3 = l2->base_constrs();
     auto base3_merged = merge(base3, "base3");
     slv.add(base3_merged);
 
 
-    slv.add(link_ports(s1->get_out_port(2), s2->get_in_port(0)), "link1");
-    slv.add(link_ports(s2->get_out_port(1), s3->get_in_port(2)), "link2");
+    slv.add(link_ports(l1->get_out_port(2), s1->get_in_port(0)), "link1");
+    slv.add(link_ports(s1->get_out_port(1), l2->get_in_port(2)), "link2");
     ev3 I;
-    I.push_back(s1->get_in_port(0));
-    I.push_back(s1->get_in_port(1));
+    I.push_back(l1->get_in_port(0));
+    I.push_back(l1->get_in_port(1));
 
     ev3 O;
-    O.push_back(s3->get_out_port(0));
-    O.push_back(s3->get_out_port(1));
+    O.push_back(l2->get_out_port(0));
+    O.push_back(l2->get_out_port(1));
 
     map<int, vector<int> > dst_to_pkt_type;
     for (auto &[pkt_type,dst]: pkt_type_to_dst)
@@ -225,14 +228,14 @@ int main(const int argc, const char *argv[]) {
     cout << "Output" << endl;
     cout << str(O, mod).str() << endl << endl;
 
-    cout << "S1" << endl << "##################################" << endl;
+    cout << "l1" << endl << "##################################" << endl;
+    l1->print(mod);
+
+    cout << "s1" << endl << "##################################" << endl;
     s1->print(mod);
 
-    cout << "S2" << endl << "##################################" << endl;
-    s2->print(mod);
-
-    cout << "S3" << endl << "##################################" << endl;
-    s3->print(mod);
+    cout << "l2" << endl << "##################################" << endl;
+    l2->print(mod);
 
     cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
     cout << "SAT VTIME: " << sat_duration.count() << endl;
