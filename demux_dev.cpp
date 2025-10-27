@@ -142,18 +142,28 @@ int main(const int argc, const char *argv[]) {
 
     LeafSts *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
-        {{0, 1}, {0, 1, 2, 3, 4, 5}}
+        {{0, 1}, {2, 3}},
+        {{0, 2}, {4, 5}},
+        {{1, 0}, {0, 1,}},
+        {{1, 2}, {4, 5}},
+        {{2, 0}, {0, 1,}},
+        {{2, 1}, {2, 3}}
     };
-    vector s1_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
 
     LeafSts *s2;
     map<tuple<int, int>, vector<int> > s2_ports = {
-        {{0, 1}, {6, 7, 8, 9, 10, 11}}
+        {{0, 1}, {8, 9}},
+        {{0, 2}, {10, 11}},
+        {{1, 0}, {6, 7}},
+        {{1, 2}, {10, 11}},
+        {{2, 0}, {6, 7}},
+        {{2, 1}, {8, 9}}
     };
-    vector s2_pkt_type_to_nxt_hop = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
@@ -173,8 +183,23 @@ int main(const int argc, const char *argv[]) {
 
     slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
     slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
-    slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
-    slv.add({link_ports(s2->get_out_port(1), l3->get_in_port(3)), format("Link: {} -> {}", "s2_1", "l3_3")});
+    slv.add({link_ports(s1->get_out_port(0), l1->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l1_2")});
+    slv.add({link_ports(s2->get_out_port(0), l1->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l1_3")});
+
+    slv.add({link_ports(l2->get_out_port(2), s1->get_in_port(1)), format("Link: {} -> {}", "l2_2", "s1_0")});
+    slv.add({link_ports(l2->get_out_port(3), s2->get_in_port(1)), format("Link: {} -> {}", "l2_3", "s2_0")});
+    slv.add({link_ports(s1->get_out_port(1), l2->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l2_2")});
+    slv.add({link_ports(s2->get_out_port(1), l2->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l2_3")});
+
+    slv.add({link_ports(l3->get_out_port(2), s1->get_in_port(2)), format("Link: {} -> {}", "l3_2", "s1_0")});
+    slv.add({link_ports(l3->get_out_port(3), s2->get_in_port(2)), format("Link: {} -> {}", "l3_3", "s2_0")});
+    slv.add({link_ports(s1->get_out_port(2), l3->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l3_2")});
+    slv.add({link_ports(s2->get_out_port(2), l3->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l3_3")});
+
+
+    // slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
+    // slv.add({link_ports(s2->get_out_port(1), l3->get_in_port(3)), format("Link: {} -> {}", "s2_1", "l3_3")});
+
     ev3 I;
     I.push_back(l1->get_in_port(0));
     I.push_back(l1->get_in_port(1));
