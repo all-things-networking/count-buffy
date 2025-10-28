@@ -267,255 +267,6 @@ vector<Buff *> LeafBase::get_buffs_for_src(int src) {
     return src_buffs;
 }
 
-
-vector<NamedExp> LeafBase::trs(int t) {
-    auto per_dst = src_map_per_dst();
-    auto per_src = dst_map_per_src();
-
-    map<int, expr> highest_prio_src_for_dst;
-    map<int, expr> highest_prio_dst_for_src;
-
-    map<int, expr> tmp_src_turn_for_dst;
-    map<int, expr> tmp_dst_turn_for_src;
-
-    vector<NamedExp> v;
-    for (const auto &[dst, dst_buffs_map]: per_dst) {
-        auto prev_turn = src_turn_for_dst[dst][t];
-        vector<Buff *> dst_buffs_list;
-        for (const auto &[src, buff]: dst_buffs_map)
-            dst_buffs_list.push_back(buff);
-        auto nxt_turn_val = rr_for_dst(dst_buffs_list, t + 1, dst);
-        // tmp_src_for_dst.insert(dst, nxt_turn_val);
-        // tmp_src_for_dst[dst] = nxt_turn_val;
-        tmp_src_turn_for_dst.insert_or_assign(dst, nxt_turn_val);
-        // src_turn_for_dst[dst].push_back(nxt_turn_val);
-        // highest_prio_src_for_dst.insert_or_assign(dst, nxt_turn_val);
-        // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
-        // tmp_per_dst[dst].push_back(nxt_turn_val);
-    }
-
-    for (const auto &[src, src_buffs_map]: per_src) {
-        auto prev_turn = dst_turn_for_src[src][t];
-        vector<Buff *> src_buffs_list;
-        for (const auto &[src, buff]: src_buffs_map)
-            src_buffs_list.push_back(buff);
-        auto nxt_turn_val = rr_for_src(src_buffs_list, t + 1, src);
-        // tmp_dst_for_src[src] = nxt_turn_val;
-        // highest_prio_dst_for_src.insert_or_assign(src, nxt_turn_val);
-        tmp_dst_turn_for_src.insert_or_assign(src, nxt_turn_val);
-        // dst_turn_for_src[src].push_back(nxt_turn_val);
-        // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
-        // tmp_per_src[src].push_back(nxt_turn_val);
-    }
-
-
-    for (const auto &[src, src_buffs_map]: per_src) {
-        expr m = slv.ctx.bool_val(false);
-        for (const auto &[dst, buff]: src_buffs_map) {
-            m = m || matched[{src, dst}][t];
-        }
-        expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
-        expr &prev_turn_for_src = dst_turn_for_src[src][t];
-        tmp_per_src[src].push_back(cur_turn_for_src);
-        dst_turn_for_src[src].push_back(ite(m, cur_turn_for_src, prev_turn_for_src));
-    }
-
-    for (const auto &[dst, dst_buffs_map]: per_dst) {
-        expr m = slv.ctx.bool_val(false);
-        for (const auto &[src, buff]: dst_buffs_map) {
-            m = m || matched[{src, dst}][t];
-        }
-        expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
-        expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
-        tmp_per_dst[dst].push_back(cur_turn_for_dst);
-        src_turn_for_dst[dst].push_back(ite(m, cur_turn_for_dst, prev_turn_for_dst));
-    }
-
-    for (const auto &[key, buff]: buffs) {
-        int src = get<0>(key);
-        int dst = get<1>(key);
-        // expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
-        // expr &prev_turn_for_src = dst_turn_for_src[src][t];
-
-        // expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
-        // expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
-
-        expr match = buff->B[t + 1]
-                     && dst_turn_for_src.at(src)[t + 1] == dst
-                     && src_turn_for_dst.at(dst)[t + 1] == src;
-        matched[{src, dst}].push_back(match);
-        // dst_turn_for_src[src].push_back(ite(match, cur_turn_for_src, prev_turn_for_src));
-        // src_turn_for_dst[dst].push_back(ite(match, cur_turn_for_dst, prev_turn_for_dst));
-        // expr e1 = (matched_dst_for_src[src][t + 1] == ite(match, highest_prio_dst_for_src.at(src),
-        //                                                   matched_dst_for_src[src][t]));
-        // v.emplace_back(e1);
-        // expr e2 = (matched_src_for_dst[dst][t + 1] == ite(match, highest_prio_src_for_dst.at(dst),
-        //                                                   matched_src_for_dst[dst][t]));
-        // v.emplace_back(e2);
-    }
-
-    return v;
-}
-
-vector<NamedExp> LeafBase::init() {
-    vector<NamedExp> v;
-
-    auto per_dst = src_map_per_dst();
-    for (const auto &[dst, src_map]: per_dst) {
-        vector<Buff *> src_buffs_of_dst;
-        for (const auto &[src, buff]: src_map)
-            src_buffs_of_dst.push_back(buff);
-
-        int count = src_buffs_of_dst.size();
-        expr x = slv.ctx.int_val(src_buffs_of_dst[count - 1]->src);
-        for (int j = 2; j <= count; ++j) {
-            int l = count - j;
-            int val = src_buffs_of_dst[l]->src;
-            x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);
-        }
-        src_turn_for_dst[dst].push_back(x);
-        tmp_per_dst[dst].push_back(x);
-    }
-
-    auto per_src = dst_map_per_src();
-    map<int, expr> highest_prio_dst_for_src;
-    for (const auto &[src, dst_map]: per_src) {
-        vector<Buff *> dst_buffs_of_src;
-        for (const auto &[dst, buff]: dst_map)
-            dst_buffs_of_src.push_back(buff);
-
-        int count = dst_buffs_of_src.size();
-        expr x = slv.ctx.int_val(dst_buffs_of_src[count - 1]->dst);
-        for (int j = 2; j <= count; ++j) {
-            int l = (count - j);
-            int val = dst_buffs_of_src[l]->dst;
-            x = ite(dst_buffs_of_src[l]->B[0], slv.ctx.int_val(val), x);
-        }
-        dst_turn_for_src[src].push_back(x);
-        tmp_per_src[src].push_back(x);
-    }
-
-    // for (const auto &[src, dst_map]: per_src) {
-    // expr e1 = (matched_dst_for_src[src][0] == highest_prio_dst_for_src.at(src));
-    // per_src.insert_or_assign(src, highest_prio_dst_for_src.at(src));
-    // tmp_per_src[src].push_back(highest_prio_dst_for_src.at(src));
-    // v.emplace_back(e1, format("Highest Prio Dst for Src=[{}] @0", src));
-    // }
-
-    // for (const auto &[dst, dst_map]: per_dst) {
-    // expr e2 = (src_turn_for_dst[dst][0] == highest_prio_src_for_dst.at(dst));
-    // per_dst.insert_or_assign(dst, highest_prio_src_for_dst.at(dst));
-    // tmp_per_dst[dst].push_back(highest_prio_src_for_dst.at(dst));
-    // v.emplace_back(e2);
-    // }
-    //
-    //
-    for (const auto &[key, buff]: buffs) {
-        int src = get<0>(key);
-        int dst = get<1>(key);
-        expr m = buff->B[0] && src_turn_for_dst[dst][0] == src && dst_turn_for_src[src][0] == dst;
-        matched[{src, dst}].push_back(m);
-        //
-        //
-    }
-    return v;
-
-
-    // map<int, map<int, int> > dst_src_to_idx;
-    // map<int, map<int, int> > src_dst_to_idx;
-    //
-    // auto per_dst = get_per_dst_buff_map();
-    // auto per_src = get_per_src_buff_map();
-    //
-    // map<int, expr> tmp_src_for_dst;
-    // map<int, expr> tmp_dst_for_src;
-    //
-    // vector<NamedExp> v;
-    // for (const auto &[key, buff]: buffs) {
-    //     int dst = get<1>(key);
-    //     auto prev_turn = selected_src_idx_for_dst[dst][t];
-    //     auto dst_buffs = per_dst[dst];
-    //     vector<Buff *> dst_buffs_list;
-    //     for (const auto &[src, buff]: dst_buffs)
-    //         dst_buffs_list.push_back(buff);
-    //
-    //     int count = dst_buffs_list.size();
-    //     expr nxt_turn = slv.ctx.int_val(0);
-    //     expr x = slv.ctx.int_val(-1);
-    //     for (int j = 0; j < count; ++j) {
-    //         int val = dst_buffs_list[j]->src;
-    //         x = ite(buffs[l]->B[t], slv.ctx.int_val(val), x);
-    //     }
-    //     nxt_turn = ite(prev_turn == slv.ctx.int_val(vals[i]), x, nxt_turn);
-    //     auto nxt_turn_val = rr(dst_buffs_list, prev_turn, 0, true);
-    //     // tmp_src_for_dst.insert(dst, nxt_turn_val);
-    //     // tmp_src_for_dst[dst] = nxt_turn_val;
-    //     tmp_src_for_dst.insert_or_assign(dst, nxt_turn_val);
-    //     // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
-    // }
-    //
-    // for (const auto &[key, buff]: buffs) {
-    //     int src = get<0>(key);
-    //     auto prev_turn = selected_dst_idx_for_src[src][t];
-    //     auto src_buffs = per_src[src];
-    //     vector<Buff *> src_buffs_list;
-    //     for (const auto &[src, buff]: src_buffs)
-    //         src_buffs_list.push_back(buff);
-    //     auto nxt_turn_val = rr(src_buffs_list, prev_turn, t + 1, false);
-    //     // tmp_dst_for_src[src] = nxt_turn_val;
-    //     tmp_dst_for_src.insert_or_assign(src, nxt_turn_val);
-    //     // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
-    // }
-    //
-    // for (const auto &[key, buff]: buffs) {
-    //     int src = get<0>(key);
-    //     int dst = get<1>(key);
-    //     expr match = buff->B[t]
-    //                  && tmp_dst_for_src.at(src) == dst
-    //                  && tmp_src_for_dst.at(dst) == src;
-    //     expr e1 = (selected_dst_idx_for_src[src][t + 1] == ite(match, tmp_dst_for_src.at(src),
-    //                                                            selected_dst_idx_for_src[src][t]));
-    //     v.emplace_back(e1);
-    //     expr e2 = (selected_src_idx_for_dst[dst][t + 1] == ite(match, tmp_src_for_dst.at(dst),
-    //                                                            selected_src_idx_for_dst[dst][t]));
-    //     v.emplace_back(e2);
-    // }
-
-
-    //
-    // for (const auto &[dst, turn]: selected_src_idx_for_dst) {
-    //     vector<Buff *> src_buffs = get_buffs_for_src(dst);
-    //     vector<int> src_vals;
-    //     for (auto buff: src_buffs) {
-    //         src_vals.push_back(buff->src);
-    //     }
-    //     expr turn_val = slv.ctx.int_val(0);
-    //     for (int i = 1; i <= src_buffs.size(); ++i) {
-    //         int idx = ((src_buffs.size() - i) % src_buffs.size());
-    //         int val = src_vals[idx];
-    //         turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
-    //     }
-    //     res = res && (selected_src_idx_for_dst[dst][0] == turn_val);
-    // }
-    //
-    //
-    // for (const auto &[src, turn]: selected_dst_idx_for_src) {
-    //     vector<Buff *> dst_buffs = get_buffs_for_src(src);
-    //     vector<int> dst_vals;
-    //     for (auto buff: dst_buffs) {
-    //         dst_vals.push_back(buff->dst);
-    //     }
-    //     expr turn_val = slv.ctx.int_val(0);
-    //     for (int i = 1; i <= dst_buffs.size(); ++i) {
-    //         int idx = ((dst_buffs.size() - i) % dst_buffs.size());
-    //         int val = dst_vals[idx];
-    //         turn_val = ite(dst_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
-    //     }
-    //     res = res && (selected_dst_idx_for_src[src][0] == turn_val);
-    // }
-    // return {res};
-}
-
 void LeafBase::print(model mod) {
     cout << var_prefix << endl << "######################################################################" << endl;
     for (const auto &[src_dst, buf]: buffs) {
@@ -600,6 +351,71 @@ void LeafBase::print(model mod) {
     // // cout << str(I[i * k + j], mod, ",").str() << endl;
     // // }
     // // }
+}
+
+vector<NamedExp> LeafBase::winds_old(int i) {
+    const auto Oi = get_buff_list()[i]->O;
+    const auto Ei = get_buff_list()[i]->E;
+    const auto wnd_enq_i = get_buff_list()[i]->wnd_enq;
+    const auto wnd_out_i = get_buff_list()[i]->wnd_out;
+    const auto wnd_enq_nxt_i = get_buff_list()[i]->wnd_enq_nxt;
+    const auto tmp_wnd_enq_i = get_buff_list()[i]->tmp_wnd_enq;
+    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i]->tmp_wnd_enq_nxt;
+    const auto Ci = get_buff_list()[i]->C;
+    vector<NamedExp> nes;
+
+    int cap = buff_cap;
+    // [14]
+    nes.emplace_back(wnd_enq_i[0] == Ei[0], format("WndEnq[{}]@{}", i, 0));
+    nes.emplace_back(wnd_out_i[0] == Oi[0], format("WndOut[{}]@{}", i, 0));
+    nes.emplace_back(wnd_enq_nxt_i[0] == 0, format("WndNxt[{}]@{}", i, 0));
+    for (int j = 1; j < timesteps; ++j) {
+        auto te = tmp_wnd_enq_i[j];
+        auto tn = tmp_wnd_enq_nxt_i[j];
+        // auto to = tmp_wnd_out[i][j];
+        // auto m = match[i][j];
+
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] + E[i][j] <= cap, te == wnd_enq[i][j - 1] + E[i][j] && sum(tn) == 0),
+        // format("WndEnq[{}]@{}", i, j));
+        //
+        // nes.emplace_back(implies(wnd_enq[i][j - 1] <= cap && sum(wnd_enq[i][j - 1] + E[i][j]) > cap,
+        // te == cap && sum(tn) == sum(
+        // wnd_enq[i][j - 1] + E[i][j] + wnd_enq_nxt[i][j - 1]) - cap),
+        // format("WndEnqNxt[{}]@{}", i, j));
+        // nes.emplace_back(
+        // implies(sum(wnd_enq[i][j]) > cap, te == wnd_enq[i][j - 1] && tn == wnd_enq_nxt[i][j - 1] + E[i][j]),
+        // format("next_wnd_enq[{}]@{}", i, j));
+
+        // [15]
+        ev total_sum = wnd_enq_i[j - 1] + wnd_enq_nxt_i[j - 1] + Ei[j];
+        // auto te = ite(total_sum <= c, total_sum, c);
+
+
+        nes.emplace_back((te + tn) == total_sum, format("Update te + tn[{}]@{}", i, j));
+        // [16], [17], [18], [19]
+        nes.emplace_back((!(te < cap && tn > 0)) && (te <= cap) && (tn <= cap) && (wnd_enq_i[j - 1] <= te),
+                         format("Overflow mechanism[{}]@{}", i, j));
+        // [20]
+        // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
+
+        auto to = wnd_out_i[j - 1] + Oi[j];
+        // [21]
+        // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
+        auto m = te <= to;
+        // [22]
+        nes.emplace_back(
+            ite(m, wnd_enq_i[j] == tn, ite(total_sum <= cap, wnd_enq_i[j] == total_sum, wnd_enq_i[j] == total_sum)),
+            format("Update WE[{}]@{}", i, j));
+        // [23]
+        nes.emplace_back(ite(m, wnd_enq_nxt_i[j] == 0, wnd_enq_nxt_i[j] == tn), format("Update WN[{}]@{}", i, j));
+        // [24]
+        nes.emplace_back(ite(m, wnd_out_i[j] == to - te, wnd_out_i[j] == to), format("Update WO[{}]@{}", i, j));
+        // [25]
+        nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j], format("WndOut <= WndEnq[{}]@{}", i, j));
+
+        nes.emplace_back(Ci[j] == wnd_enq_i[j] + wnd_enq_nxt_i[j] - wnd_out_i[j], format("equity[{}]@{}", i, j));
+    }
+    return nes;
 }
 
 vector<NamedExp> LeafBase::inputs(const int i) {
@@ -770,68 +586,3 @@ vector<NamedExp> LeafBase::out() {
     return {merge(res, "out")};
 }
 
-//
-vector<NamedExp> LeafBase::winds_old(int i) {
-    const auto Oi = get_buff_list()[i]->O;
-    const auto Ei = get_buff_list()[i]->E;
-    const auto wnd_enq_i = get_buff_list()[i]->wnd_enq;
-    const auto wnd_out_i = get_buff_list()[i]->wnd_out;
-    const auto wnd_enq_nxt_i = get_buff_list()[i]->wnd_enq_nxt;
-    const auto tmp_wnd_enq_i = get_buff_list()[i]->tmp_wnd_enq;
-    const auto tmp_wnd_enq_nxt_i = get_buff_list()[i]->tmp_wnd_enq_nxt;
-    const auto Ci = get_buff_list()[i]->C;
-    vector<NamedExp> nes;
-
-    int cap = buff_cap;
-    // [14]
-    nes.emplace_back(wnd_enq_i[0] == Ei[0], format("WndEnq[{}]@{}", i, 0));
-    nes.emplace_back(wnd_out_i[0] == Oi[0], format("WndOut[{}]@{}", i, 0));
-    nes.emplace_back(wnd_enq_nxt_i[0] == 0, format("WndNxt[{}]@{}", i, 0));
-    for (int j = 1; j < timesteps; ++j) {
-        auto te = tmp_wnd_enq_i[j];
-        auto tn = tmp_wnd_enq_nxt_i[j];
-        // auto to = tmp_wnd_out[i][j];
-        // auto m = match[i][j];
-
-        // nes.emplace_back(implies(wnd_enq[i][j - 1] + E[i][j] <= cap, te == wnd_enq[i][j - 1] + E[i][j] && sum(tn) == 0),
-        // format("WndEnq[{}]@{}", i, j));
-        //
-        // nes.emplace_back(implies(wnd_enq[i][j - 1] <= cap && sum(wnd_enq[i][j - 1] + E[i][j]) > cap,
-        // te == cap && sum(tn) == sum(
-        // wnd_enq[i][j - 1] + E[i][j] + wnd_enq_nxt[i][j - 1]) - cap),
-        // format("WndEnqNxt[{}]@{}", i, j));
-        // nes.emplace_back(
-        // implies(sum(wnd_enq[i][j]) > cap, te == wnd_enq[i][j - 1] && tn == wnd_enq_nxt[i][j - 1] + E[i][j]),
-        // format("next_wnd_enq[{}]@{}", i, j));
-
-        // [15]
-        ev total_sum = wnd_enq_i[j - 1] + wnd_enq_nxt_i[j - 1] + Ei[j];
-        // auto te = ite(total_sum <= c, total_sum, c);
-
-
-        nes.emplace_back((te + tn) == total_sum, format("Update te + tn[{}]@{}", i, j));
-        // [16], [17], [18], [19]
-        nes.emplace_back((!(te < cap && tn > 0)) && (te <= cap) && (tn <= cap) && (wnd_enq_i[j - 1] <= te),
-                         format("Overflow mechanism[{}]@{}", i, j));
-        // [20]
-        // nes.emplace_back(to == (wnd_out[i][j - 1] + O[i][j]), format("Update to[{}]@{}", i, j));
-
-        auto to = wnd_out_i[j - 1] + Oi[j];
-        // [21]
-        // nes.emplace_back(m == (te <= to), format("Match[{}]@{}", i, j));
-        auto m = te <= to;
-        // [22]
-        nes.emplace_back(
-            ite(m, wnd_enq_i[j] == tn, ite(total_sum <= cap, wnd_enq_i[j] == total_sum, wnd_enq_i[j] == total_sum)),
-            format("Update WE[{}]@{}", i, j));
-        // [23]
-        nes.emplace_back(ite(m, wnd_enq_nxt_i[j] == 0, wnd_enq_nxt_i[j] == tn), format("Update WN[{}]@{}", i, j));
-        // [24]
-        nes.emplace_back(ite(m, wnd_out_i[j] == to - te, wnd_out_i[j] == to), format("Update WO[{}]@{}", i, j));
-        // [25]
-        nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j], format("WndOut <= WndEnq[{}]@{}", i, j));
-
-        nes.emplace_back(Ci[j] == wnd_enq_i[j] + wnd_enq_nxt_i[j] - wnd_out_i[j], format("equity[{}]@{}", i, j));
-    }
-    return nes;
-}

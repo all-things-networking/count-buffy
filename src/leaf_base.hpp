@@ -38,26 +38,31 @@ public:
     map<tuple<int, int>, ev> matched;
 
     LeafBase(SmtSolver &slv,
-            const string &var_prefix,
-            vector<tuple<int, int> > port_list,
-            int time_steps,
-            int pkt_types,
-            int buf_cap,
-            int max_enq,
-            int max_deq);
+             const string &var_prefix,
+             vector<tuple<int, int> > port_list,
+             int time_steps,
+             int pkt_types,
+             int buf_cap,
+             int max_enq,
+             int max_deq);
 
     LeafBase(SmtSolver &slv,
-            const string &var_prefix,
-            map<tuple<int, int>, vector<int> > port_list,
-            int time_steps,
-            int pkt_types,
-            int buf_cap,
-            int max_enq,
-            int max_deq);
+             const string &var_prefix,
+             map<tuple<int, int>, vector<int> > port_list,
+             int time_steps,
+             int pkt_types,
+             int buf_cap,
+             int max_enq,
+             int max_deq);
 
     vector<Buff *> get_buff_list() const;
 
-    vector<NamedExp> out(int t);
+    virtual vector<NamedExp> out(int t) = 0;
+
+    virtual vector<NamedExp> trs(int t) = 0;
+
+    virtual vector<NamedExp> init() = 0;
+
 
     expr rr_for_dst(const vector<Buff *> &buffs, int t, int dst);
 
@@ -67,9 +72,17 @@ public:
 
     vector<Buff *> get_buffs_for_src(int src);
 
-    vector<NamedExp> trs(int t);
+    virtual ev2 get_in_port(int src);
 
-    vector<NamedExp> init();
+    vector<int> get_in_ports();
+
+    vector<int> get_out_ports();
+
+    ev2 get_out_port(int dst);
+
+    void print(model m);
+
+    int num_ports;
 
     vector<NamedExp> base_constrs();
 
@@ -90,18 +103,6 @@ public:
     vector<NamedExp> winds_old(int i);
 
     vector<NamedExp> trs();
-
-    virtual ev2 get_in_port(int src);
-
-    vector<int> get_in_ports();
-
-    vector<int> get_out_ports();
-
-    ev2 get_out_port(int dst);
-
-    void print(model m);
-
-    int num_ports;
 };
 
 

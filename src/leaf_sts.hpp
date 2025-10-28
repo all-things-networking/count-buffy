@@ -26,6 +26,12 @@ public:
             int buf_cap,
             int max_enq,
             int max_deq);
+
+    vector<NamedExp> out(int t) override;
+
+    vector<NamedExp> trs(int t) override;
+
+    vector<NamedExp> init() override;
 };
 
 
