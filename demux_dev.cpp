@@ -86,21 +86,16 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {5}},
-        {{0, 3}, {11}},
+        {{0, 2}, {4}},
+        {{0, 3}, {}},
         {{1, 2}, {}},
         {{1, 3}, {}},
         {{1, 0}, {}},
         {{2, 0}, {}},
-        {{2, 1}, {}}
+        {{2, 1}, {}},
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
-
-    // vector<tuple<int, int> > l1_ports = {
-    //     {0, 2},
-    //     {1, 2},
-    //     {2, 0},
-    //     {2, 1}
-    // };
 
     vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
     l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -110,13 +105,15 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {}},
+        {{0, 2}, {5}},
         {{0, 3}, {}},
         {{1, 0}, {}},
         {{1, 2}, {}},
         {{1, 3}, {}},
         {{2, 0}, {}},
-        {{2, 1}, {}}
+        {{2, 1}, {}},
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
     vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -131,14 +128,16 @@ int main(const int argc, const char *argv[]) {
         {{1, 0}, {}},
         {{1, 2}, {}},
         {{1, 3}, {}},
-        {{2, 0}, {}},
+        {{2, 0}, {4}},
         {{2, 1}, {5}},
-        {{3, 1}, {11}}
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
     vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
     l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
+
 
     LeafSts *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
@@ -168,18 +167,25 @@ int main(const int argc, const char *argv[]) {
                          s2_pkt_type_to_nxt_hop
     );
 
-    auto base1 = l1->base_constrs();
-    auto base1_merged = merge(base1, "base1");
-    slv.add(base1_merged);
+    auto base_s1 = s1->base_constrs();
+    auto base_s1_merged = merge(base_s1, "base_s1");
+    slv.add(base_s1_merged);
 
-    auto base2 = s1->base_constrs();
-    auto base2_merged = merge(base2, "base2");
-    slv.add(base2_merged);
+    auto base_s2 = s2->base_constrs();
+    auto base_s2_merged = merge(base_s2, "base_s2");
+    slv.add(base_s2_merged);
 
-    auto base3 = l2->base_constrs();
-    auto base3_merged = merge(base3, "base3");
-    slv.add(base3_merged);
+    auto base_l1 = l1->base_constrs();
+    auto base_l1_merged = merge(base_l1, "base_l1");
+    slv.add(base_l1_merged);
 
+    auto base_l2 = l2->base_constrs();
+    auto base_l2_merged = merge(base_l2, "base_l2");
+    slv.add(base_l2_merged);
+
+    auto base_l3 = l3->base_constrs();
+    auto base_l3_merged = merge(base_l3, "base_l3");
+    slv.add(base_l3_merged);
 
     slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
     slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
@@ -203,10 +209,12 @@ int main(const int argc, const char *argv[]) {
     ev3 I;
     I.push_back(l1->get_in_port(0));
     I.push_back(l1->get_in_port(1));
+    I.push_back(l2->get_in_port(0));
+    I.push_back(l2->get_in_port(1));
 
     ev3 O;
-    O.push_back(l2->get_out_port(0));
-    O.push_back(l2->get_out_port(1));
+    O.push_back(l3->get_out_port(0));
+    O.push_back(l3->get_out_port(1));
 
     map<int, vector<int> > dst_to_pkt_type;
     for (auto &[pkt_type,dst]: pkt_type_to_dst)
@@ -232,20 +240,23 @@ int main(const int argc, const char *argv[]) {
     }
 
 
+    if (0) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query").negate());
+        auto start_t = high_resolution_clock::now();
+        slv.check_unsat();
+        auto end_t = high_resolution_clock::now();
+        auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
+        slv.s.pop();
+        cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
+    }
+
     slv.s.push();
-    slv.add(NamedExp(query(slv, O), "query").negate());
+    // slv.add({query(slv, O), "query"});
+
     auto start_t = high_resolution_clock::now();
-    slv.check_unsat();
-    auto end_t = high_resolution_clock::now();
-    auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-    slv.s.pop();
-
-    slv.s.push();
-    slv.add({query(slv, O), "query"});
-
-    start_t = high_resolution_clock::now();
     auto mod = slv.check_sat();
-    end_t = high_resolution_clock::now();
+    auto end_t = high_resolution_clock::now();
     auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
 
     cout << "DST" << endl;
@@ -278,10 +289,9 @@ int main(const int argc, const char *argv[]) {
     cout << "s1" << endl << "##################################" << endl;
     s1->print(mod);
 
-    cout << "l2" << endl << "##################################" << endl;
-    l2->print(mod);
+    cout << "l3" << endl << "##################################" << endl;
+    l3->print(mod);
 
-    cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
     cout << "SAT VTIME: " << sat_duration.count() << endl;
     slv.s.pop();
 }
