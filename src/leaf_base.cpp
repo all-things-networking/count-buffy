@@ -40,9 +40,9 @@ map<int, map<int, Buff *> > LeafBase::dst_map_per_src() {
 ev2 LeafBase::get_in_port(int src) {
     vector<Buff *> src_buffs = get_buffs_for_src(src);
     assert(src_buffs.size() > 0);
-    ev2 in = src_buffs[0]->I;
+    ev2 in = src_buffs[0]->getI();
     for (int i = 1; i < src_buffs.size(); ++i) {
-        in = in + src_buffs[i]->I;
+        in = in + src_buffs[i]->getI();
     }
     return in;
 }
@@ -197,7 +197,7 @@ void LeafBase::print(model mod) {
         cout << "--------------" << endl;
         cout << src << " -> " << dst << endl;
         cout << "IN :" << endl;
-        cout << str(buf->I, mod, ",").str() << endl;
+        cout << str(buf->getI(), mod, ",").str() << endl;
         cout << "OUT:" << endl;
         cout << str(buf->O, mod, ",").str() << endl;
         cout << "DST" << endl;
@@ -430,7 +430,7 @@ vector<NamedExp> LeafBase::drops(int i) {
 }
 
 vector<NamedExp> LeafBase::enq_deq_sum(int i) {
-    const auto Ii = get_buff_list()[i]->I;
+    const auto Ii = get_buff_list()[i]->getI();
     const auto Di = get_buff_list()[i]->D;
     const auto Ei = get_buff_list()[i]->E;
 

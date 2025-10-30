@@ -14,7 +14,7 @@ void DemuxSwitch::add_some_constraint(SmtSolver &slv, const string &var_prefix, 
                     int nxt_hop_dst_port = pkt_type_to_nxt_hop[k];
                     if (dst != nxt_hop_dst_port) {
                         string constr_name = format("{}_[{}->{}@{}#{}] == 0", var_prefix, src, dst, t, k);
-                        slv.add(buff->I[t][k] == 0, constr_name);
+                        slv.add(buff->getI()[t][k] == 0, constr_name);
                     }
                 }
             }
@@ -66,7 +66,7 @@ ev2 DemuxSwitch::get_in_port(int src) {
             int nxt_hop_dst_port = pkt_type_to_nxt_hop[k];
             if (dst_buffs.contains(nxt_hop_dst_port)) {
                 Buff *nxt_hop_buff = dst_buffs[nxt_hop_dst_port];
-                val = nxt_hop_buff->I[t][k];
+                val = nxt_hop_buff->getI()[t][k];
             }
             vals.push_back(val);
         }
