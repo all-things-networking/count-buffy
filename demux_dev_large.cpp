@@ -88,13 +88,13 @@ int main(const int argc, const char *argv[]) {
         {{0, 1}, {}},
         {{0, 2}, {5}},
         {{0, 3}, {}},
-        {{1, 2}, {}},
-        {{1, 3}, {}},
-        {{1, 0}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
+        {{1, 0}, {0, 6}},
+        {{1, 2}, {0, 1, 2, 3}},
+        {{1, 3}, {6, 7, 8, 9}},
+        {{2, 0}, {0}},
+        {{2, 1}, {1}},
         {{3, 0}, {6}},
-        {{3, 1}, {}}
+        {{3, 1}, {7}}
     };
 
     vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
@@ -110,10 +110,10 @@ int main(const int argc, const char *argv[]) {
         {{1, 0}, {}},
         {{1, 2}, {}},
         {{1, 3}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
+        {{2, 0}, {2}},
+        {{2, 1}, {3}},
+        {{3, 0}, {8}},
+        {{3, 1}, {9}}
     };
     vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -122,16 +122,16 @@ int main(const int argc, const char *argv[]) {
 
     LeafSts *l3;
     map<tuple<int, int>, vector<int> > l3_ports = {
-        {{0, 1}, {}},
-        {{0, 2}, {}},
-        {{0, 3}, {}},
-        {{1, 0}, {}},
-        {{1, 2}, {}},
-        {{1, 3}, {}},
+        {{0, 1}, {4, 10}},
+        {{0, 2}, {0, 1, 2, 3}},
+        {{0, 3}, {6, 7, 8, 9}},
+        {{1, 0}, {4, 10}},
+        {{1, 2}, {0, 1, 2, 3}},
+        {{1, 3}, {6, 7, 8, 9}},
         {{2, 0}, {4}},
         {{2, 1}, {5}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
+        {{3, 0}, {10}},
+        {{3, 1}, {11}}
     };
     vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
     l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -211,6 +211,8 @@ int main(const int argc, const char *argv[]) {
     I.push_back(l1->get_in_port(1));
     I.push_back(l2->get_in_port(0));
     I.push_back(l2->get_in_port(1));
+    I.push_back(l3->get_in_port(0));
+    I.push_back(l3->get_in_port(1));
 
     ev3 O;
     O.push_back(l3->get_out_port(0));

@@ -128,90 +128,13 @@ vector<Buff *> LeafBase::get_buff_list() const {
     return result;
 }
 
-vector<NamedExp> LeafBase::out(int t) {
-    expr res = slv.ctx.bool_val(true);
-
-    map<int, map<int, int> > dst_src_to_idx;
-    map<int, map<int, int> > src_dst_to_idx;
-
-    auto per_dst = src_map_per_dst();
-    for (const auto &[dst, src_map]: per_dst) {
-        vector<Buff *> src_buffs_list;
-        for (const auto &[src, buff]: src_map)
-            src_buffs_list.push_back(buff);
-        for (int i = 0; i < src_buffs_list.size(); ++i) {
-            auto buff = src_buffs_list[i];
-            dst_src_to_idx[dst][buff->src] = i;
-        }
-    }
-
-    auto per_src = dst_map_per_src();
-    for (const auto &[src, dst_map]: per_src) {
-        vector<Buff *> dst_buffs_list;
-        for (const auto &[dst, buff]: dst_map)
-            dst_buffs_list.push_back(buff);
-        for (int i = 0; i < dst_buffs_list.size(); ++i) {
-            auto buff = dst_buffs_list[i];
-            src_dst_to_idx[src][buff->dst] = i;
-        }
-    }
-
-    // for (const auto &[key, buff]: buffs) {
-    //     int src = get<0>(key);
-    //     int dst = get<1>(key);
-    //
-    //     int src_idx_for_dst = dst_src_to_idx[dst][src];
-    //     int dst_idx_for_src = src_dst_to_idx[src][dst];
-    //
-    //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
-    //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
-    //
-    //     res = res && ite(
-    //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
-    //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
-    //               buff->O[t] == 1, buff->O[t] == 0);
-    // }
-
-    for (const auto &[key, buff]: buffs) {
-        int src = get<0>(key);
-        int dst = get<1>(key);
-        //
-        //     int src_idx_for_dst = dst_src_to_idx[dst][src];
-        //     int dst_idx_for_src = src_dst_to_idx[src][dst];
-        //
-        //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
-        //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
-        //
-        res = res && ite(
-                  buff->B[t] && matched[{src, dst}][t], buff->O[t] == 1, buff->O[t] == 0
-              );
-        // buff->B[t] && dst_turn_for_src[src][t] == dst
-        // && src_turn_for_dst[dst][t] == src,
-        //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
-        //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
-        // buff->O[t] == 1, buff->O[t] == 0);
-        // }
-
-
-        // for (const auto &[dst, turn]: turn_for_dst) {
-        // vector<Buff *> src_buffs = get_buffs_for_dst(dst);
-        // for (int i = 0; i < src_buffs.size(); ++i) {
-        // Buff *buff = src_buffs[i];
-        // res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
-        // res = res && (buff->O[t] == 0);
-    }
-    // }
-    return {res};
-}
-
-expr LeafBase::rr_for_dst(const vector<Buff *> &buffs, int t, int dst) {
+expr LeafBase::rr_for_dst(const vector<Buff *> &buffs, int t, expr prev_turn) {
     vector<int> src_vals;
     for (auto buff: buffs) {
         src_vals.push_back(buff->src);
     }
 
     int count = buffs.size();
-    expr prev_turn = src_turn_for_dst[dst][t - 1];
     expr nxt_turn = prev_turn;
     for (int i = 0; i < count; ++i) {
         int src_i = src_vals[i];
@@ -226,14 +149,13 @@ expr LeafBase::rr_for_dst(const vector<Buff *> &buffs, int t, int dst) {
     return nxt_turn;
 }
 
-expr LeafBase::rr_for_src(const vector<Buff *> &buffs, int t, int src) {
+expr LeafBase::rr_for_src(const vector<Buff *> &buffs, int t, expr prev_turn) {
     vector<int> dst_vals;
     for (auto buff: buffs) {
         dst_vals.push_back(buff->dst);
     }
 
     int count = buffs.size();
-    expr prev_turn = dst_turn_for_src[src][t - 1];
     expr nxt_turn = prev_turn;
     for (int i = 0; i < count; ++i) {
         int dst_i = dst_vals[i];

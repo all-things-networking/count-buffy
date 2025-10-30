@@ -1,0 +1,407 @@
+#include "leaf_sts.hpp"
+
+#include <map>
+#include <ranges>
+
+#include "Buff.hpp"
+#include "prio_sts.hpp"
+#include <set>
+
+using namespace views;
+
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
+                 const int time_steps,
+                 const int pkt_types,
+                 const int buff_cap,
+                 const int max_enq,
+                 const int max_deq
+): LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+}
+
+LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
+                 const int time_steps,
+                 const int pkt_types,
+                 const int buff_cap,
+                 const int max_enq,
+                 const int max_deq
+): LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+}
+
+vector<NamedExp> LeafSts::out(int t) {
+    expr res = slv.ctx.bool_val(true);
+
+    map<int, map<int, int> > dst_src_to_idx;
+    map<int, map<int, int> > src_dst_to_idx;
+
+    // auto per_dst = src_map_per_dst();
+    // for (const auto &[dst, src_map]: per_dst) {
+    //     vector<Buff *> src_buffs_list;
+    //     for (const auto &[src, buff]: src_map)
+    //         src_buffs_list.push_back(buff);
+    //     for (int i = 0; i < src_buffs_list.size(); ++i) {
+    //         auto buff = src_buffs_list[i];
+    //         dst_src_to_idx[dst][buff->src] = i;
+    //     }
+    // }
+    //
+    // auto per_src = dst_map_per_src();
+    // for (const auto &[src, dst_map]: per_src) {
+    //     vector<Buff *> dst_buffs_list;
+    //     for (const auto &[dst, buff]: dst_map)
+    //         dst_buffs_list.push_back(buff);
+    //     for (int i = 0; i < dst_buffs_list.size(); ++i) {
+    //         auto buff = dst_buffs_list[i];
+    //         src_dst_to_idx[src][buff->dst] = i;
+    //     }
+    // }
+
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     int dst = get<1>(key);
+    //
+    //     int src_idx_for_dst = dst_src_to_idx[dst][src];
+    //     int dst_idx_for_src = src_dst_to_idx[src][dst];
+    //
+    //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
+    //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
+    //
+    //     res = res && ite(
+    //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
+    //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
+    //               buff->O[t] == 1, buff->O[t] == 0);
+    // }
+
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        //
+        //     int src_idx_for_dst = dst_src_to_idx[dst][src];
+        //     int dst_idx_for_src = src_dst_to_idx[src][dst];
+        //
+        //     expr sel_dst_idx_for_src = selected_dst_idx_for_src[src][t];
+        //     expr sel_src_idx_for_dst = selected_src_idx_for_dst[dst][t];
+        //
+        res = res && ite(
+                  buff->B[t] && matched[{src, dst}][t], buff->O[t] == 1, buff->O[t] == 0
+              );
+        // buff->B[t] && dst_turn_for_src[src][t] == dst
+        // && src_turn_for_dst[dst][t] == src,
+        //               buff->B[t] && (sel_dst_idx_for_src == slv.ctx.int_val(dst_idx_for_src)) && (
+        //                   sel_src_idx_for_dst == slv.ctx.int_val(src_idx_for_dst)),
+        // buff->O[t] == 1, buff->O[t] == 0);
+        // }
+
+
+        // for (const auto &[dst, turn]: turn_for_dst) {
+        // vector<Buff *> src_buffs = get_buffs_for_dst(dst);
+        // for (int i = 0; i < src_buffs.size(); ++i) {
+        // Buff *buff = src_buffs[i];
+        // res = res && ite(buff->B[t] && (turn[t] == slv.ctx.int_val(i)), buff->O[t] == 1, buff->O[t] == 0);
+        // res = res && (buff->O[t] == 0);
+    }
+    // }
+    return {res};
+}
+
+vector<NamedExp> LeafSts::trs(int t) {
+    auto per_dst = src_map_per_dst();
+    auto per_src = dst_map_per_src();
+
+    map<int, expr> highest_prio_src_for_dst;
+    map<int, expr> highest_prio_dst_for_src;
+
+    map<int, expr> tmp_src_turn_for_dst;
+    map<int, expr> tmp_dst_turn_for_src;
+
+    vector<NamedExp> v;
+    for (const auto &[dst, dst_buffs_map]: per_dst) {
+        auto prev_turn = src_turn_for_dst[dst][t];
+        vector<Buff *> dst_buffs_list;
+        for (const auto &[src, buff]: dst_buffs_map)
+            dst_buffs_list.push_back(buff);
+        auto nxt_turn_val = rr_for_dst(dst_buffs_list, t + 1, dst);
+        // tmp_src_for_dst.insert(dst, nxt_turn_val);
+        // tmp_src_for_dst[dst] = nxt_turn_val;
+        tmp_src_turn_for_dst.insert_or_assign(dst, nxt_turn_val);
+        // src_turn_for_dst[dst].push_back(nxt_turn_val);
+        // highest_prio_src_for_dst.insert_or_assign(dst, nxt_turn_val);
+        // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+        // tmp_per_dst[dst].push_back(nxt_turn_val);
+    }
+
+    for (const auto &[src, src_buffs_map]: per_src) {
+        auto prev_turn = dst_turn_for_src[src][t];
+        vector<Buff *> src_buffs_list;
+        for (const auto &[src, buff]: src_buffs_map)
+            src_buffs_list.push_back(buff);
+        auto nxt_turn_val = rr_for_src(src_buffs_list, t + 1, TODO);
+        // tmp_dst_for_src[src] = nxt_turn_val;
+        // highest_prio_dst_for_src.insert_or_assign(src, nxt_turn_val);
+        tmp_dst_turn_for_src.insert_or_assign(src, nxt_turn_val);
+        // dst_turn_for_src[src].push_back(nxt_turn_val);
+        // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
+        // tmp_per_src[src].push_back(nxt_turn_val);
+    }
+
+
+    for (const auto &[src, src_buffs_map]: per_src) {
+        expr m = slv.ctx.bool_val(false);
+        for (const auto &[dst, buff]: src_buffs_map) {
+            m = m || matched[{src, dst}][t];
+        }
+        expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
+        expr &prev_turn_for_src = dst_turn_for_src[src][t];
+        tmp_per_src[src].push_back(cur_turn_for_src);
+        dst_turn_for_src[src].push_back(ite(m, cur_turn_for_src, prev_turn_for_src));
+    }
+
+    for (const auto &[dst, dst_buffs_map]: per_dst) {
+        expr m = slv.ctx.bool_val(false);
+        for (const auto &[src, buff]: dst_buffs_map) {
+            m = m || matched[{src, dst}][t];
+        }
+        expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
+        expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
+        tmp_per_dst[dst].push_back(cur_turn_for_dst);
+        src_turn_for_dst[dst].push_back(ite(m, cur_turn_for_dst, prev_turn_for_dst));
+    }
+
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        // expr &cur_turn_for_src = tmp_dst_turn_for_src.at(src);
+        // expr &prev_turn_for_src = dst_turn_for_src[src][t];
+
+        // expr &cur_turn_for_dst = tmp_src_turn_for_dst.at(dst);
+        // expr &prev_turn_for_dst = src_turn_for_dst[dst][t];
+
+        expr &cand_turn_for_src = tmp_per_src[src][t + 1];
+        expr &cand_turn_for_dst = tmp_per_dst[dst][t + 1];
+
+        expr match_case = buff->B[t + 1] && !matched[{src, dst}][t] && (
+                              cand_turn_for_dst == src && cand_turn_for_src == dst
+                          );
+
+        expr match_uncase = buff->B[t + 1] && matched[{src, dst}][t] && (
+                                src_turn_for_dst.at(dst)[t + 1] == src && dst_turn_for_src.at(src)[t + 1] == dst
+                            );
+
+        matched[{src, dst}].push_back(match_case || match_uncase);
+        // expr match = buff->B[t + 1]
+        //              && dst_turn_for_src.at(src)[t + 1] == dst
+        //              && src_turn_for_dst.at(dst)[t + 1] == src;
+        // matched[{src, dst}].push_back(match_case);
+        // matched[{src, dst}].push_back(ite(match_case, match, slv.ctx.bool_val(false)));
+        // dst_turn_for_src[src].push_back(ite(match, cur_turn_for_src, prev_turn_for_src));
+        // src_turn_for_dst[dst].push_back(ite(match, cur_turn_for_dst, prev_turn_for_dst));
+        // expr e1 = (matched_dst_for_src[src][t + 1] == ite(match, highest_prio_dst_for_src.at(src),
+        //                                                   matched_dst_for_src[src][t]));
+        // v.emplace_back(e1);
+        // expr e2 = (matched_src_for_dst[dst][t + 1] == ite(match, highest_prio_src_for_dst.at(dst),
+        //                                                   matched_src_for_dst[dst][t]));
+        // v.emplace_back(e2);
+    }
+
+    set<int> srcs;
+    set<int> dsts;
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        srcs.insert(src);
+        dsts.insert(dst);
+    }
+
+    for (int src: srcs) {
+        for (int d: dsts) {
+            expr other_false = slv.ctx.bool_val(true);
+            for (int dp: dsts) {
+                if (d == dp)
+                    continue;
+                other_false = other_false && (!matched[{src, dp}][t + 1]);
+            }
+            expr e = implies(matched[{src, d}][t + 1], other_false);
+            v.emplace_back(e);
+        }
+    }
+
+    for (int dst: dsts) {
+        for (int s: srcs) {
+            expr other_false = slv.ctx.bool_val(true);
+            for (int sp: srcs) {
+                if (s == sp)
+                    continue;
+                other_false = other_false && (!matched[{sp, dst}][t + 1]);
+            }
+            expr e = implies(matched[{s, dst}][t + 1], other_false);
+            v.emplace_back(e);
+        }
+    }
+
+
+    return v;
+}
+
+vector<NamedExp> LeafSts::init() {
+    vector<NamedExp> v;
+
+    auto per_dst = src_map_per_dst();
+    for (const auto &[dst, src_map]: per_dst) {
+        vector<Buff *> src_buffs_of_dst;
+        for (const auto &[src, buff]: src_map)
+            src_buffs_of_dst.push_back(buff);
+
+        int count = src_buffs_of_dst.size();
+        expr x = slv.ctx.int_val(src_buffs_of_dst[count - 1]->src);
+        // tmp_per_dst[dst].push_back(x);
+        for (int j = 2; j <= count; ++j) {
+            int l = count - j;
+            int val = src_buffs_of_dst[l]->src;
+            x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);
+            // tmp_per_dst[dst].push_back(slv.ctx.int_val(val));
+            // tmp_per_dst[dst].push_back(src_buffs_of_dst[l]->B[0]);
+            // tmp_per_dst[dst].push_back(x);
+        }
+        src_turn_for_dst[dst].push_back(x);
+        tmp_per_dst[dst].push_back(x);
+        // tmp_per_dst[dst].push_back(src_buffs_of_dst[count-1]->B[0]);
+    }
+
+    auto per_src = dst_map_per_src();
+    map<int, expr> highest_prio_dst_for_src;
+    for (const auto &[src, dst_map]: per_src) {
+        vector<Buff *> dst_buffs_of_src;
+        for (const auto &[dst, buff]: dst_map)
+            dst_buffs_of_src.push_back(buff);
+
+        int count = dst_buffs_of_src.size();
+        expr x = slv.ctx.int_val(dst_buffs_of_src[count - 1]->dst);
+        for (int j = 2; j <= count; ++j) {
+            int l = (count - j);
+            int val = dst_buffs_of_src[l]->dst;
+            x = ite(dst_buffs_of_src[l]->B[0], slv.ctx.int_val(val), x);
+        }
+        dst_turn_for_src[src].push_back(x);
+        tmp_per_src[src].push_back(x);
+        // tmp_per_src[src].push_back(dst_buffs_of_src[count-1]->B[0]);
+    }
+
+    // for (const auto &[src, dst_map]: per_src) {
+    // expr e1 = (matched_dst_for_src[src][0] == highest_prio_dst_for_src.at(src));
+    // per_src.insert_or_assign(src, highest_prio_dst_for_src.at(src));
+    // tmp_per_src[src].push_back(highest_prio_dst_for_src.at(src));
+    // v.emplace_back(e1, format("Highest Prio Dst for Src=[{}] @0", src));
+    // }
+
+    // for (const auto &[dst, dst_map]: per_dst) {
+    // expr e2 = (src_turn_for_dst[dst][0] == highest_prio_src_for_dst.at(dst));
+    // per_dst.insert_or_assign(dst, highest_prio_src_for_dst.at(dst));
+    // tmp_per_dst[dst].push_back(highest_prio_src_for_dst.at(dst));
+    // v.emplace_back(e2);
+    // }
+    //
+    //
+    for (const auto &[key, buff]: buffs) {
+        int src = get<0>(key);
+        int dst = get<1>(key);
+        expr m = buff->B[0] && src_turn_for_dst[dst][0] == src && dst_turn_for_src[src][0] == dst;
+        matched[{src, dst}].push_back(m);
+        //
+        //
+    }
+    return v;
+
+
+    // map<int, map<int, int> > dst_src_to_idx;
+    // map<int, map<int, int> > src_dst_to_idx;
+    //
+    // auto per_dst = get_per_dst_buff_map();
+    // auto per_src = get_per_src_buff_map();
+    //
+    // map<int, expr> tmp_src_for_dst;
+    // map<int, expr> tmp_dst_for_src;
+    //
+    // vector<NamedExp> v;
+    // for (const auto &[key, buff]: buffs) {
+    //     int dst = get<1>(key);
+    //     auto prev_turn = selected_src_idx_for_dst[dst][t];
+    //     auto dst_buffs = per_dst[dst];
+    //     vector<Buff *> dst_buffs_list;
+    //     for (const auto &[src, buff]: dst_buffs)
+    //         dst_buffs_list.push_back(buff);
+    //
+    //     int count = dst_buffs_list.size();
+    //     expr nxt_turn = slv.ctx.int_val(0);
+    //     expr x = slv.ctx.int_val(-1);
+    //     for (int j = 0; j < count; ++j) {
+    //         int val = dst_buffs_list[j]->src;
+    //         x = ite(buffs[l]->B[t], slv.ctx.int_val(val), x);
+    //     }
+    //     nxt_turn = ite(prev_turn == slv.ctx.int_val(vals[i]), x, nxt_turn);
+    //     auto nxt_turn_val = rr(dst_buffs_list, prev_turn, 0, true);
+    //     // tmp_src_for_dst.insert(dst, nxt_turn_val);
+    //     // tmp_src_for_dst[dst] = nxt_turn_val;
+    //     tmp_src_for_dst.insert_or_assign(dst, nxt_turn_val);
+    //     // v.emplace_back(selected_src_idx_for_dst[dst][t + 1] == nxt_turn_val);
+    // }
+    //
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     auto prev_turn = selected_dst_idx_for_src[src][t];
+    //     auto src_buffs = per_src[src];
+    //     vector<Buff *> src_buffs_list;
+    //     for (const auto &[src, buff]: src_buffs)
+    //         src_buffs_list.push_back(buff);
+    //     auto nxt_turn_val = rr(src_buffs_list, prev_turn, t + 1, false);
+    //     // tmp_dst_for_src[src] = nxt_turn_val;
+    //     tmp_dst_for_src.insert_or_assign(src, nxt_turn_val);
+    //     // v.emplace_back(selected_dst_idx_for_src[src][t + 1] == nxt_turn_val);
+    // }
+    //
+    // for (const auto &[key, buff]: buffs) {
+    //     int src = get<0>(key);
+    //     int dst = get<1>(key);
+    //     expr match = buff->B[t]
+    //                  && tmp_dst_for_src.at(src) == dst
+    //                  && tmp_src_for_dst.at(dst) == src;
+    //     expr e1 = (selected_dst_idx_for_src[src][t + 1] == ite(match, tmp_dst_for_src.at(src),
+    //                                                            selected_dst_idx_for_src[src][t]));
+    //     v.emplace_back(e1);
+    //     expr e2 = (selected_src_idx_for_dst[dst][t + 1] == ite(match, tmp_src_for_dst.at(dst),
+    //                                                            selected_src_idx_for_dst[dst][t]));
+    //     v.emplace_back(e2);
+    // }
+
+
+    //
+    // for (const auto &[dst, turn]: selected_src_idx_for_dst) {
+    //     vector<Buff *> src_buffs = get_buffs_for_src(dst);
+    //     vector<int> src_vals;
+    //     for (auto buff: src_buffs) {
+    //         src_vals.push_back(buff->src);
+    //     }
+    //     expr turn_val = slv.ctx.int_val(0);
+    //     for (int i = 1; i <= src_buffs.size(); ++i) {
+    //         int idx = ((src_buffs.size() - i) % src_buffs.size());
+    //         int val = src_vals[idx];
+    //         turn_val = ite(src_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
+    //     }
+    //     res = res && (selected_src_idx_for_dst[dst][0] == turn_val);
+    // }
+    //
+    //
+    // for (const auto &[src, turn]: selected_dst_idx_for_src) {
+    //     vector<Buff *> dst_buffs = get_buffs_for_src(src);
+    //     vector<int> dst_vals;
+    //     for (auto buff: dst_buffs) {
+    //         dst_vals.push_back(buff->dst);
+    //     }
+    //     expr turn_val = slv.ctx.int_val(0);
+    //     for (int i = 1; i <= dst_buffs.size(); ++i) {
+    //         int idx = ((dst_buffs.size() - i) % dst_buffs.size());
+    //         int val = dst_vals[idx];
+    //         turn_val = ite(dst_buffs[idx]->B[0], slv.ctx.int_val(val), turn_val);
+    //     }
+    //     res = res && (selected_dst_idx_for_src[src][0] == turn_val);
+    // }
+    // return {res};
+}

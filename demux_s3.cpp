@@ -65,8 +65,6 @@ int main(const int argc, const char *argv[]) {
     LeafSts *s1;
     vector<tuple<int, int> > s1_ports = {
         {0, 1},
-        {0, 3},
-        {2, 1},
         {2, 3}
     };
     vector s1_pkt_type_to_nxt_hop = {1, 3};
@@ -76,10 +74,8 @@ int main(const int argc, const char *argv[]) {
 
     // in_port, time, type -> count
     map<tuple<int, int, int>, int> ins = {
-        {{0, 0, 0}, 2},
-        {{0, 0, 1}, 2},
-        {{2, 0, 0}, 2},
-        {{2, 0, 1}, 2}
+        {{0, 1, 0}, 2},
+        {{2, 1, 1}, 2}
     };
     auto constr = add_constr(s1, ins);
     slv.add(constr);

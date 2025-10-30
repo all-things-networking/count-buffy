@@ -64,9 +64,9 @@ public:
     virtual vector<NamedExp> init() = 0;
 
 
-    expr rr_for_dst(const vector<Buff *> &buffs, int t, int dst);
+    expr rr_for_dst(const vector<Buff *> &buffs, int t, expr prev_turn);
 
-    expr rr_for_src(const vector<Buff *> &buffs, int t, int src);
+    expr rr_for_src(const vector<Buff *> &buffs, int t, expr prev_turn);
 
     vector<Buff *> get_buffs_for_dst(int dst);
 

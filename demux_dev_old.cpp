@@ -86,14 +86,14 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {5}},
+        {{0, 2}, {4}},
         {{0, 3}, {}},
         {{1, 2}, {}},
         {{1, 3}, {}},
         {{1, 0}, {}},
         {{2, 0}, {}},
         {{2, 1}, {}},
-        {{3, 0}, {6}},
+        {{3, 0}, {}},
         {{3, 1}, {}}
     };
 
@@ -105,7 +105,7 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {4}},
+        {{0, 2}, {5}},
         {{0, 3}, {}},
         {{1, 0}, {}},
         {{1, 2}, {}},

@@ -39,8 +39,7 @@ expr link_ports(ev2 out, ev2 in) {
     return e;
 }
 
-vector<NamedExp> add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
-    vector<NamedExp> v;
+expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
     expr e = sts->slv.ctx.bool_val(true);
     auto in_ports = sts->get_in_ports();
     for (int port: in_ports) {
@@ -52,38 +51,32 @@ vector<NamedExp> add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
                     val = inp[{port, t, k}];
                     cout << "INCLUDES: " << port << "@" << t << " -> " << k << endl;
                 }
-                v.emplace_back(in_port[t][k] == val, format("input p{}_t{}_k{}", port, t, k));
-                // e = e && in_port[t][k] == val;
+                e = e && in_port[t][k] == val;
             }
         }
     }
-    return v;
+    return e;
 }
 
 int main(const int argc, const char *argv[]) {
     SmtSolver slv;
     LeafSts *s1;
     vector<tuple<int, int> > s1_ports = {
-        {0, 1},
-        {0, 3},
-        {2, 1},
-        {2, 3}
+        {2, 0},
+        {2, 1}
     };
-    vector s1_pkt_type_to_nxt_hop = {1, 3};
+    vector s1_pkt_type_to_nxt_hop = {0, 1};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop
     );
 
     // in_port, time, type -> count
     map<tuple<int, int, int>, int> ins = {
-        {{0, 0, 0}, 2},
-        {{0, 0, 1}, 2},
         {{2, 0, 0}, 2},
         {{2, 0, 1}, 2}
     };
     auto constr = add_constr(s1, ins);
-    slv.add(constr);
-    // slv.add({constr, "inp"});
+    slv.add({constr, "inp"});
 
     auto base1 = s1->base_constrs();
     auto base1_merged = merge(base1, "base1");
