@@ -259,6 +259,15 @@ int main(const int argc, const char *argv[]) {
     auto end_t = high_resolution_clock::now();
     auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
 
+    cout << "Valid" << endl;
+    for (int i = 0; i < I.size(); ++i) {
+        for (int t = 0; t < I[0].size(); ++t) {
+            expr e = valid_meta(I, slv, i, t);
+            cout << mod.eval(e) << ", ";
+        }
+        cout << endl;
+    }
+
     cout << "DST" << endl;
     for (int i = 0; i < I.size(); ++i) {
         for (int t = 0; t < I[0].size(); ++t) {

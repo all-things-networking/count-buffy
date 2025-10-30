@@ -71,22 +71,29 @@ expr ecmp_val(ev3 &I, SmtSolver &slv, map<int, vector<int> > ecmp_to_pkt_type, i
     return e;
 }
 
-expr uniq(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps) {
-    expr res = slv.ctx.bool_val(true);
+vector<NamedExp> uniq(ev3 &I, SmtSolver &slv, map<int, vector<int> > dst_to_pkt_type, int num_buffs, int timesteps) {
+    vector<NamedExp> v;
     for (int t = 0; t < timesteps; ++t) {
         for (int i = 0; i < num_buffs; ++i) {
             for (int j = 0; j < num_buffs; ++j) {
                 if (i == j)
                     continue;
-                expr valid_i = valid_meta(I, slv, i, t);
-                expr valid_j = valid_meta(I, slv, j, t);
-                // expr e = implies(valid_i && valid_j,
-                //                  dst_val(I, slv, dst_to_pkt_type, i, t) !=
-                //                  dst_val(I, slv, dst_to_pkt_type, j, t));
-                expr e = (dst_val(I, slv, dst_to_pkt_type, i, t) !=
-                          dst_val(I, slv, dst_to_pkt_type, j, t));
-                res = res && e;
+                expr diff = (dst_val(I, slv, dst_to_pkt_type, i, t) !=
+                             dst_val(I, slv, dst_to_pkt_type, j, t));
+                expr neg = (dst_val(I, slv, dst_to_pkt_type, i, t) == -1
+                            && dst_val(I, slv, dst_to_pkt_type, j, t) == -1);
+                v.emplace_back(diff || neg, format("unique_t{}_i{}_j{}", t, i, j));
             }
+        }
+    }
+    return v;
+}
+
+expr valid(ev3 &I, SmtSolver &slv, int num_buffs, int timesteps) {
+    expr res = slv.ctx.bool_val(true);
+    for (int i = 0; i < num_buffs; ++i) {
+        for (int t = 0; t < timesteps; ++t) {
+            res = res && valid_meta(I, slv, i, t);
         }
     }
     return res;
