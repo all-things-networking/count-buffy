@@ -89,12 +89,12 @@ int main(const int argc, const char *argv[]) {
         {{0, 2}, {5}},
         {{0, 3}, {}},
         {{1, 2}, {}},
-        {{1, 3}, {}},
+        {{1, 3}, {9}},
         {{1, 0}, {}},
         {{2, 0}, {}},
         {{2, 1}, {}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
+        {{3, 0}, {6}},
+        {{3, 1}, {7}}
     };
 
     vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
@@ -113,7 +113,7 @@ int main(const int argc, const char *argv[]) {
         {{2, 0}, {}},
         {{2, 1}, {}},
         {{3, 0}, {}},
-        {{3, 1}, {}}
+        {{3, 1}, {9}}
     };
     vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -124,10 +124,10 @@ int main(const int argc, const char *argv[]) {
     map<tuple<int, int>, vector<int> > l3_ports = {
         {{0, 1}, {}},
         {{0, 2}, {}},
-        {{0, 3}, {}},
+        {{0, 3}, {6}},
         {{1, 0}, {}},
         {{1, 2}, {}},
-        {{1, 3}, {}},
+        {{1, 3}, {7}},
         {{2, 0}, {4}},
         {{2, 1}, {5}},
         {{3, 0}, {}},
@@ -249,6 +249,7 @@ int main(const int argc, const char *argv[]) {
         auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
         slv.s.pop();
         cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
+        exit(0);
     }
 
     slv.s.push();

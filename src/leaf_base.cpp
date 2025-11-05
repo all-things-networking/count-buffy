@@ -11,6 +11,8 @@
 #include "prio_sts.hpp"
 #include <set>
 
+#include "SparseBuff.hpp"
+
 using namespace views;
 
 const int MAX_I = 10;
