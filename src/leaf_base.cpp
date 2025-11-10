@@ -84,14 +84,14 @@ ev2 LeafBase::get_out_port(int dst) {
 
 
 LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
-                 const int time_steps,
-                 const int pkt_types,
-                 const int buff_cap,
-                 const int max_enq,
-                 const int max_deq
-): slv(slv), var_prefix(move(var_prefix)),
-   timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
-   max_deq(max_deq) {
+                   const int time_steps,
+                   const int pkt_types,
+                   const int buff_cap,
+                   const int max_enq,
+                   const int max_deq
+) : slv(slv), var_prefix(move(var_prefix)),
+    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
+    max_deq(max_deq) {
     for (auto src_dst: port_list) {
         int src = get<0>(src_dst);
         int dst = get<1>(src_dst);
@@ -103,19 +103,21 @@ LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, vector<tuple<int, i
 }
 
 LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
-                 const int time_steps,
-                 const int pkt_types,
-                 const int buff_cap,
-                 const int max_enq,
-                 const int max_deq
-): slv(slv), var_prefix(move(var_prefix)),
-   timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
-   max_deq(max_deq) {
+                   const int time_steps,
+                   const int pkt_types,
+                   const int buff_cap,
+                   const int max_enq,
+                   const int max_deq
+) : slv(slv), var_prefix(move(var_prefix)),
+    timesteps(time_steps), pkt_types(pkt_types), buff_cap(buff_cap), max_enq(max_enq),
+    max_deq(max_deq) {
     for (auto src_dst_pkt_type: port_list) {
         auto src_dst = get<0>(src_dst_pkt_type);
         auto used_pkt_types = get<1>(src_dst_pkt_type);
         int src = get<0>(src_dst);
         int dst = get<1>(src_dst);
+        if (used_pkt_types.empty())
+            continue;
         Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
                               pkt_types, max_enq, max_deq, buff_cap, src, dst, used_pkt_types);
         buffs[{src, dst}] = buff;
@@ -350,15 +352,18 @@ vector<NamedExp> LeafBase::inputs(const int i) {
     extend(res, drops(i));
     extend(res, enq_deq_sum(i));
     if (this->use_win) {
-        extend(res, winds_old(i));
-        // extend(res, winds(i));
+        // extend(res, winds_old(i));
+        extend(res, winds(i));
     }
     return res;
 }
 
 vector<NamedExp> LeafBase::base_constrs() {
     vector<NamedExp> res;
-    for (int i = 0; i < buffs.size(); ++i) {
+    auto buffs_list = get_buff_list();
+    for (int i = 0; i < buffs_list.size(); ++i) {
+        if (buffs_list[i]->empty)
+            continue;
         auto ie = inputs(i);
         res.insert(res.end(), ie.begin(), ie.end());
     }
@@ -510,4 +515,3 @@ vector<NamedExp> LeafBase::out() {
     }
     return {merge(res, "out")};
 }
-
