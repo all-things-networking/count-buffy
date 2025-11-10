@@ -15,7 +15,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int
                  const int buff_cap,
                  const int max_enq,
                  const int max_deq
-): LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+) : LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
 }
 
 LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
@@ -24,7 +24,7 @@ LeafSts::LeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, 
                  const int buff_cap,
                  const int max_enq,
                  const int max_deq
-): LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+) : LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
 }
 
 vector<NamedExp> LeafSts::out(int t) {
@@ -36,6 +36,8 @@ vector<NamedExp> LeafSts::out(int t) {
     for (const auto &[key, buff]: buffs) {
         int src = get<0>(key);
         int dst = get<1>(key);
+        if (buff->empty)
+            continue;
         res = res && ite(
                   buff->B[t] && matched[{src, dst}][t], buff->O[t] == 1, buff->O[t] == 0
               );
