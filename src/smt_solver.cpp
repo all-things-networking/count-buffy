@@ -9,7 +9,7 @@
 
 #include "IntSeq.hpp"
 
-SmtSolver::SmtSolver(): s(ctx) {
+SmtSolver::SmtSolver() : s(ctx) {
     params p(ctx);
     p.set("random_seed", 600u);
     s.set(p);
@@ -17,7 +17,7 @@ SmtSolver::SmtSolver(): s(ctx) {
     int_vars = 0;
 }
 
-SmtSolver::SmtSolver(unsigned int random_seed): s(ctx) {
+SmtSolver::SmtSolver(unsigned int random_seed) : s(ctx) {
     params p(ctx);
     p.set("random_seed", random_seed);
     s.set(p);
@@ -31,6 +31,16 @@ ev &SmtSolver::bv(const int k, const string &name) {
         string vname = name;
         vname += "_" + to_string(i);
         expr e = ctx.bool_const(vname.c_str());
+        bool_vars++;
+        result->push_back(e);
+    }
+    return *result;
+}
+
+ev &SmtSolver::bv(const int k, const bool &val) {
+    const auto result = new vector<expr>[k];
+    for (int i = 0; i < k; i++) {
+        expr e = ctx.bool_val(val);
         bool_vars++;
         result->push_back(e);
     }
@@ -71,18 +81,36 @@ ev &SmtSolver::iv(const int k, const string &name) {
     return *result;
 }
 
-ev &SmtSolver::iv(const int k, const string &name, vector<int> pkt_types) {
+ev &SmtSolver::iv(const int k, const int const_val) {
     auto *result = new vector<expr>[k];
     for (int i = 0; i < k; i++) {
-        string vname = name;
-        vname += "_" + to_string(i);
-        expr e = ctx.int_val(0);
-        if (ranges::find(pkt_types, i) != pkt_types.end()) {
-            e = ctx.int_const(vname.c_str());
-        }
+        expr e = ctx.int_val(const_val);
         result->push_back(e);
         int_vars++;
     }
+    return *result;
+}
+
+ev &SmtSolver::iv(const int k, const string &name, vector<int> pkt_types) {
+    auto *result = new vector<expr>[k];
+    for (int i = 0; i < pkt_types.size(); i++) {
+        string vname = name;
+        vname += "_" + to_string(i) + "->" + to_string(pkt_types[i]);
+        expr e = ctx.int_val(0);
+        e = ctx.int_const(vname.c_str());
+        result->push_back(e);
+        int_vars++;
+    }
+    // for (int i = 0; i < k; i++) {
+    //     string vname = name;
+    //     vname += "_" + to_string(i);
+    //     expr e = ctx.int_val(0);
+    //     if (ranges::find(pkt_types, i) != pkt_types.end()) {
+    //         e = ctx.int_const(vname.c_str());
+    //     }
+    //     result->push_back(e);
+    //     int_vars++;
+    // }
     return *result;
 }
 
@@ -116,6 +144,15 @@ ev2 &SmtSolver::ivv(const int m, const int k, const string &name) {
         string vname = name;
         vname += "_" + to_string(i);
         auto v = iv(k, vname);
+        result->push_back(v);
+    }
+    return *result;
+}
+
+ev2 &SmtSolver::ivv(const int m, const int k, int const_val) {
+    const auto result = new vector<ev>[m];
+    for (int i = 0; i < m; i++) {
+        auto v = iv(k, const_val);
         result->push_back(v);
     }
     return *result;

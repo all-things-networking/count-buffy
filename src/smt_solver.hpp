@@ -29,11 +29,15 @@ public:
 
     ev &bv(int k, const string &name);
 
+    ev &bv(int k, const bool &val);
+
     ev2 &bvv(int m, int k, const string &name);
 
     ev3 &bvvv(int n, int m, int k, const string &name);
 
     ev &iv(int k, const string &name);
+
+    ev &iv(int k, int const_val);
 
     ev &iv(int k, const string &name, vector<int> pkt_types);
 
@@ -42,6 +46,8 @@ public:
     ev2 &svv(int m, int k, const string &name);
 
     ev2 &ivv(int m, int k, const string &name);
+
+    ev2 &ivv(int m, int k, int const_val);
 
     ev2 &ivv(int m, int k, const string &name, vector<int> pkt_types);
 
