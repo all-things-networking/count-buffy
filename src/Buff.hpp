@@ -23,9 +23,11 @@ public:
     Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int max_enq, int max_deq, int buf_cap,
          int src, int dst, vector<int> used_pkt_types);
 
-    // Getter for input events matrix I
+    Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int src, int dst);
+
     virtual ev2 getI() const { return I; }
-    // Getters for other fields
+    virtual ev2 getExpandedI() const;
+    virtual ev2 getExpandedO() const;
     virtual ev2 getE() const { return E; }
     virtual ev2 getD() const { return D; }
     virtual ev getB() const { return B; }
@@ -41,6 +43,7 @@ public:
     virtual ev getMatch() const { return match; }
 
     SmtSolver &slv;
+    ev2 I;
     ev2 E;
     ev2 D;
     ev B;
@@ -56,9 +59,12 @@ public:
     ev match;
     int src;
     int dst;
+    map<int,int> get_pkt_type_to_local_vec_idx() const;
+    bool empty;
 
 private:
-    ev2 I;
+    vector<int> used_pkt_types;
+    int pkt_types;
 };
 
 
