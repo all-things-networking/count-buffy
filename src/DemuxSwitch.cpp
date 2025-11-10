@@ -25,20 +25,20 @@ void DemuxSwitch::add_some_constraint(SmtSolver &slv, const string &var_prefix, 
 DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
                          int time_steps,
                          int pkt_types, int buf_cap, int max_enq, int max_deq,
-                         vector<int> pkt_type_to_nxt_hop): LeafSts(
-                                                               slv, var_prefix, port_list, time_steps, pkt_types,
-                                                               buf_cap, max_enq, max_deq),
-                                                           pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
-    add_some_constraint(slv, var_prefix, pkt_types, pkt_type_to_nxt_hop);
+                         vector<int> pkt_type_to_nxt_hop) : LeafSts(
+                                                                slv, var_prefix, port_list, time_steps, pkt_types,
+                                                                buf_cap, max_enq, max_deq),
+                                                            pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
+    // add_some_constraint(slv, var_prefix, pkt_types, pkt_type_to_nxt_hop);
 }
 
 DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list, int time_steps,
                          int pkt_types, int buf_cap, int max_enq, int max_deq,
-                         vector<int> pkt_type_to_nxt_hop): LeafSts(
-                                                               slv, var_prefix, port_list, time_steps, pkt_types,
-                                                               buf_cap, max_enq, max_deq),
-                                                           pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
-    add_some_constraint(slv, var_prefix, pkt_types, pkt_type_to_nxt_hop);
+                         vector<int> pkt_type_to_nxt_hop) : LeafSts(
+                                                                slv, var_prefix, port_list, time_steps, pkt_types,
+                                                                buf_cap, max_enq, max_deq),
+                                                            pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
+    // add_some_constraint(slv, var_prefix, pkt_types, pkt_type_to_nxt_hop);
 }
 
 map<int, Buff *> DemuxSwitch::get_dst_map(int src) {
@@ -66,7 +66,8 @@ ev2 DemuxSwitch::get_in_port(int src) {
             int nxt_hop_dst_port = pkt_type_to_nxt_hop[k];
             if (dst_buffs.contains(nxt_hop_dst_port)) {
                 Buff *nxt_hop_buff = dst_buffs[nxt_hop_dst_port];
-                val = nxt_hop_buff->getI()[t][k];
+                auto I = nxt_hop_buff->getExpandedI();
+                val = I[t][k];
             }
             vals.push_back(val);
         }
