@@ -42,9 +42,9 @@ map<int, map<int, Buff *> > LeafBase::dst_map_per_src() {
 ev2 LeafBase::get_in_port(int src) {
     vector<Buff *> src_buffs = get_buffs_for_src(src);
     assert(src_buffs.size() > 0);
-    ev2 in = src_buffs[0]->getI();
+    ev2 in = src_buffs[0]->getExpandedI();
     for (int i = 1; i < src_buffs.size(); ++i) {
-        in = in + src_buffs[i]->getI();
+        in = in + src_buffs[i]->getExpandedI();
     }
     return in;
 }
