@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter, MaxNLocator
 
-TC = "loom.mem"
+TC = "leaf"
 
 plt.rcParams["font.size"] = 24
 plt.rcParams["font.weight"] = "bold"
@@ -47,7 +47,7 @@ def add_fperf_df(tc, buf_size, dfs):
 
 dfs = []
 for i in range(501):
-    add_buffy_df(TC, i, dfs)
+    # add_buffy_df(TC, i, dfs)
     add_fperf_df(TC, i, dfs)
 
 df = pd.concat(dfs)
@@ -102,7 +102,7 @@ for i, (model, group) in enumerate(summary.groupby("model")):
 # plt.fill_between(summary['buf_size'], summary['mean'], summary['p95'], color='red', alpha=0.3, data=summary)
 leg = plt.legend()
 leg.set_title(None)
-plt.ylim(0, 250)
+plt.ylim(0, 2000)
 # plt.ylabel("Verification Time (s)")
 plt.ylabel("")
 plt.tight_layout()
