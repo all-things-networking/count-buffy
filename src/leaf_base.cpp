@@ -72,11 +72,12 @@ vector<int> LeafBase::get_out_ports() {
 }
 
 ev2 LeafBase::get_out_port(int dst) {
-    vector<Buff *> dst_buffs = get_buffs_for_dst(dst);
-    assert(dst_buffs.size() > 0);
-    ev2 out = dst_buffs[0]->O;
-    for (int i = 1; i < dst_buffs.size(); ++i) {
-        out = out + dst_buffs[i]->O;
+    vector<Buff *> buffs_of_dst = get_buffs_for_dst(dst);
+    if (buffs_of_dst.empty())
+        return slv.ivv(timesteps, pkt_types, 0);
+    ev2 out = buffs_of_dst[0]->getExpandedO();
+    for (int i = 1; i < buffs_of_dst.size(); ++i) {
+        out = out + buffs_of_dst[i]->getExpandedO();
     }
     return out;
 }
