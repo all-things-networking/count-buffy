@@ -20,8 +20,10 @@ expr binop(const expr &left, const string &op, const expr &right);
 
 
 class ConstrExtractor : public fperfBaseVisitor {
+public:
     SmtSolver &slv;
     vector<int> tmp_ids;
+    vector<int> max_t_with_zero_cenq;
     int begin;
     int end;
     string metric;

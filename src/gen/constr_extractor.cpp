@@ -13,15 +13,16 @@
 using namespace std;
 
 ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps, map<int, vector<int> > dst_to_pkt_type,
-                                 map<int, vector<int> > ecmp_to_pkt_type): slv(slv), timesteps(timesteps), I(I),
-                                                                           dst_to_pkt_type(dst_to_pkt_type),
-                                                                           ecmp_to_pkt_type(ecmp_to_pkt_type) {
+                                 map<int, vector<int> > ecmp_to_pkt_type) : slv(slv), timesteps(timesteps), I(I),
+                                                                            dst_to_pkt_type(dst_to_pkt_type),
+                                                                            ecmp_to_pkt_type(ecmp_to_pkt_type) {
     IT = slv.ivv(I.size(), timesteps, "Workload");
     for (int i = 0; i < IT.size(); ++i) {
         auto cenqs_i = get_cenqs_for_buff(IT[i]);
         cenqs.push_back(cenqs_i);
         auto aipgs_i = get_aipgs_for_buf(IT[i]);
         aipgs.push_back(aipgs_i);
+        max_t_with_zero_cenq.push_back(-1);
     }
     for (int i = 0; i < I.size(); ++i) {
         ev buf_ev;
@@ -117,6 +118,12 @@ void ConstrExtractor::parse_cenq() {
         string constr_name = format("CENQ[{},{}] {} {}", join_vec(tmp_ids), t_index, op, rhs);
         constrs.emplace_back(e, constr_name);
         // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
+    }
+    if (op == "<" || op == "<=" || op == "==") {
+        if (rhs <= 0) {
+            for (auto i: tmp_ids)
+                max_t_with_zero_cenq[i] = max(max_t_with_zero_cenq[i], end);
+        }
     }
 }
 

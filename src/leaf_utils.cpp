@@ -13,8 +13,8 @@
 
 using namespace std;
 
-void add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
-                  map<int, int> pkt_type_to_ecmp) {
+set<int> add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
+                      map<int, int> pkt_type_to_ecmp) {
     string wl_file_path = format("./leaf.txt");
     vector<vector<string> > wls = read_wl_file(wl_file_path);
     int i = 0;
@@ -24,6 +24,15 @@ void add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_
     LeafWorkloadParser parser(slv, I, timesteps, pkt_type_to_dst, pkt_type_to_ecmp);
     wl.erase(wl.begin());
     parser.parse(wl);
+    auto zero_inputs = parser.get_zero_inputs();
+    // vector<set<int> > result;
+    // for (int i = 0; i < I.size(); ++i) {
+    //     if (zero_inputs.contains(i))
+    //         result.push_back({});
+    //     else
+    //         result.push_back({4, 5});
+    // }
+    return zero_inputs;
 }
 
 

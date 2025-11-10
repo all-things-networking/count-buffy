@@ -8,7 +8,7 @@
 #include "smt_solver.hpp"
 using namespace std;
 
-void add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst, map<int, int> pkt_type_to_ecmp);
+set<int> add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst, map<int, int> pkt_type_to_ecmp);
 
 expr valid_meta(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx);
 

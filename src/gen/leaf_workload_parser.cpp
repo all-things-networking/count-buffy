@@ -9,6 +9,7 @@
 #include "constr_extractor.hpp"
 #include "fperfLexer.h"
 #include "fperfParser.h"
+#include <set>
 #include "../leaf_utils.hpp"
 
 using namespace antlr4;
@@ -16,15 +17,18 @@ using namespace antlr4;
 #define DEBUG false
 
 LeafWorkloadParser::LeafWorkloadParser(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
-                                       map<int, int> pkt_type_to_ecmp): slv(slv),
-                                                                        timesteps(timesteps),
-                                                                        I(I) {
+                                       map<int, int> pkt_type_to_ecmp) : slv(slv),
+                                                                         timesteps(timesteps),
+                                                                         I(I) {
     for (auto &[pkt_type,dst]: pkt_type_to_dst) {
         dst_to_pkt_type[dst].push_back(pkt_type);
     }
 
     for (auto &[pkt_type,ecmp]: pkt_type_to_ecmp) {
         ecmp_to_pkt_type[ecmp].push_back(pkt_type);
+    }
+    for (int i = 0; i < I.size(); ++i) {
+        max_t_with_zero_cenq.push_back(-1);
     }
     // for (int i = 0; i < num_spines; ++i) {
     //     for (int j = 0; j < num_leafs; ++j) {
@@ -40,6 +44,21 @@ LeafWorkloadParser::LeafWorkloadParser(SmtSolver &slv, ev3 &I, int timesteps, ma
     // }
 }
 
+void LeafWorkloadParser::merge(vector<int> max_t_update) {
+    for (int i = 0; i < max_t_update.size(); ++i) {
+        max_t_with_zero_cenq[i] = max(max_t_with_zero_cenq[i], max_t_update[i]);
+    }
+}
+
+set<int> LeafWorkloadParser::get_zero_inputs() {
+    set<int> result = {};
+    for (int i = 0; i < max_t_with_zero_cenq.size(); ++i) {
+        if (max_t_with_zero_cenq[i] >= timesteps - 1)
+            result.insert(i);
+    }
+    return result;
+}
+
 vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
     expr wl_expr = slv.ctx.bool_val(true);
     ANTLRInputStream inputStream(wl_line);
@@ -49,6 +68,7 @@ vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
     auto tree = parser.con();
     ConstrExtractor *visitor = new ConstrExtractor(slv, I, timesteps, dst_to_pkt_type, ecmp_to_pkt_type);
     visitor->visit(tree);
+    merge(visitor->max_t_with_zero_cenq);
     vector<NamedExp> nes;
     for (auto &constr: visitor->constrs)
         nes.push_back(constr.prefix(prefix));
@@ -72,6 +92,11 @@ void LeafWorkloadParser::parse(vector<string> wl) {
         auto nes = parse(prefix, line);
         slv.add(nes);
     }
+
+    for (int i = 0; i < max_t_with_zero_cenq.size(); ++i) {
+        cout << i << ": " << max_t_with_zero_cenq[i] << endl;
+    }
+
     int num_buffs = I.size();
     slv.add(uniq(I, slv, dst_to_pkt_type, num_buffs, timesteps));
     slv.add(valid(I, slv, num_buffs, timesteps));
