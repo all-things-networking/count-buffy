@@ -154,8 +154,10 @@ void ConstrExtractor::parse_dst() {
         int buf_index = tmp_ids[0];
         expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
         expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
-        constrs.emplace_back(valid_meta(I, slv, buf_index, t_index), format("DST[{}][{}] valid", buf_index, t_index));
+        expr v = valid_meta(I, slv, buf_index, t_index);;
+        constrs.emplace_back(v, format("DST[{}][{}] valid", buf_index, t_index));
         constrs.emplace_back(NamedExp(e).prefix(format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs)));
+        dst_constrs.emplace_back(t, buf_index, op, rhs);
     }
 }
 
@@ -172,6 +174,7 @@ void ConstrExtractor::parse_ecmp() {
         // format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
         // constrs.emplace_back(e, format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
         constrs.emplace_back(NamedExp(e).prefix(format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs)));
+        ecmp_constrs.emplace_back(t, buf_index, op, rhs);
     }
 }
 

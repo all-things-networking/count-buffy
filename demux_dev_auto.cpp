@@ -114,17 +114,27 @@ int main(const int argc, const char *argv[]) {
 
     SmtSolver slv;
 
+
     ev3 tmp_I = slv.ivvv(6, TIME_STEPS, PKT_TYPES, "TMP_I");
     slv.s.push();
-    auto zero_inputs = add_workload(slv, tmp_I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
+    auto vals_map = add_workload(slv, tmp_I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
+    slv.s.pop();
+
+    set<int> used_dsts = get_used_vals(vals_map, "dst");
+    set<int> used_ecmps = get_used_vals(vals_map, "ecmp");
+    cout << "Used DST:" << endl;
+    printSet(used_dsts);
+    cout << "Used ECMP:" << endl;
+    printSet(used_ecmps);
+    set<int> zero_inputs = get_zero_inputs(vals_map);
+    cout << "Zero Inputs:" << endl;
     for (auto zi: zero_inputs)
         cout << zi << ", ";
     cout << endl;
-    slv.s.pop();
     // exit(0);
 
-    set<int> used_dsts = {3, 5};
-    set<int> used_ecmps = {0, 1};
+    // set<int> used_dsts = {3, 5};
+    // set<int> used_ecmps = {0, 1};
 
 
     LeafSts *l1;
@@ -285,8 +295,8 @@ int main(const int argc, const char *argv[]) {
     for (auto &[pkt_type,ecmp]: pkt_type_to_ecmp)
         ecmp_to_pkt_type[ecmp].push_back(pkt_type);
 
+    slv.s.push();
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp);
-    // exit(0);
 
     if (false) {
         expr_vector v(slv.ctx);

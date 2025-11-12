@@ -18,6 +18,8 @@ public:
     map<int, vector<int> > dst_to_pkt_type;
     map<int, vector<int> > ecmp_to_pkt_type;
     vector<int> all_pkt_types;
+    vector<tuple<int, int, string, int> > dst_constrs;
+    vector<tuple<int, int, string, int> > ecmp_constrs;
     ev3 I;
 
     void merge(vector<int> max_t_update);

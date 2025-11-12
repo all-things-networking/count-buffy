@@ -69,6 +69,8 @@ vector<NamedExp> LeafWorkloadParser::parse(string prefix, string wl_line) {
     ConstrExtractor *visitor = new ConstrExtractor(slv, I, timesteps, dst_to_pkt_type, ecmp_to_pkt_type);
     visitor->visit(tree);
     merge(visitor->max_t_with_zero_cenq);
+    dst_constrs.insert(dst_constrs.end(), visitor->dst_constrs.begin(), visitor->dst_constrs.end());
+    ecmp_constrs.insert(ecmp_constrs.end(), visitor->ecmp_constrs.begin(), visitor->ecmp_constrs.end());
     vector<NamedExp> nes;
     for (auto &constr: visitor->constrs)
         nes.push_back(constr.prefix(prefix));

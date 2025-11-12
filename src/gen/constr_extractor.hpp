@@ -36,6 +36,8 @@ public:
     int timesteps;
     map<int, vector<int> > dst_to_pkt_type;
     map<int, vector<int> > ecmp_to_pkt_type;
+    vector<tuple<int, int,string, int>> dst_constrs;
+    vector<tuple<int, int,string, int>> ecmp_constrs;
 
 public:
     vector<NamedExp> constrs;
