@@ -100,6 +100,28 @@ void fix(map<tuple<int, int>, vector<int> > &ports,
     }
 }
 
+void update_ports(vector<map<string, set<int> > > vals_per_input,
+                  map<tuple<int, int>, vector<int> > &ports) {
+    for (auto &[src_dst, pkt_types]: ports) {
+        int src = get<0>(src_dst);
+        int dst = get<1>(src_dst);
+        if (src >= vals_per_input.size())
+            continue;
+        if (dst < vals_per_input.size())
+            continue;
+        set<int> used_dsts = vals_per_input[src]["dst"];
+        set<int> used_ecmps = vals_per_input[src]["ecmp"];
+        int ecmp = dst % 2;
+        if (!used_ecmps.contains(ecmp))
+            continue;
+        int dst_offset = ecmp * 6;
+        for (auto dst: used_dsts) {
+            int pkt_type = dst_offset + dst;
+            pkt_types.push_back(pkt_type);
+        }
+    }
+}
+
 int main(const int argc, const char *argv[]) {
     ev3 I;
 
@@ -140,11 +162,11 @@ int main(const int argc, const char *argv[]) {
     LeafSts *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
-        {{0, 2}, {5}},
+        {{0, 2}, {}},
         {{0, 3}, {}},
         {{1, 0}, {}},
         {{1, 2}, {}},
-        {{1, 3}, {9}},
+        {{1, 3}, {}},
         {{2, 0}, {}},
         {{2, 1}, {}},
         {{3, 0}, {}},
@@ -156,10 +178,13 @@ int main(const int argc, const char *argv[]) {
     vector l1_src_port_to_input = {0, 1, -1, -1};
     fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l1_src_port_to_input, zero_inputs);
+    update_ports({vals_map[0], vals_map[1]}, l1_ports);
+    cout << "L1 Ports:" << endl;
     printPorts(l1_ports);
     l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
+
 
     LeafSts *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
@@ -178,6 +203,8 @@ int main(const int argc, const char *argv[]) {
     vector l2_src_port_to_input = {2, 3, -1, -1};
     fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l2_src_port_to_input, zero_inputs);
+    update_ports({vals_map[2], vals_map[3]}, l2_ports);
+    cout << "L2 Ports:" << endl;
     printPorts(l2_ports);
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
@@ -201,6 +228,8 @@ int main(const int argc, const char *argv[]) {
     vector l3_src_port_to_input = {4, 5, -1, -1};
     fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l3_src_port_to_input, zero_inputs);
+    update_ports({vals_map[4], vals_map[5]}, l3_ports);
+    cout << "L3 Ports:" << endl;
     printPorts(l3_ports);
 
     l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -311,8 +340,18 @@ int main(const int argc, const char *argv[]) {
         slv.add(mk_and(v));
     }
 
+    if (1) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query"));
+        auto start_t = high_resolution_clock::now();
+        slv.check_sat();
+        auto end_t = high_resolution_clock::now();
+        auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
+        slv.s.pop();
+        cout << "SAT VTIME: " << unsat_duration.count() << endl;
+    }
 
-    if (0) {
+    if (1) {
         slv.s.push();
         slv.add(NamedExp(query(slv, O), "query").negate());
         auto start_t = high_resolution_clock::now();
@@ -323,7 +362,7 @@ int main(const int argc, const char *argv[]) {
         cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
     }
 
-    if (1) {
+    if (0) {
         slv.s.push();
         slv.add(NamedExp(query(slv, O), "query").negate());
         auto start_t = high_resolution_clock::now();
