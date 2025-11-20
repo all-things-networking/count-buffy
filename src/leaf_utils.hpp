@@ -10,7 +10,7 @@
 using namespace std;
 
 map<int, map<string, set<int>>> add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
-                                             map<int, int> pkt_type_to_ecmp);
+                                             map<int, int> pkt_type_to_ecmp, vector<string> wl);
 
 expr valid_meta(ev3 &I, SmtSolver &slv, int buf_idx, int time_idx);
 

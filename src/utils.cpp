@@ -27,7 +27,9 @@ vector<vector<string> > read_wl_file(string file_path) {
                 current.clear();
             }
 
-            if (line.rfind("UNSAT") != -1)
+            if (line.rfind("SKIP") != -1)
+                current.emplace_back("SKIP");
+            else if (line.rfind("UNSAT") != -1)
                 current.emplace_back("UNSAT");
             else
                 current.emplace_back("SAT");

@@ -82,15 +82,29 @@ map<int, set<int> > parse_meta_constrs(vector<tuple<int, int, string, int> > con
     return values_map;
 }
 
+map<int, set<int> > parse_meta_constrs_per_time(vector<tuple<int, int, string, int> > constrs, set<int> all_vals) {
+    map<int, map<int, vector<string> > > per_buf_map;
+    for (auto row: constrs) {
+        int time = get<0>(row);
+        int buf_idx = get<1>(row);
+        string expr = format("{} {} {}", "x", get<2>(row), get<3>(row));
+        per_buf_map[buf_idx][time].push_back(expr);
+    }
+    map<int, set<int> > values_map;
+    for (auto &[buf_idx, time_exprs]: per_buf_map) {
+        for (auto &[t, exprs]: time_exprs) {
+            auto values = get_possible_values(exprs, all_vals);
+            for (auto v: values) {
+                values_map[buf_idx].insert(v);
+            }
+        }
+    }
+    return values_map;
+}
+
 
 map<int, map<string, set<int> > > add_workload(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
-                                               map<int, int> pkt_type_to_ecmp) {
-    string wl_file_path = format("./leaf.txt");
-    vector<vector<string> > wls = read_wl_file(wl_file_path);
-    int i = 0;
-    auto wl = wls[i];
-    string res_stat = wl[0];
-    cout << "WL: " << i + 1 << "/" << wls.size() << " " << res_stat << endl;
+                                               map<int, int> pkt_type_to_ecmp, vector<string> wl) {
     LeafWorkloadParser parser(slv, I, timesteps, pkt_type_to_dst, pkt_type_to_ecmp);
     wl.erase(wl.begin());
     parser.parse(wl);
@@ -104,7 +118,7 @@ map<int, map<string, set<int> > > add_workload(SmtSolver &slv, ev3 &I, int times
 
     auto zero_inputs = parser.get_zero_inputs();
     auto dst_values = parse_meta_constrs(dst_constrs, {0, 1, 2, 3, 4, 5});
-    auto ecmp_values = parse_meta_constrs(ecmp_constrs, {0, 1});
+    auto ecmp_values = parse_meta_constrs_per_time(ecmp_constrs, {0, 1});
 
     map<int, map<string, set<int> > > values_map;
     for (int i = 0; i < I.size(); ++i) {

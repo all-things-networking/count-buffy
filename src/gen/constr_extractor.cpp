@@ -147,18 +147,21 @@ void ConstrExtractor::parse_aipg() {
 
 void ConstrExtractor::parse_dst() {
     assert(begin > 0);
-    for (int t = begin; t <= end; ++t) {
-        int t_index = t - 1;
-        assert(tmp_ids.size() == 1);
-        assert(!rhs_linear);
-        int buf_index = tmp_ids[0];
-        expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
-        expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
-        expr v = valid_meta(I, slv, buf_index, t_index);;
-        constrs.emplace_back(v, format("DST[{}][{}] valid", buf_index, t_index));
-        constrs.emplace_back(NamedExp(e).prefix(format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs)));
-        dst_constrs.emplace_back(t, buf_index, op, rhs);
-    }
+    // for (int t = begin; t <= end; ++t) {
+    int t = 1;
+    int t_index = t - 1;
+    assert(tmp_ids.size() == 1);
+    assert(!rhs_linear);
+    int buf_index = tmp_ids[0];
+    expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
+    expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
+    expr v = valid_meta(I, slv, buf_index, t_index);;
+    expr not_empty = (sum(I[buf_index][t_index]) > 0);
+    // constrs.emplace_back(v, format("DST[{}][{}] valid", buf_index, t_index));
+    constrs.emplace_back(NamedExp(not_empty).prefix(format("DST[{}][{}] Not Empty", buf_index, t_index)));
+    constrs.emplace_back(NamedExp(e).prefix(format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs)));
+    dst_constrs.emplace_back(t, buf_index, op, rhs);
+    // }
 }
 
 void ConstrExtractor::parse_ecmp() {
@@ -170,9 +173,11 @@ void ConstrExtractor::parse_ecmp() {
         int buf_index = tmp_ids[0];
         expr ecmp_value = ecmp_val(I, slv, ecmp_to_pkt_type, buf_index, t_index);
         expr e = binop(ecmp_value, op, slv.ctx.int_val(rhs));
+        expr not_empty = (sum(I[buf_index][t_index]) > 0);
         // constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
         // format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
         // constrs.emplace_back(e, format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        constrs.emplace_back(NamedExp(not_empty).prefix(format("ECMP[{}][{}] Not Empty", buf_index, t_index)));
         constrs.emplace_back(NamedExp(e).prefix(format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs)));
         ecmp_constrs.emplace_back(t, buf_index, op, rhs);
     }

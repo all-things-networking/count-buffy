@@ -99,7 +99,7 @@ LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, vector<tuple<int, i
                               pkt_types, max_enq, max_deq, buff_cap, src, dst);
         buffs[{src, dst}] = buff;
     }
-    use_win = true;
+    use_win = false;
 }
 
 LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
@@ -122,7 +122,7 @@ LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>
                               pkt_types, max_enq, max_deq, buff_cap, src, dst, used_pkt_types);
         buffs[{src, dst}] = buff;
     }
-    use_win = true;
+    use_win = false;
 }
 
 vector<Buff *> LeafBase::get_buff_list() const {
