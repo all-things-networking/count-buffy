@@ -52,16 +52,16 @@ set<int> get_possible_values(vector<string> exprs, set<int> all_vals) {
 void printSet(set<int> &s) {
     for (const auto &x: s)
         cout << x << " ";
-    cout << endl;
 }
 
 void printMap(map<int, map<string, set<int> > > &m) {
     for (auto &[buf_idx, exprs]: m) {
-        cout << "IDX: " << buf_idx << endl;
-        cout << "DST:" << endl;
+        cout << "IDX: " << buf_idx << " ";
+        cout << "DST:" << " ";
         printSet(exprs["dst"]);
-        cout << "ECMP:" << endl;
+        cout << "ECMP:" << " ";
         printSet(exprs["ecmp"]);
+        cout << endl;
     }
 }
 
