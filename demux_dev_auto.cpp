@@ -113,7 +113,8 @@ void fix(map<tuple<int, int>, vector<int> > &ports,
 void update_ports(vector<map<string, set<int> > > vals_per_input,
                   map<tuple<int, int>, vector<int> > &ports,
                   vector<int> port_to_input,
-                  vector<int> pkt_type_to_next_hop
+                  vector<int> pkt_type_to_next_hop,
+                  vector<int> port_to_ecmp
 ) {
     for (auto &[src_dst, pkt_types]: ports) {
         int src_port = get<0>(src_dst);
@@ -127,21 +128,30 @@ void update_ports(vector<map<string, set<int> > > vals_per_input,
         set<int> used_dst_vals = vals_per_input[src_input_idx]["dst"];
         set<int> used_ecmps = vals_per_input[src_input_idx]["ecmp"];
 
-        int dst_ecmp = dst_port % 2;
+        // int dst_ecmp = dst_port % 2;
+        int dst_ecmp = port_to_ecmp[dst_port];
 
-        if (!used_ecmps.contains(dst_ecmp))
-            continue;
+        vector<int> dst_ecmps;
+        if (dst_ecmp != -1)
+            dst_ecmps.push_back(dst_ecmp);
+        else
+            for (auto ecmp: used_ecmps)
+                dst_ecmps.push_back(ecmp);
 
-        int ecmp_offset = dst_ecmp * 6;
-
-        for (auto used_dst_val: used_dst_vals) {
-            int pkt_type = ecmp_offset + used_dst_val;
-            int nxt_hop_port = pkt_type_to_next_hop[pkt_type];
-            if (dst_port != nxt_hop_port)
+        for (auto dst_ecmp_val: dst_ecmps) {
+            if (!used_ecmps.contains(dst_ecmp_val))
                 continue;
 
-            if (find(pkt_types.begin(), pkt_types.end(), pkt_type) == pkt_types.end()) {
-                pkt_types.push_back(pkt_type);
+            int ecmp_offset = dst_ecmp_val * 6;
+            for (auto used_dst_val: used_dst_vals) {
+                int pkt_type = ecmp_offset + used_dst_val;
+                int nxt_hop_port = pkt_type_to_next_hop[pkt_type];
+                if (dst_port != nxt_hop_port)
+                    continue;
+
+                if (find(pkt_types.begin(), pkt_types.end(), pkt_type) == pkt_types.end()) {
+                    pkt_types.push_back(pkt_type);
+                }
             }
         }
     }
@@ -203,7 +213,7 @@ int check_wl(vector<string> wl, bool sat) {
     vector l1_src_port_to_input = {0, 1, -1, -1};
     fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l1_src_port_to_input, zero_inputs);
-    update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop);
+    update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
     // Fix sending packets to the same leaf, 0 to 1, 1 to 0 should not go through the spine
     // Need to know what to set for ecmp
     cout << "L1 Ports:" << endl;
@@ -230,7 +240,7 @@ int check_wl(vector<string> wl, bool sat) {
     vector l2_src_port_to_input = {2, 3, -1, -1};
     fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l2_src_port_to_input, zero_inputs);
-    update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop);
+    update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
     cout << "L2 Ports:" << endl;
     printPorts(l2_ports);
     l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
@@ -255,7 +265,7 @@ int check_wl(vector<string> wl, bool sat) {
     vector l3_src_port_to_input = {4, 5, -1, -1};
     fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l3_src_port_to_input, zero_inputs);
-    update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop);
+    update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
     cout << "L3 Ports:" << endl;
     printPorts(l3_ports);
 
@@ -387,14 +397,36 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "SAT VTIME: " << result << endl;
+        cout << "WL IS SAT" << endl;
     }
 
     if (sat) {
         slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query").negate());
+        // slv.add(NamedExp(query(slv, O), "query").negate());
+        slv.add(NamedExp(query(slv, O), "query"));
         auto start_t = high_resolution_clock::now();
         try {
-            slv.check_sat();
+            auto mod = slv.check_sat();
+
+            cout << "Input" << endl;
+            for (int i = 0; i < I.size(); ++i) {
+                for (int t = 0; t < TIME_STEPS; ++t) {
+                    auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
+                    auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
+                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+                }
+                cout << endl;
+            }
+
+            cout << "Output" << endl;
+            for (int i = 0; i < O.size(); ++i) {
+                for (int t = 0; t < TIME_STEPS; ++t) {
+                    auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
+                    auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
+                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+                }
+                cout << endl;
+            }
         } catch (std::exception e) {
             cout << "WL & !Q is UNSAT" << endl;
             throw e;
@@ -431,27 +463,41 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "UNSAT VTIME: " << result << endl;
-        // return result;
+        return result;
+    }
 
-        // cout << "Input" << endl;
-        // for (int i = 0; i < I.size(); ++i) {
-        //     for (int t = 0; t < TIME_STEPS; ++t) {
-        //         auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
-        //         auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-        //         cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-        //     }
-        //     cout << endl;
-        // }
-        //
-        // cout << "Output" << endl;
-        // for (int i = 0; i < O.size(); ++i) {
-        //     for (int t = 0; t < TIME_STEPS; ++t) {
-        //         auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
-        //         auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
-        //         cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-        //     }
-        //     cout << endl;
-        // }
+    if (!sat && false) {
+        slv.s.push();
+        // slv.add(NamedExp(query(slv, O), "query").negate());
+        // slv.add(NamedExp(query(slv, O), "query"));
+        auto start_t = high_resolution_clock::now();
+        auto mod = slv.check_sat();
+        // slv.check_unsat();
+        auto end_t = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(end_t - start_t);
+        result = duration.count();
+        slv.s.pop();
+        cout << "UNSAT VTIME: " << result << endl;
+
+        cout << "Input" << endl;
+        for (int i = 0; i < I.size(); ++i) {
+            for (int t = 0; t < TIME_STEPS; ++t) {
+                auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
+                auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
+                cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+            }
+            cout << endl;
+        }
+
+        cout << "Output" << endl;
+        for (int i = 0; i < O.size(); ++i) {
+            for (int t = 0; t < TIME_STEPS; ++t) {
+                auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
+                auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
+                cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+            }
+            cout << endl;
+        }
         // cout << "Output" << endl;
         // cout << s1->tmp_per_dst[0][0] << endl;
         // cout << s1->tmp_per_dst[0][1] << endl;
@@ -568,13 +614,13 @@ int check_wl(vector<string> wl, bool sat) {
 
 
 int main() {
-    string wl_file_path = format("./leaf.txt");
+    string wl_file_path = format("./leaf/fperf/leaf.{}.txt", BUFF_CAP);
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./logs/{}.txt", "leaf");
+    string out_file_path = format("./leaf/buffy/leaf.{}.txt", BUFF_CAP);
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
-        // if (i + 1 < 43)
+        // if (i + 1 < 180)
             // continue;
         // if (i > 50)
         // break;
@@ -598,6 +644,6 @@ int main() {
         // exit(1);
         // }
         out << "leaf" << "," << 10 << ", " << i << ", " << res << ", " << res_stat << endl;
-        // exit(0);
+        exit(0);
     }
 }

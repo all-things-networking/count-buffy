@@ -13,7 +13,6 @@ plt.rcParams["legend.fontsize"] = 8
 plt.rcParams['legend.title_fontsize'] = 16
 
 
-
 def add_buffy_df(tc, buf_size, dfs):
     p = f"{tc}/Ours/{tc}.{buf_size}.txt"
     if os.path.exists(p):
@@ -57,7 +56,7 @@ sns.lineplot(data=df, x='buf_size', y='time_millis', hue='model', estimator="mea
 mean_df = df.groupby(['buf_size', 'model'])['time_millis'].mean().reset_index()
 # p95_df = df.groupby(['buf_size', 'model'])['time_millis'].quantile(0.95).reset_index()
 # p95_df.rename(columns={'time_millis': 'time_millis_p95'}, inplace=True)
-# merged = pd.merge(mean_df, p95_df, on=['buf_size', 'model'])
+merged = pd.merge(mean_df, p95_df, on=['buf_size', 'model'])
 
 melted = pd.melt(
     merged,

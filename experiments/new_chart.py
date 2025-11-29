@@ -16,7 +16,7 @@ plt.rcParams['legend.title_fontsize'] = 16
 
 
 def add_buffy_df(tc, buf_size, dfs):
-    p = f"{tc}/Ours/{tc}.{buf_size}.txt"
+    p = f"../{tc}/buffy/{tc}.{buf_size}.txt"
     if os.path.exists(p):
         df = pd.read_csv(p)
         df['model'] = 'Ours: With Windows'
@@ -26,7 +26,7 @@ def add_buffy_df(tc, buf_size, dfs):
 
 def add_fperf_df(tc, buf_size, dfs):
     rows = []
-    p = f"{tc}/FPerf/{tc}.{buf_size}.txt"
+    p = f"../{tc}/fperf/{tc}.{buf_size}.txt"
     if os.path.exists(p):
         with open(p, "r") as file:
             for line in file:
@@ -47,7 +47,7 @@ def add_fperf_df(tc, buf_size, dfs):
 
 dfs = []
 for i in range(501):
-    # add_buffy_df(TC, i, dfs)
+    add_buffy_df(TC, i, dfs)
     add_fperf_df(TC, i, dfs)
 
 df = pd.concat(dfs)
@@ -77,7 +77,7 @@ sns.lineplot(
 ax = plt.gca()
 ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
 # ax.set_xticks(list(range(100, 501, 100)))
-ax.set_xticks(range(100, 501, 100))
+# ax.set_xticks(range(100, 501, 100))
 palette = sns.color_palette()
 for i, (model, group) in enumerate(summary.groupby("model")):
     ax.fill_between(
@@ -102,7 +102,7 @@ for i, (model, group) in enumerate(summary.groupby("model")):
 # plt.fill_between(summary['buf_size'], summary['mean'], summary['p95'], color='red', alpha=0.3, data=summary)
 leg = plt.legend()
 leg.set_title(None)
-plt.ylim(0, 2000)
+# plt.ylim(0, 2000)
 # plt.ylabel("Verification Time (s)")
 plt.ylabel("")
 plt.tight_layout()
