@@ -367,20 +367,6 @@ int check_wl(vector<string> wl, bool sat) {
     slv.s.push();
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp, wl);
 
-    if (false) {
-        expr_vector v(slv.ctx);
-        for (int i = 0; i < I.size(); ++i) {
-            for (int t = 0; t < I[0].size(); ++t) {
-                expr e = dst_val(I, slv, dst_to_pkt_type, i, t);
-                v.push_back((e == 2 || e == 3 || e == -1));
-                e = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-                v.push_back((e == 0 || e == -1));
-            }
-        }
-        slv.add(mk_and(v));
-    }
-
-
     duration<long long, ratio<1, 1000> >::rep result;
     if (sat) {
         slv.s.push();
@@ -397,36 +383,35 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "SAT VTIME: " << result << endl;
-        cout << "WL IS SAT" << endl;
+        cout << "Expected: SAT, WL is SAT" << endl;
     }
 
     if (sat) {
         slv.s.push();
-        // slv.add(NamedExp(query(slv, O), "query").negate());
-        slv.add(NamedExp(query(slv, O), "query"));
+        slv.add(NamedExp(query(slv, O), "query").negate());
         auto start_t = high_resolution_clock::now();
         try {
             auto mod = slv.check_sat();
 
-            cout << "Input" << endl;
-            for (int i = 0; i < I.size(); ++i) {
-                for (int t = 0; t < TIME_STEPS; ++t) {
-                    auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
-                    auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-                }
-                cout << endl;
-            }
-
-            cout << "Output" << endl;
-            for (int i = 0; i < O.size(); ++i) {
-                for (int t = 0; t < TIME_STEPS; ++t) {
-                    auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
-                    auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
-                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-                }
-                cout << endl;
-            }
+            // cout << "Input" << endl;
+            // for (int i = 0; i < I.size(); ++i) {
+            //     for (int t = 0; t < TIME_STEPS; ++t) {
+            //         auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
+            //         auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
+            //         cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+            //     }
+            //     cout << endl;
+            // }
+            //
+            // cout << "Output" << endl;
+            // for (int i = 0; i < O.size(); ++i) {
+            //     for (int t = 0; t < TIME_STEPS; ++t) {
+            //         auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
+            //         auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
+            //         cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
+            //     }
+            //     cout << endl;
+            // }
         } catch (std::exception e) {
             cout << "WL & !Q is UNSAT" << endl;
             throw e;
@@ -436,11 +421,12 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "SAT VTIME: " << result << endl;
+        cout << "Expected: SAT, WL & !Q is SAT" << endl;
         return result;
     }
 
 
-    if (!sat && false) {
+    if (!sat) {
         slv.s.push();
         slv.add(NamedExp(query(slv, O), "query"));
         auto start_t = high_resolution_clock::now();
@@ -450,6 +436,7 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "SAT VTIME: " << result << endl;
+        cout << "Expected: UNSAT, WL & Q is SAT" << endl;
     }
 
     if (!sat) {
@@ -463,6 +450,7 @@ int check_wl(vector<string> wl, bool sat) {
         result = duration.count();
         slv.s.pop();
         cout << "UNSAT VTIME: " << result << endl;
+        cout << "Expected: UNSAT, WL & !Q is UNSAT" << endl;
         return result;
     }
 
@@ -524,92 +512,6 @@ int check_wl(vector<string> wl, bool sat) {
         // exit(0);
         // exit(0);
     }
-    return 0;
-    slv.s.pop();
-
-    // return result;
-
-    if (1) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query"));
-        auto start_t = high_resolution_clock::now();
-        slv.check_sat();
-        auto end_t = high_resolution_clock::now();
-        auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-        slv.s.pop();
-        cout << "SAT VTIME: " << unsat_duration.count() << endl;
-    }
-
-    if (1) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query").negate());
-        auto start_t = high_resolution_clock::now();
-        slv.check_unsat();
-        auto end_t = high_resolution_clock::now();
-        auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-        slv.s.pop();
-        cout << "UNSAT VTIME: " << unsat_duration.count() << endl;
-    }
-
-    if (0) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query").negate());
-        auto start_t = high_resolution_clock::now();
-        slv.check_sat();
-        auto end_t = high_resolution_clock::now();
-        auto unsat_duration = duration_cast<milliseconds>(end_t - start_t);
-        slv.s.pop();
-        cout << "SAT VTIME: " << unsat_duration.count() << endl;
-    }
-    exit(0);
-
-    slv.s.push();
-    slv.add({query(slv, O), "query"});
-
-    auto start_t = high_resolution_clock::now();
-    auto mod = slv.check_sat();
-    auto end_t = high_resolution_clock::now();
-    auto sat_duration = duration_cast<milliseconds>(end_t - start_t);
-
-    cout << "Valid" << endl;
-    for (int i = 0; i < I.size(); ++i) {
-        for (int t = 0; t < I[0].size(); ++t) {
-            expr e = valid_meta(I, slv, i, t);
-            cout << mod.eval(e) << ", ";
-        }
-        cout << endl;
-    }
-
-    cout << "DST" << endl;
-    for (int i = 0; i < I.size(); ++i) {
-        for (int t = 0; t < I[0].size(); ++t) {
-            expr e = dst_val(I, slv, dst_to_pkt_type, i, t);
-            cout << mod.eval(e) << ", ";
-        }
-        cout << endl;
-    }
-
-    cout << "ECMP" << endl;
-    for (int i = 0; i < I.size(); ++i) {
-        for (int t = 0; t < I[0].size(); ++t) {
-            expr e = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-            cout << mod.eval(e) << ", ";
-        }
-        cout << endl;
-    }
-
-
-    cout << "l1" << endl << "##################################" << endl;
-    l1->print(mod);
-    //
-    // cout << "s1" << endl << "##################################" << endl;
-    // s1->print(mod);
-    //
-    cout << "l3" << endl << "##################################" << endl;
-    l3->print(mod);
-
-    cout << "SAT VTIME: " << sat_duration.count() << endl;
-    slv.s.pop();
 }
 
 
@@ -621,7 +523,7 @@ int main() {
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
         // if (i + 1 < 180)
-            // continue;
+        // continue;
         // if (i > 50)
         // break;
         auto wl = wls[i];
@@ -644,6 +546,6 @@ int main() {
         // exit(1);
         // }
         out << "leaf" << "," << 10 << ", " << i << ", " << res << ", " << res_stat << endl;
-        exit(0);
+        // exit(0);
     }
 }
