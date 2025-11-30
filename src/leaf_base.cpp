@@ -63,7 +63,7 @@ vector<int> LeafBase::get_in_ports() {
 vector<int> LeafBase::get_out_ports() {
     vector<int> out_ports;
     for (const auto &[src_dst, buff]: buffs) {
-        int dst = get<0>(src_dst);
+        int dst = get<1>(src_dst);
         if (ranges::find(out_ports, dst) == out_ports.end()) {
             out_ports.push_back(dst);
         }
@@ -392,7 +392,7 @@ vector<NamedExp> LeafBase::bl_size(const int i) const {
         ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]));
         res.push_back(ne);
     }
-    return {merge(res, format("BL Size[{}]", i))};
+    return {merge(res, slv.ctx, format("BL Size[{}]", i))};
 }
 
 vector<NamedExp> LeafBase::enqs(const int i) const {
@@ -413,7 +413,7 @@ vector<NamedExp> LeafBase::enqs(const int i) const {
         expr ej = lt_cap;
         res.emplace_back(ej);
     }
-    return {merge(res, format("Enqs[{}]", i))};
+    return {merge(res, slv.ctx, format("Enqs[{}]", i))};
     // return res;
 }
 
@@ -434,7 +434,7 @@ vector<NamedExp> LeafBase::drops(int i) {
                       Di[j] == 0);
         res.emplace_back(dj);
     }
-    return {merge(res, format("Drops[{}]", i))};
+    return {merge(res, slv.ctx, format("Drops[{}]", i))};
 }
 
 vector<NamedExp> LeafBase::enq_deq_sum(int i) {
@@ -450,7 +450,7 @@ vector<NamedExp> LeafBase::enq_deq_sum(int i) {
         expr ij = (Ii[j] == (Ei[j] + Di[j]));
         res.emplace_back(ij);
     }
-    return {merge(res, format("EnqDropSum[{}]", i))};
+    return {merge(res, slv.ctx, format("EnqDropSum[{}]", i))};
 }
 
 vector<NamedExp> LeafBase::winds(int i) {
@@ -492,7 +492,7 @@ vector<NamedExp> LeafBase::winds(int i) {
         nes.emplace_back(constr);
         nes.emplace_back(wnd_out_i[j] <= wnd_enq_i[j]);
     }
-    return {merge(nes, format("wins[{}]", i))};
+    return {merge(nes, slv.ctx, format("wins[{}]", i))};
 }
 
 vector<NamedExp> LeafBase::trs() {
@@ -502,7 +502,8 @@ vector<NamedExp> LeafBase::trs() {
     for (int i = 0; i < timesteps - 1; ++i) {
         nes = trs(i);
         if (!nes.empty())
-            res.push_back(merge(nes, format("Trs({},{})", i, i + 1)));
+            // res.push_back(merge(nes, slv.ctx, format("Trs({},{})", i, i + 1)));
+            extend(res, nes);
     }
     return res;
 }
@@ -513,5 +514,5 @@ vector<NamedExp> LeafBase::out() {
         auto nes = out(j);
         extend(res, nes, format("@{}", j));
     }
-    return {merge(res, "out")};
+    return {merge(res, slv.ctx, "out")};
 }

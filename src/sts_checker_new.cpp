@@ -84,7 +84,7 @@ model STSCheckerNew::check_wl_sat() {
 void STSCheckerNew::check_wl_not_qry_unsat() {
     slv.s.push();
     slv.add(workload());
-    slv.add(merge(query(5), "Query").negate());
+    slv.add(merge(query(5), slv.ctx, "Query").negate());
     slv.add(out());
     slv.add(trs());
     for (int i = 0; i < num_bufs; ++i) {

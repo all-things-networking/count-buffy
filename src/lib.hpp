@@ -75,7 +75,7 @@ expr operator>=(const ev &l, int n);
 
 expr operator==(const ev &v, const vector<int> &n);
 
-NamedExp merge(const vector<NamedExp> &nes, const string &name);
+NamedExp merge(const vector<NamedExp> &nes, context &ctx, const string &name);
 
 NamedExp merge(const vector<expr> &nes, const string &name);
 

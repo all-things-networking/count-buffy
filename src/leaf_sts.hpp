@@ -34,5 +34,4 @@ public:
     vector<NamedExp> init() override;
 };
 
-
-#endif //PRIO_STS_HPP
+#endif

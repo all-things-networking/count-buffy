@@ -162,9 +162,9 @@ ev2 operator+(const ev2 &l, const ev2 &r) {
     return result;
 }
 
-NamedExp merge(const vector<NamedExp> &nes, const string &name) {
-    auto expr = nes[0].e;
-    for (int i = 1; i < nes.size(); ++i)
+NamedExp merge(const vector<NamedExp> &nes, context &ctx, const string &name) {
+    auto expr = ctx.bool_val(true);
+    for (int i = 0; i < nes.size(); ++i)
         expr = expr && nes[i].e;
     return {expr, name};
 }

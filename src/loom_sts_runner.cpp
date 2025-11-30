@@ -64,7 +64,7 @@ void LoomStsRunner::run() {
         wl.erase(wl.begin());
         parser.parse(wl);
 
-        slv.add(merge(query(slv, O), "not query").negate());
+        slv.add(merge(query(slv, O), slv.ctx, "not query").negate());
         auto start_t = chrono::high_resolution_clock::now();
         if (res_stat == "SAT")
             slv.check_sat();

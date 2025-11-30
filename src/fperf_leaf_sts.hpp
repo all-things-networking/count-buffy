@@ -2,8 +2,8 @@
 // Created by Amir Hossein Seyhani on 3/17/25.
 //
 
-#ifndef PRIO_STS_HPP
-#define PRIO_STS_HPP
+#ifndef FPERF_PRIO_STS_HPP
+#define FPERF_PRIO_STS_HPP
 
 #include "leaf_base.hpp"
 
@@ -46,4 +46,4 @@ public:
 };
 
 
-#endif //PRIO_STS_HPP
+#endif

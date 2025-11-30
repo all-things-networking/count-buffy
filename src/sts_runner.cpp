@@ -22,7 +22,7 @@ void StsRunner::run(int num_buffers, int timesteps) {
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     slv.add(sts->base_constrs());
     slv.add(sts->base_wl());
-    slv.add(merge(sts->query(), "Query").negate());
+    slv.add(merge(sts->query(), slv.ctx, "Query").negate());
     for (int i = 0; i < wls.size(); ++i) {
         WorkloadParser parser(sts->I, slv, timesteps);
         auto wl = wls[i];
