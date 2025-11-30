@@ -9,13 +9,8 @@
 
 using namespace views;
 
-FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
-                           const int time_steps,
-                           const int pkt_types,
-                           const int buff_cap,
-                           const int max_enq,
-                           const int max_deq
-) : LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+
+void FperfLeafSts::setup() {
     auto src_ports = get_in_ports();
     auto dst_ports = get_out_ports();
 
@@ -41,13 +36,13 @@ FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, vector<tupl
     for (int src_port: src_ports) {
         auto dst_buffs_for_src = get_buffs_for_src(src_port);
         for (int dst_port_idx = 0; dst_port_idx < dst_buffs_for_src.size(); dst_port_idx++) {
-            // in_to_out_[src_port_idx].push_back(vector<expr>());
-            // in_prio_head_[src_port_idx].push_back(vector<expr>());
-            for (int t = 0; t < time_steps; t++) {
+            in_to_out_[src_port].push_back(vector<expr>());
+            in_prio_head_[src_port].push_back(vector<expr>());
+            for (int t = 0; t < timesteps; t++) {
                 string vname = format("%s_in_to_out[%d][%d][%d]", var_prefix, src_port, dst_port_idx, t);
                 in_to_out_[src_port][dst_port_idx].push_back(slv.ctx.bool_const(vname.c_str()));
 
-                vname = format(vname, "%s_in_prio_head[%d][%d][%d]", var_prefix, src_port, dst_port_idx, t);
+                vname = format("%s_in_prio_head[%d][%d][%d]", var_prefix, src_port, dst_port_idx, t);
                 in_prio_head_[src_port][dst_port_idx].push_back(slv.ctx.bool_const(vname.c_str()));
             }
         }
@@ -56,9 +51,9 @@ FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, vector<tupl
     for (int dst_port: dst_ports) {
         auto src_buffs_for_dst = get_buffs_for_dst(dst_port);
         for (int src_port_idx = 0; src_port_idx < src_buffs_for_dst.size(); ++src_port_idx) {
-            // out_from_in_[dst_port_idx].push_back(vector<expr>());
-            // out_prio_head_[dst_port_idx].push_back(vector<expr>());
-            for (int t = 0; t < time_steps; ++t) {
+            out_from_in_[dst_port].push_back(vector<expr>());
+            out_prio_head_[dst_port].push_back(vector<expr>());
+            for (int t = 0; t < timesteps; ++t) {
                 string vname = format("%s_out_from_in[%d][%d][%d]", var_prefix, dst_port, src_port_idx, t);
                 out_from_in_[dst_port][src_port_idx].push_back(slv.ctx.bool_const(vname.c_str()));
 
@@ -69,6 +64,16 @@ FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, vector<tupl
     }
 }
 
+FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list,
+                           const int time_steps,
+                           const int pkt_types,
+                           const int buff_cap,
+                           const int max_enq,
+                           const int max_deq
+) : LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+    setup();
+}
+
 FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
                            const int time_steps,
                            const int pkt_types,
@@ -76,19 +81,23 @@ FperfLeafSts::FperfLeafSts(SmtSolver &slv, const string &var_prefix, map<tuple<i
                            const int max_enq,
                            const int max_deq
 ) : LeafBase(slv, var_prefix, port_list, time_steps, pkt_types, buff_cap, max_enq, max_deq) {
+    setup();
 }
 
 vector<NamedExp> FperfLeafSts::out(int t) {
+    vector<NamedExp> constrs;
     auto src_ports = get_in_ports();
     for (auto src_port: src_ports) {
         auto dst_buffs_for_src = get_buffs_for_src(src_port);
         for (int i = 0; i < dst_buffs_for_src.size(); ++i) {
             auto buff = dst_buffs_for_src[i];
-            constr_name = format("%s_in_%d_deq_cnt[%d]_is_one", var_prefix, i, t);
-            constr_expr = implies(in_to_out_[src_port][i][t], buff->O[t] == 1);
+            auto constr_name = format("%s_in_%d_deq_cnt[%d]_is_one", var_prefix, i, t);
+            expr constr_expr = implies(in_to_out_[src_port][i][t], buff->O[t] == 1);
+            constrs.emplace_back(constr_expr, constr_name);
 
             constr_name = format("%s_in_%d_deq_cnt[%d]_is_zero", var_prefix, i, t);
             constr_expr = implies(!in_to_out_[src_port][i][t], buff->O[t] == 0);
+            constrs.emplace_back(constr_expr, constr_name);
         }
     }
 
@@ -108,10 +117,14 @@ vector<NamedExp> FperfLeafSts::out(int t) {
         }
         string constr_name = format("%s_no_enqs_in_out_%d_at_%d", var_prefix, dst_port, t);
         expr constr_expr = implies(mk_and(match_all_zeros), mk_and(out_all_zeros));
+        constrs.emplace_back(constr_expr, constr_name);
     }
+    return constrs;
 }
 
 vector<NamedExp> FperfLeafSts::trs(int prev_t) {
+    vector<NamedExp> constrs;
+
     int t = prev_t + 1;
     auto src_ports = get_in_ports();
     auto dst_ports = get_out_ports();
@@ -135,6 +148,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                                     out_from_in_[dst_port][src_port_idx][t]) &&
                             implies(!in_to_out_[src_port][dst_port_idx][t],
                                     !out_from_in_[dst_port][src_port_idx][t]));
+        constrs.emplace_back(constr_expr, constr_name);
     }
 
     for (const auto &[src_dst,buff]: buffs) {
@@ -178,10 +192,11 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
 
         string constr_name = format("%s_%d_matches_%d_at_%d", var_prefix, src_port, dst_port, t);
         expr constr_expr = implies(match_cond, in_to_out_[src_port][dst_idx_in_src][t]);
-
+        constrs.emplace_back(constr_expr, constr_name);
 
         constr_name = format("%s_%d_doesnt_match_%d_at_%d", var_prefix, src_port, dst_port, t);
         constr_expr = implies(!match_cond, !in_to_out_[src_port][dst_idx_in_src][t]);
+        constrs.emplace_back(constr_expr, constr_name);
     }
 
 
@@ -202,6 +217,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                 i,
                 t);
             expr constr_expr = implies(in_to_out_[src_port][i][t], mk_and(others_zero));
+            constrs.emplace_back(constr_expr, constr_name);
         }
     }
 
@@ -223,6 +239,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                 i,
                 t);
             expr constr_expr = implies(out_from_in_[dst_port][i][t], mk_and(others_zero));
+            constrs.emplace_back(constr_expr, constr_name);
         }
     }
 
@@ -238,6 +255,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
 
         string constr_name = format("%s_at_least_one_in_prio_head_[%d]_at_%d", var_prefix, src_port, t);
         expr constr_expr = mk_or(all_prios);
+        constrs.emplace_back(constr_expr, constr_name);
 
         for (int i = 0; i < dst_buffs_for_src.size(); ++i) {
             expr_vector others_zero(slv.ctx);
@@ -247,6 +265,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             }
             constr_name = format("%s_only_in_prio_head[%d][%d][%d]_is_one", var_prefix, src_port, i, t);
             constr_expr = implies(in_prio_head_[src_port][i][t], mk_and(others_zero));
+            constrs.emplace_back(constr_expr, constr_name);
         }
     }
 
@@ -260,6 +279,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
 
         string constr_name = format("%s_at_least_one_out_prio_head_[%d]_at_%d", var_prefix, dst_port, t);
         expr constr_expr = mk_or(all_prios);
+        constrs.emplace_back(constr_expr, constr_name);
 
         for (int i = 0; i < src_buffs_for_dst.size(); ++i) {
             expr_vector others_zero(slv.ctx);
@@ -269,6 +289,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             }
             constr_name = format("%s_only_out_prio_head[%d][%d][%d]_is_one", var_prefix, dst_port, i, t);
             constr_expr = implies(out_prio_head_[dst_port][i][t], mk_and(others_zero));
+            constrs.emplace_back(constr_expr, constr_name);
         }
     }
 
@@ -283,6 +304,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                     i,
                     t);
                 expr constr_expr = implies(in_to_out_[src_port][i][prev_t], in_prio_head_[src_port][i][t]);
+                constrs.emplace_back(constr_expr, constr_name);
             }
 
             expr_vector all_zero(slv.ctx);
@@ -300,6 +322,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                 expr constr_expr = implies(mk_and(all_zero),
                                            in_prio_head_[src_port][i][t] ==
                                            in_prio_head_[src_port][i][prev_t]);
+                constrs.emplace_back(constr_expr, constr_name);
             }
         }
 
@@ -313,6 +336,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                     i,
                     t);
                 expr constr_expr = implies(out_prio_head_[dst_port][i][prev_t], out_from_in_[dst_port][i][t]);
+                constrs.emplace_back(constr_expr, constr_name);
             }
 
             expr_vector all_zero(slv.ctx);
@@ -330,14 +354,18 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
                 expr constr_expr = implies(mk_and(all_zero),
                                            out_prio_head_[dst_port][i][t] ==
                                            out_prio_head_[dst_port][i][prev_t]);
+                constrs.emplace_back(constr_expr, constr_name);
             }
         }
     }
+
+    return constrs;
 }
 
 vector<NamedExp> FperfLeafSts::init() {
+    vector<NamedExp> constrs;
     trs(-1);
-    auto dst_ports = get_in_ports();
+    auto src_ports = get_in_ports();
     auto dst_ports = get_out_ports();
 
     for (auto src_port: dst_ports) {
@@ -349,6 +377,7 @@ vector<NamedExp> FperfLeafSts::init() {
             for (unsigned int i = 1; i < dst_buffs_for_src.size(); i++) {
                 constr_name = format("%s_in_prio_head[%d][%d][0]_is_zero", var_prefix, src_port, i);
                 constr_expr = !in_prio_head_[src_port][i][0];
+                constrs.emplace_back(constr_expr, constr_name);
             }
         }
     }
@@ -362,7 +391,9 @@ vector<NamedExp> FperfLeafSts::init() {
             for (unsigned int i = 1; i < src_buffs_for_dst.size(); i++) {
                 constr_name = format("%s_out_prio_head[%d][%d][0]_is_zero", var_prefix, dst_port, i);
                 constr_expr = !out_prio_head_[dst_port][i][0];
+                constrs.emplace_back(constr_expr, constr_name);
             }
         }
     }
+    return constrs;
 }

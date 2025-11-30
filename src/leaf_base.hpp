@@ -14,6 +14,8 @@ class SmtSolver;
 
 class LeafBase {
 public:
+    virtual ~LeafBase() = default;
+
     SmtSolver &slv;
     string var_prefix;
     int timesteps;

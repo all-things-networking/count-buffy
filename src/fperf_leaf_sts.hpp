@@ -27,6 +27,8 @@ public:
                  int max_enq,
                  int max_deq);
 
+    void setup();
+
     vector<NamedExp> out(int t) override;
 
     vector<NamedExp> trs(int t) override;

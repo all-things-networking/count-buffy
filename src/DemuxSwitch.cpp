@@ -25,7 +25,7 @@ void DemuxSwitch::add_some_constraint(SmtSolver &slv, const string &var_prefix, 
 DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>, vector<int> > port_list,
                          int time_steps,
                          int pkt_types, int buf_cap, int max_enq, int max_deq,
-                         vector<int> pkt_type_to_nxt_hop) : LeafSts(
+                         vector<int> pkt_type_to_nxt_hop) : FperfLeafSts(
                                                                 slv, var_prefix, port_list, time_steps, pkt_types,
                                                                 buf_cap, max_enq, max_deq),
                                                             pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {
@@ -34,7 +34,7 @@ DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, map<tuple<int
 
 DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list, int time_steps,
                          int pkt_types, int buf_cap, int max_enq, int max_deq,
-                         vector<int> pkt_type_to_nxt_hop) : LeafSts(
+                         vector<int> pkt_type_to_nxt_hop) : FperfLeafSts(
                                                                 slv, var_prefix, port_list, time_steps, pkt_types,
                                                                 buf_cap, max_enq, max_deq),
                                                             pkt_type_to_nxt_hop(pkt_type_to_nxt_hop) {

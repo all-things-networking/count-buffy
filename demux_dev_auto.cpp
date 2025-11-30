@@ -42,7 +42,7 @@ expr link_ports(ev2 out, ev2 in) {
     return e;
 }
 
-expr add_constr(LeafSts *sts, map<tuple<int, int, int>, int> inp) {
+expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
     expr e = sts->slv.ctx.bool_val(true);
     auto in_ports = sts->get_in_ports();
     for (int port: in_ports) {
@@ -194,7 +194,7 @@ int check_wl(vector<string> wl, bool sat) {
     // set<int> used_ecmps = {0, 1};
 
 
-    LeafSts *l1;
+    LeafBase *l1;
     map<tuple<int, int>, vector<int> > l1_ports = {
         {{0, 1}, {}},
         {{0, 2}, {}},
@@ -223,7 +223,7 @@ int check_wl(vector<string> wl, bool sat) {
     );
 
 
-    LeafSts *l2;
+    LeafBase *l2;
     map<tuple<int, int>, vector<int> > l2_ports = {
         {{0, 1}, {}},
         {{0, 2}, {}},
@@ -248,7 +248,7 @@ int check_wl(vector<string> wl, bool sat) {
     );
 
 
-    LeafSts *l3;
+    LeafBase *l3;
     map<tuple<int, int>, vector<int> > l3_ports = {
         {{0, 1}, {}},
         {{0, 2}, {}},
@@ -274,7 +274,7 @@ int check_wl(vector<string> wl, bool sat) {
     );
 
     // exit(0);
-    LeafSts *s1;
+    LeafBase *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
         {{0, 1}, {2, 3}},
         {{0, 2}, {4, 5}},
@@ -287,7 +287,7 @@ int check_wl(vector<string> wl, bool sat) {
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop);
 
-    LeafSts *s2;
+    LeafBase *s2;
     map<tuple<int, int>, vector<int> > s2_ports = {
         {{0, 1}, {8, 9}},
         {{0, 2}, {10, 11}},

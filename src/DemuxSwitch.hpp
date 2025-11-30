@@ -4,10 +4,11 @@
 
 #ifndef DEMUX_SWITCH_HPP
 #define DEMUX_SWITCH_HPP
+#include "fperf_leaf_sts.hpp"
 #include "leaf_sts.hpp"
 
 
-class DemuxSwitch : public LeafSts {
+class DemuxSwitch : public FperfLeafSts {
 public:
     void add_some_constraint(SmtSolver &slv, const string &var_prefix, int pkt_types, vector<int> pkt_type_to_nxt_hop);
 
