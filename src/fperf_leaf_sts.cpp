@@ -202,7 +202,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             for (int j = 0; j < dst_buffs.size(); ++j) {
                 if (i == j)
                     continue;
-                others_zero.push_back(in_to_out_[src_port][j][t]);
+                others_zero.push_back(!in_to_out_[src_port][j][t]);
             }
             string constr_name = format(
                 "{}_in_port_{}_matches_only_voq_{}_at_{}",
@@ -223,7 +223,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             for (int j = 0; j < src_buffs.size(); ++j) {
                 if (i == j)
                     continue;
-                others_zero.push_back(out_from_in_[dst_port][j][t]);
+                others_zero.push_back(!out_from_in_[dst_port][j][t]);
             }
 
             string constr_name = format(
