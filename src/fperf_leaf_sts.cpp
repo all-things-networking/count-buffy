@@ -89,11 +89,11 @@ vector<NamedExp> FperfLeafSts::out(int t) {
         for (int i = 0; i < dst_buffs.size(); ++i) {
             auto buff = dst_buffs[i];
             auto constr_name = format("{}_in_{}_deq_cnt[{}]_is_one", var_prefix, i, t);
-            expr constr_expr = implies(in_to_out_[src_port][i][t], buff->O[t] == 1);
+            expr constr_expr = implies(in_to_out_[src_port][i][t], sum(buff->O[t]) == 1);
             constrs.emplace_back(constr_expr, constr_name);
 
             constr_name = format("{}_in_{}_deq_cnt[{}]_is_zero", var_prefix, i, t);
-            constr_expr = implies(!in_to_out_[src_port][i][t], buff->O[t] == 0);
+            constr_expr = implies(!in_to_out_[src_port][i][t], sum(buff->O[t]) == 0);
             constrs.emplace_back(constr_expr, constr_name);
         }
     }
@@ -195,7 +195,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
     }
 
     // No double matching in input
-    for (int src_port: dst_ports) {
+    for (int src_port: src_ports) {
         auto dst_buffs = get_buffs_for_src(src_port);
         for (int i = 0; i < dst_buffs.size(); ++i) {
             expr_vector others_zero(slv.ctx);
@@ -227,7 +227,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             }
 
             string constr_name = format(
-                "{}_in_port_{}_matches_only_voq_{}_at_{}",
+                "{}_out_port_{}_matches_only_voq_{}_at_{}",
                 var_prefix,
                 dst_port,
                 i,
@@ -365,6 +365,7 @@ vector<NamedExp> FperfLeafSts::init() {
         if (!dst_buffs.empty()) {
             string constr_name = format("{}_in_prio_head[{}][0][0]_is_one", var_prefix, src_port);
             expr constr_expr = in_prio_head_[src_port][0][0];
+            constrs.emplace_back(constr_expr, constr_name);
 
             for (unsigned int i = 1; i < dst_buffs.size(); i++) {
                 constr_name = format("{}_in_prio_head[{}][{}][0]_is_zero", var_prefix, src_port, i);
@@ -379,6 +380,7 @@ vector<NamedExp> FperfLeafSts::init() {
         if (!src_buffs.empty()) {
             string constr_name = format("{}_out_prio_head[{}][0][0]_is_one", var_prefix, dst_port);
             expr constr_expr = out_prio_head_[dst_port][0][0];
+            constrs.emplace_back(constr_expr, constr_name);
 
             for (unsigned int i = 1; i < src_buffs.size(); i++) {
                 constr_name = format("{}_out_prio_head[{}][{}][0]_is_zero", var_prefix, dst_port, i);

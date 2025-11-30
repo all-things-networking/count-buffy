@@ -10,6 +10,8 @@ const int MAX_I = 10;
 
 Buff::Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int max_enq, int max_deq,
            int buf_cap, int src, int dst) : slv(slv), src(src), dst(dst), pkt_types(pkt_types), empty(false) {
+    for (int i = 0; i < pkt_types; ++i)
+        used_pkt_types.push_back(i);
     I = slv.ivv(time_steps, pkt_types, format("I_{}", var_prefix));
     E = slv.ivv(time_steps, pkt_types, format("E_{}", var_prefix));
     D = slv.ivv(time_steps, pkt_types, format("D_{}", var_prefix));
