@@ -22,7 +22,7 @@ constexpr int MAX_ENQ = 5;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int PKT_TYPES = 12;
-constexpr int BUFF_CAP = 10;
+constexpr int BUFF_CAP = 30;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
     if (ranges::find(container, value) != container.end()) {
@@ -369,24 +369,44 @@ int check_wl(vector<string> wl, bool sat) {
     slv.s.push();
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp, wl);
 
-    if (sat) {
+    bool debug = false;
+
+    auto start_t = high_resolution_clock::now();
+
+    if (sat && debug) {
         slv.s.push();
         // slv.add(NamedExp(query(slv, O), "query").negate());
         // slv.add(NamedExp(query(slv, O), "query"));
         slv.check_sat();
         slv.s.pop();
-        cout << "WL is SAT" << endl;
-        exit(0);
+        cout << "SAT: WL is SAT" << endl;
     }
     if (sat) {
         slv.s.push();
-        // slv.add(NamedExp(query(slv, O), "query").negate());
-        // slv.add(NamedExp(query(slv, O), "query"));
+        slv.add(NamedExp(query(slv, O), "query").negate());
         slv.check_sat();
         slv.s.pop();
-        cout << "WL is SAT" << endl;
-        exit(0);
+        cout << "SAT: WL & !Q is SAT" << endl;
     }
+    if (!sat && debug) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query"));
+        slv.check_sat();
+        slv.s.pop();
+        cout << "UNSAT: WL & Q is SAT" << endl;
+    }
+    if (!sat) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query").negate());
+        slv.check_unsat();
+        slv.s.pop();
+        cout << "UNSAT: WL & !Q is UNSAT" << endl;
+    }
+
+    auto end_t = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end_t - start_t);
+    long result = duration.count();
+    return result;
 }
 
 
@@ -409,8 +429,8 @@ int main() {
             continue;
         }
         bool sat = res_stat == "SAT";
-        // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
-        // wl.emplace_back("[1, 10]: dst(0, t) == 5");
+        wl.emplace_back("[1, 10]: cenq(0, t) >= t");
+        wl.emplace_back("[1, 10]: dst(0, t) == 5");
         // wl.emplace_back("[1, 10]: cenq(2, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(3, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(4, t) <= 0");
