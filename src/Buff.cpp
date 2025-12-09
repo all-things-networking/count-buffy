@@ -70,7 +70,7 @@ Buff::Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_typ
     slv.add_bound(tmp_wnd_out, 0, buf_cap);
 }
 
-Buff::Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int src, int dst) : slv(slv),
+Buff::Buff(SmtSolver &slv, int time_steps, int pkt_types, int src, int dst) : slv(slv),
     src(src), dst(dst), pkt_types(pkt_types), empty(true) {
     I = slv.ivv(time_steps, pkt_types, 0);
     E = slv.ivv(time_steps, pkt_types, 0);
@@ -115,6 +115,23 @@ ev2 Buff::getExpandedO() const {
                 v.push_back(slv.ctx.int_val(0));
             } else {
                 v.push_back(O[t][m[i]]);
+            }
+        }
+        result.push_back(v);
+    }
+    return result;
+}
+
+ev2 Buff::getExpandedC() const {
+    auto m = get_pkt_type_to_local_vec_idx();
+    ev2 result;
+    for (int t = 0; t < C.size(); ++t) {
+        ev v;
+        for (int i = 0; i < pkt_types; ++i) {
+            if (m[i] == -1) {
+                v.push_back(slv.ctx.int_val(0));
+            } else {
+                v.push_back(C[t][m[i]]);
             }
         }
         result.push_back(v);

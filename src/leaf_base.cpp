@@ -116,10 +116,12 @@ LeafBase::LeafBase(SmtSolver &slv, const string &var_prefix, map<tuple<int, int>
         auto used_pkt_types = get<1>(src_dst_pkt_type);
         int src = get<0>(src_dst);
         int dst = get<1>(src_dst);
+        Buff *buff;
         if (used_pkt_types.empty())
-            continue;
-        Buff *buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
-                              pkt_types, max_enq, max_deq, buff_cap, src, dst, used_pkt_types);
+            buff = new Buff(slv, timesteps, pkt_types, src, dst);
+        else
+            buff = new Buff(slv, format("{}_BUF_{}_{}", var_prefix, src, dst), timesteps,
+                            pkt_types, max_enq, max_deq, buff_cap, src, dst, used_pkt_types);
         buffs[{src, dst}] = buff;
     }
     use_win = false;

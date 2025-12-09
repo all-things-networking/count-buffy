@@ -22,7 +22,7 @@ constexpr int MAX_ENQ = 5;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int PKT_TYPES = 12;
-constexpr int BUFF_CAP = 30;
+constexpr int RANDOM_SEED = 6000;
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
     if (ranges::find(container, value) != container.end()) {
@@ -157,7 +157,7 @@ void update_ports(vector<map<string, set<int> > > vals_per_input,
     }
 }
 
-int check_wl(vector<string> wl, bool sat) {
+int check_wl(vector<string> wl, bool sat, int buff_cap) {
     ev3 I;
 
     map<int, int> pkt_type_to_dst = {
@@ -169,7 +169,7 @@ int check_wl(vector<string> wl, bool sat) {
         {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}
     };
 
-    SmtSolver slv;
+    SmtSolver slv(RANDOM_SEED);
 
 
     ev3 tmp_I = slv.ivvv(6, TIME_STEPS, PKT_TYPES, "TMP_I");
@@ -216,7 +216,7 @@ int check_wl(vector<string> wl, bool sat) {
     update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
     cout << "L1 Ports:" << endl;
     printPorts(l1_ports);
-    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
 
@@ -242,7 +242,7 @@ int check_wl(vector<string> wl, bool sat) {
     update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
     cout << "L2 Ports:" << endl;
     printPorts(l2_ports);
-    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
 
@@ -269,7 +269,7 @@ int check_wl(vector<string> wl, bool sat) {
     cout << "L3 Ports:" << endl;
     printPorts(l3_ports);
 
-    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
 
@@ -285,7 +285,7 @@ int check_wl(vector<string> wl, bool sat) {
     };
 
     vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop);
 
     LeafBase *s2;
@@ -299,7 +299,7 @@ int check_wl(vector<string> wl, bool sat) {
     };
 
     vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
 
@@ -410,14 +410,17 @@ int check_wl(vector<string> wl, bool sat) {
 }
 
 
-int main() {
-    string wl_file_path = format("./leaf/fperf/leaf.{}.txt", BUFF_CAP);
+int main(const int argc, const char *argv[]) {
+    if (argc < 2)
+        return 1;
+    int buff_cap = atoi(argv[1]);
+    string wl_file_path = format("./leaf/fperf/leaf.{}.txt", buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./leaf/buffy/leaf.{}.txt", BUFF_CAP);
+    string out_file_path = format("./leaf/buffy_nw/leaf.{}.txt", buff_cap);
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
-        // if (i + 1 < 180)
+        // if (i + 1 < 95)
         // continue;
         // if (i > 50)
         // break;
@@ -429,18 +432,18 @@ int main() {
             continue;
         }
         bool sat = res_stat == "SAT";
-        wl.emplace_back("[1, 10]: cenq(0, t) >= t");
-        wl.emplace_back("[1, 10]: dst(0, t) == 5");
+        // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
+        // wl.emplace_back("[1, 10]: dst(0, t) == 5");
         // wl.emplace_back("[1, 10]: cenq(2, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(3, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(4, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(5, t) <= 0");
-        int res = check_wl(wl, sat);
+        int res = check_wl(wl, sat, buff_cap);
         // if (res > 0) {
         // cout << "FAILED:" << i << endl;
         // exit(1);
         // }
-        out << "leaf" << "," << 10 << ", " << i << ", " << res << ", " << res_stat << endl;
+        out << "leaf" << "," << buff_cap << ", " << i << ", " << res << ", " << res_stat << endl;
         // exit(0);
     }
 }

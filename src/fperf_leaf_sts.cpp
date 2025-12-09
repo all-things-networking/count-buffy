@@ -88,6 +88,8 @@ vector<NamedExp> FperfLeafSts::out(int t) {
         auto dst_buffs = get_buffs_for_src(src_port);
         for (int i = 0; i < dst_buffs.size(); ++i) {
             auto buff = dst_buffs[i];
+            if (buff->empty)
+                continue;
             auto constr_name = format("{}_in_{}_deq_cnt[{}]_is_one", var_prefix, i, t);
             expr constr_expr = implies(in_to_out_[src_port][i][t], sum(buff->O[t]) == 1);
             constrs.emplace_back(constr_expr, constr_name);
@@ -110,6 +112,8 @@ vector<NamedExp> FperfLeafSts::out(int t) {
 
         for (auto i = 0; i < src_buffs.size(); i++) {
             match_all_zeros.push_back(!out_from_in_[dst_port][i][t]);
+            if (src_buffs[i]->empty)
+                continue;
             out_all_zeros.push_back(src_buffs[i]->O[t] == 0);
         }
         string constr_name = format("{}_no_enqs_in_out_{}_at_{}", var_prefix, dst_port, t);
@@ -127,7 +131,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
     auto dst_ports = get_out_ports();
 
     //  input and output match together
-    for (const auto &src_dst: buffs | keys) {
+    for (const auto &[src_dst, buff]: buffs ) {
         int src_port = get<0>(src_dst);
         int dst_port = get<1>(src_dst);
         int src_port_idx = dst_src_to_src_idx[dst_port][src_port];
@@ -142,7 +146,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
             src_port_idx,
             t);
         expr constr_expr = (implies(in_to_out_[src_port][dst_port_idx][t],
-                                    out_from_in_[dst_port][src_port_idx][t]) &&
+                                    out_from_in_[dst_port][src_port_idx][t] && buff->B[t]) &&
                             implies(!in_to_out_[src_port][dst_port_idx][t],
                                     !out_from_in_[dst_port][src_port_idx][t]));
         constrs.emplace_back(constr_expr, constr_name);

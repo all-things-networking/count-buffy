@@ -12,7 +12,6 @@
 #include "src/gen/constr_extractor.hpp"
 #include "src/gen/wl_parser.hpp"
 
-class fperfVisitor;
 using namespace std;
 using namespace z3;
 using namespace antlr4;
@@ -21,8 +20,18 @@ using namespace chrono;
 constexpr int MAX_ENQ = 5;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
+constexpr int OFFSET = 3;
 constexpr int PKT_TYPES = 12;
-constexpr int BUFF_CAP = 10;
+constexpr int RANDOM_SEED = 6000;
+
+
+void print_ev2(ev2 e, model m) {
+    for (int i = 0; i < e.size(); ++i) {
+        cout << m.eval(sum(e[i])) << ", ";
+    }
+    cout << endl;
+}
+
 
 bool contains(vector<vector<int> > &container, vector<int> value) {
     if (ranges::find(container, value) != container.end()) {
@@ -61,14 +70,19 @@ expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
     return e;
 }
 
-expr query(SmtSolver &slv, ev3 &O) {
+expr query_val(SmtSolver &slv, ev3 &path_C) {
     expr s = slv.s.ctx().int_val(0);
-    int i = 5;
-    for (int t = 0; t < TIME_STEPS - 3; ++t)
-        s = s + sum(O[i][t]);
-    int thresh = TIME_STEPS / 2;
+    int t = TIME_STEPS - 1 - OFFSET;
+    for (int i = 0; i < path_C.size(); ++i) {
+        s = s + sum(path_C[i][t]);
+    }
+    return s;
+}
+
+expr query(SmtSolver &slv, ev3 &path_C) {
+    int thresh = 0;
     cout << "QUERY THRESHOLD:" << thresh << endl;
-    expr q = s < thresh;
+    expr q = query_val(slv, path_C) >= thresh;
     return q;
 }
 
@@ -157,7 +171,7 @@ void update_ports(vector<map<string, set<int> > > vals_per_input,
     }
 }
 
-int check_wl(vector<string> wl, bool sat) {
+int check_wl(vector<string> wl, bool sat, int buff_cap) {
     ev3 I;
 
     map<int, int> pkt_type_to_dst = {
@@ -169,7 +183,7 @@ int check_wl(vector<string> wl, bool sat) {
         {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}
     };
 
-    SmtSolver slv;
+    SmtSolver slv(RANDOM_SEED);
 
 
     ev3 tmp_I = slv.ivvv(6, TIME_STEPS, PKT_TYPES, "TMP_I");
@@ -195,164 +209,111 @@ int check_wl(vector<string> wl, bool sat) {
 
 
     LeafBase *l1;
-    // map<tuple<int, int>, vector<int> > l1_ports = {
-    //     {{0, 1}, {}},
-    //     {{0, 2}, {}},
-    //     {{0, 3}, {}},
-    //     {{1, 0}, {}},
-    //     {{1, 2}, {}},
-    //     {{1, 3}, {}},
-    //     {{2, 0}, {}},
-    //     {{2, 1}, {}},
-    //     {{3, 0}, {}},
-    //     {{3, 1}, {}}
-    // };
-
-    vector<tuple<int, int> > l1_ports = {
-        {0, 1},
-        {0, 2},
-        {0, 3},
-        {1, 0},
-        {1, 2},
-        {1, 3},
-        {2, 0},
-        {2, 1},
-        {3, 0},
-        {3, 1}
+    map<tuple<int, int>, vector<int> > l1_ports = {
+        {{0, 1}, {}},
+        {{0, 2}, {}},
+        {{0, 3}, {}},
+        {{1, 0}, {}},
+        {{1, 2}, {}},
+        {{1, 3}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {}},
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
 
     vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
     vector port_to_ecmp = {-1, -1, 0, 1};
     vector l1_src_port_to_input = {0, 1, -1, -1};
-    // fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-    //     l1_src_port_to_input, zero_inputs);
-    // update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
-    // cout << "L1 Ports:" << endl;
-    // printPorts(l1_ports);
-    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+        l1_src_port_to_input, zero_inputs);
+    update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
+    cout << "L1 Ports:" << endl;
+    printPorts(l1_ports);
+    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l1_pkt_type_to_nxt_hop
     );
 
 
     LeafBase *l2;
-    // map<tuple<int, int>, vector<int> > l2_ports = {
-    //     {{0, 1}, {}},
-    //     {{0, 2}, {}},
-    //     {{0, 3}, {}},
-    //     {{1, 0}, {}},
-    //     {{1, 2}, {}},
-    //     {{1, 3}, {}},
-    //     {{2, 0}, {}},
-    //     {{2, 1}, {}},
-    //     {{3, 0}, {}},
-    //     {{3, 1}, {}}
-    // };
-
-    vector<tuple<int, int> > l2_ports = {
-        {0, 1},
-        {0, 2},
-        {0, 3},
-        {1, 0},
-        {1, 2},
-        {1, 3},
-        {2, 0},
-        {2, 1},
-        {3, 0},
-        {3, 1}
+    map<tuple<int, int>, vector<int> > l2_ports = {
+        {{0, 1}, {}},
+        {{0, 2}, {}},
+        {{0, 3}, {}},
+        {{1, 0}, {}},
+        {{1, 2}, {}},
+        {{1, 3}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {}},
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
+
     vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
     vector l2_src_port_to_input = {2, 3, -1, -1};
-    // fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-    //     l2_src_port_to_input, zero_inputs);
-    // update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
-    // cout << "L2 Ports:" << endl;
-    // printPorts(l2_ports);
-    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+        l2_src_port_to_input, zero_inputs);
+    update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
+    cout << "L2 Ports:" << endl;
+    printPorts(l2_ports);
+    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l2_pkt_type_to_nxt_hop
     );
 
 
     LeafBase *l3;
-    // map<tuple<int, int>, vector<int> > l3_ports = {
-    //     {{0, 1}, {}},
-    //     {{0, 2}, {}},
-    //     {{0, 3}, {}},
-    //     {{1, 0}, {}},
-    //     {{1, 2}, {}},
-    //     {{1, 3}, {}},
-    //     {{2, 0}, {}},
-    //     {{2, 1}, {}},
-    //     {{3, 0}, {}},
-    //     {{3, 1}, {}}
-    // };
-
-    vector<tuple<int, int>> l3_ports = {
-        {0, 1},
-        {0, 2},
-        {0, 3},
-        {1, 0},
-        {1, 2},
-        {1, 3},
-        {2, 0},
-        {2, 1},
-        {3, 0},
-        {3, 1}
+    map<tuple<int, int>, vector<int> > l3_ports = {
+        {{0, 1}, {}},
+        {{0, 2}, {}},
+        {{0, 3}, {}},
+        {{1, 0}, {}},
+        {{1, 2}, {}},
+        {{1, 3}, {}},
+        {{2, 0}, {}},
+        {{2, 1}, {}},
+        {{3, 0}, {}},
+        {{3, 1}, {}}
     };
+
     vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
     vector l3_src_port_to_input = {4, 5, -1, -1};
-    // fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-    //     l3_src_port_to_input, zero_inputs);
-    // update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
-    // cout << "L3 Ports:" << endl;
-    // printPorts(l3_ports);
+    fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+        l3_src_port_to_input, zero_inputs);
+    update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
+    cout << "L3 Ports:" << endl;
+    printPorts(l3_ports);
 
-    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          l3_pkt_type_to_nxt_hop
     );
 
     // exit(0);
     LeafBase *s1;
-    // map<tuple<int, int>, vector<int> > s1_ports = {
-    //     {{0, 1}, {2, 3}},
-    //     {{0, 2}, {4, 5}},
-    //     {{1, 0}, {0, 1}},
-    //     {{1, 2}, {4, 5}},
-    //     {{2, 0}, {0, 1}},
-    //     {{2, 1}, {2, 3}}
-    // };
-
-    vector<tuple<int, int>> s1_ports = {
-        {0, 1},
-        {0, 2},
-        {1, 0},
-        {1, 2},
-        {2, 0},
-        {2, 1}
+    map<tuple<int, int>, vector<int> > s1_ports = {
+        {{0, 1}, {2, 3}},
+        {{0, 2}, {4, 5}},
+        {{1, 0}, {0, 1}},
+        {{1, 2}, {4, 5}},
+        {{2, 0}, {0, 1}},
+        {{2, 1}, {2, 3}}
     };
+
     vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop);
 
     LeafBase *s2;
-    // map<tuple<int, int>, vector<int> > s2_ports = {
-    //     {{0, 1}, {8, 9}},
-    //     {{0, 2}, {10, 11}},
-    //     {{1, 0}, {6, 7}},
-    //     {{1, 2}, {10, 11}},
-    //     {{2, 0}, {6, 7}},
-    //     {{2, 1}, {8, 9}}
-    // };
-
-    vector<tuple<int, int> > s2_ports = {
-        {0, 1},
-        {0, 2},
-        {1, 0},
-        {1, 2},
-        {2, 0},
-        {2, 1}
+    map<tuple<int, int>, vector<int> > s2_ports = {
+        {{0, 1}, {8, 9}},
+        {{0, 2}, {10, 11}},
+        {{1, 0}, {6, 7}},
+        {{1, 2}, {10, 11}},
+        {{2, 0}, {6, 7}},
+        {{2, 1}, {8, 9}}
     };
+
     vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
-    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, BUFF_CAP, MAX_ENQ, MAX_DEQ,
+    s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
 
@@ -403,6 +364,11 @@ int check_wl(vector<string> wl, bool sat) {
     I.push_back(l3->get_in_port(0));
     I.push_back(l3->get_in_port(1));
 
+    ev3 path_C;
+    path_C.push_back(l1->buffs[{0, 2}]->getExpandedC());
+    path_C.push_back(s1->buffs[{0, 2}]->getExpandedC());
+    path_C.push_back(l3->buffs[{2, 1}]->getExpandedC());
+
     ev3 O;
     O.push_back(l1->get_out_port(0));
     O.push_back(l1->get_out_port(1));
@@ -422,119 +388,17 @@ int check_wl(vector<string> wl, bool sat) {
     slv.s.push();
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp, wl);
 
-    if (true) {
-        cout << "HERE"<< endl;
+    bool debug = true;
+
+    auto start_t = high_resolution_clock::now();
+
+    if (sat && debug) {
         slv.s.push();
-        // slv.add(NamedExp(query(slv, O), "query").negate());
-        slv.add(NamedExp(query(slv, O), "query"));
-        slv.check_sat();
-        slv.s.pop();
-        cout << "WL: " << endl;
-        for (const auto& s: wl)
-            cout << s << endl;
-        cout << "WL is SAT" << endl;
-        exit(0);
-    }
-    duration<long long, ratio<1, 1000> >::rep result;
-    if (sat && false) {
-        slv.s.push();
-        auto start_t = high_resolution_clock::now();
-        try {
-            slv.check_sat();
-        } catch (std::exception e) {
-            cout << "WL is UNSAT" << endl;
-            throw e;
-        }
-        auto mod = slv.s.get_model();
-        auto end_t = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end_t - start_t);
-        result = duration.count();
-        slv.s.pop();
-        cout << "SAT VTIME: " << result << endl;
-        cout << "Expected: SAT, WL is SAT" << endl;
-    }
-
-    if (sat) {
-        slv.s.push();
-        // slv.add(NamedExp(query(slv, O), "query").negate());
-        slv.add(NamedExp(query(slv, O), "query"));
-        auto start_t = high_resolution_clock::now();
-        try {
-            auto mod = slv.check_sat();
-
-            cout << "Input" << endl;
-            for (int i = 0; i < I.size(); ++i) {
-                for (int t = 0; t < TIME_STEPS; ++t) {
-                    auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
-                    auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-                }
-                cout << endl;
-            }
-
-            cout << "Output" << endl;
-            for (int i = 0; i < O.size(); ++i) {
-                for (int t = 0; t < TIME_STEPS; ++t) {
-                    auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
-                    auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
-                    cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-                }
-                cout << endl;
-            }
-        } catch (std::exception e) {
-            cout << "WL & !Q is UNSAT" << endl;
-            throw e;
-        }
-        auto end_t = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end_t - start_t);
-        result = duration.count();
-        slv.s.pop();
-        cout << "SAT VTIME: " << result << endl;
-        cout << "Expected: SAT, WL & !Q is SAT" << endl;
-        return result;
-    }
-
-
-    if (!sat) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query"));
-        auto start_t = high_resolution_clock::now();
-        slv.check_sat();
-        auto end_t = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end_t - start_t);
-        result = duration.count();
-        slv.s.pop();
-        cout << "SAT VTIME: " << result << endl;
-        cout << "Expected: UNSAT, WL & Q is SAT" << endl;
-    }
-
-    if (!sat) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, O), "query").negate());
-        auto start_t = high_resolution_clock::now();
-        // auto mod = slv.check_sat();
-        slv.check_unsat();
-        auto end_t = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end_t - start_t);
-        result = duration.count();
-        slv.s.pop();
-        cout << "UNSAT VTIME: " << result << endl;
-        cout << "Expected: UNSAT, WL & !Q is UNSAT" << endl;
-        return result;
-    }
-
-    if (!sat && false) {
-        slv.s.push();
-        // slv.add(NamedExp(query(slv, O), "query").negate());
-        // slv.add(NamedExp(query(slv, O), "query"));
-        auto start_t = high_resolution_clock::now();
+        // slv.add(NamedExp(query(slv, path_C), "query").negate());
+        slv.add(NamedExp(query(slv, path_C), "query"));
         auto mod = slv.check_sat();
-        // slv.check_unsat();
-        auto end_t = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(end_t - start_t);
-        result = duration.count();
         slv.s.pop();
-        cout << "UNSAT VTIME: " << result << endl;
+        cout << "SAT: WL is SAT" << endl;
 
         cout << "Input" << endl;
         for (int i = 0; i < I.size(); ++i) {
@@ -555,43 +419,70 @@ int check_wl(vector<string> wl, bool sat) {
             }
             cout << endl;
         }
-        // cout << "Output" << endl;
-        // cout << s1->tmp_per_dst[0][0] << endl;
-        // cout << s1->tmp_per_dst[0][1] << endl;
-        // cout << s1->tmp_per_dst[0][2] << endl;
-        // cout << str(l1->tmp_per_src[0], mod).str() << endl;
-        // cout << l1->dst_turn_for_src[0][0] << endl;
-        // cout << mod.eval(l1->src_turn_for_dst[2][0]) << endl;
-        // cout << mod.eval(l1->dst_turn_for_src[0][0]) << endl;
-        // cout << mod.eval(l1->dst_turn_for_src[1][0]) << endl;
-        //
-        // int t = 0;
-        // cout << "ENQ" << endl;
-        // cout << mod.eval(sum(l1->buffs[{0, 2}]->E[t])) << endl;
-        // cout << mod.eval(sum(l1->buffs[{0, 2}]->I[t])) << endl;
-        // cout << mod.eval(sum(l1->buffs[{1, 2}]->I[t])) << endl;
-        // cout << mod.eval(sum(l1->buffs[{1, 2}]->E[t])) << endl;
-        // cout << "ENQ" << endl;
-        //
-        // cout << s1->buffs[{0, 1}]->B[t] << endl;
-        // cout << mod.eval(s1->buffs[{0, 1}]->B[t]) << endl;
-        // cout << s1->buffs[{0, 2}]->B[t] << endl;
-        // cout << mod.eval(s1->buffs[{0, 2}]->B[t]) << endl;
-        // cout << str(O, mod).str() << endl << endl;
-        // exit(0);
-        // exit(0);
+
+        cout << "Cap" << endl;
+        for (int i = 0; i < path_C.size(); ++i) {
+            for (int t = 0; t < TIME_STEPS; ++t) {
+                cout << "(" << setw(5) << mod.eval(sum(path_C[i][t])) << ")" << ", ";
+            }
+            cout << endl;
+        }
+        cout << "L1" << endl;
+        print_ev2(l1->buffs[{0,2}]->E, mod);
+        print_ev2(l1->buffs[{0,2}]->O, mod);
+        print_ev2(l1->buffs[{0,2}]->C, mod);
+
+        cout << "S1" << endl;
+        print_ev2(s1->buffs[{0,2}]->E, mod);
+        print_ev2(s1->buffs[{0,2}]->O, mod);
+        print_ev2(s1->buffs[{0,2}]->C, mod);
+
+        cout << "L3" << endl;
+        print_ev2(l3->buffs[{2,1}]->E, mod);
+        print_ev2(l3->buffs[{2,1}]->O, mod);
+        print_ev2(l3->buffs[{2,1}]->C, mod);
+
+        cout << "Query" << endl;
+        cout << mod.eval(query_val(slv, path_C)) << endl;
     }
+    // if (sat) {
+        // slv.s.push();
+        // slv.add(NamedExp(query(slv, path_C), "query").negate());
+        // slv.check_sat();
+        // slv.s.pop();
+        // cout << "SAT: WL & !Q is SAT" << endl;
+    // }
+    // if (!sat && debug) {
+    //     slv.s.push();
+    //     slv.add(NamedExp(query(slv, O), "query"));
+    //     slv.check_sat();
+    //     slv.s.pop();
+    //     cout << "UNSAT: WL & Q is SAT" << endl;
+    // }
+    // if (!sat) {
+    //     slv.s.push();
+    //     slv.add(NamedExp(query(slv, O), "query").negate());
+    //     slv.check_unsat();
+    //     slv.s.pop();
+    //     cout << "UNSAT: WL & !Q is UNSAT" << endl;
+    // }
+
+    auto end_t = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(end_t - start_t);
+    long result = duration.count();
+    return result;
 }
-
-
-int main() {
-    string wl_file_path = format("./leaf/fperf/leaf.{}.txt", BUFF_CAP);
+int main(const int argc, const char *argv[]) {
+    if (argc < 2)
+        return 1;
+    int buff_cap = atoi(argv[1]);
+    string wl_file_path = format("./late/fperf/late.{}.txt", buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./leaf/buffy/leaf.{}.txt", BUFF_CAP);
+    string out_file_path = format("./late/buffy_nw/late.{}.txt", buff_cap);
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
-        // if (i + 1 < 180)
+        // if (i + 1 < 95)
         // continue;
         // if (i > 50)
         // break;
@@ -605,16 +496,17 @@ int main() {
         bool sat = res_stat == "SAT";
         // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
         // wl.emplace_back("[1, 10]: dst(0, t) == 5");
+        // wl.emplace_back("[1, 10]: cenq(1, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(2, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(3, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(4, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(5, t) <= 0");
-        int res = check_wl(wl, sat);
+        int res = check_wl(wl, sat, buff_cap);
         // if (res > 0) {
         // cout << "FAILED:" << i << endl;
         // exit(1);
         // }
-        out << "leaf" << "," << 10 << ", " << i << ", " << res << ", " << res_stat << endl;
+        out << "leaf" << "," << buff_cap << ", " << i << ", " << res << ", " << res_stat << endl;
         // exit(0);
     }
 }

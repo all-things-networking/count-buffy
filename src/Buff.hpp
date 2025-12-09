@@ -23,11 +23,14 @@ public:
     Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int max_enq, int max_deq, int buf_cap,
          int src, int dst, vector<int> used_pkt_types);
 
-    Buff(SmtSolver &slv, const string &var_prefix, int time_steps, int pkt_types, int src, int dst);
+    Buff(SmtSolver &slv, int time_steps, int pkt_types, int src, int dst);
 
     virtual ev2 getI() const { return I; }
     virtual ev2 getExpandedI() const;
     virtual ev2 getExpandedO() const;
+
+    ev2 getExpandedC() const;
+
     virtual ev2 getE() const { return E; }
     virtual ev2 getD() const { return D; }
     virtual ev getB() const { return B; }

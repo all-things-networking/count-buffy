@@ -46,6 +46,7 @@ vector<NamedExp> LeafSts::out(int t) {
 }
 
 vector<NamedExp> LeafSts::trs(int t) {
+    // Compute for t -> t+1
     auto per_dst = src_map_per_dst();
     auto per_src = dst_map_per_src();
 
