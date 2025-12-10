@@ -338,7 +338,7 @@ vector<NamedExp> FperfLeafSts::trs(int prev_t) {
 
             expr_vector all_zero(slv.ctx);
             for (int i = 0; i < src_buffs.size(); ++i) {
-                all_zero.push_back(!out_prio_head_[dst_port][i][prev_t]);
+                all_zero.push_back(!out_from_in_[dst_port][i][prev_t]);
             }
 
             for (unsigned int i = 0; i < src_buffs.size(); i++) {
