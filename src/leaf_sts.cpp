@@ -168,7 +168,8 @@ vector<NamedExp> LeafSts::init() {
         expr x = slv.ctx.int_val(src_buffs_of_dst[0]->src);
         tmp_per_dst[dst].push_back(x);
         for (int j = 1; j <= count; ++j) {
-            int l = count - j;
+            // int l = count - j;
+            int l = j - 1;
             int val = src_buffs_of_dst[l]->src;
             x = ite(src_buffs_of_dst[l]->B[0], slv.ctx.int_val(val), x);
             tmp_per_dst[dst].push_back(x);
@@ -187,7 +188,8 @@ vector<NamedExp> LeafSts::init() {
         expr x = slv.ctx.int_val(dst_buffs_of_src[0]->dst);
         tmp_per_src[src].push_back(x);
         for (int j = 1; j <= count; ++j) {
-            int l = (count - j);
+            // int l = (count - j);
+            int l = j - 1;
             int val = dst_buffs_of_src[l]->dst;
             x = ite(dst_buffs_of_src[l]->B[0], slv.ctx.int_val(val), x);
             tmp_per_src[src].push_back(x);

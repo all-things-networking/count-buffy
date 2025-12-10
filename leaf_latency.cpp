@@ -25,9 +25,20 @@ constexpr int PKT_TYPES = 12;
 constexpr int RANDOM_SEED = 6000;
 
 
-void print_ev2(ev2 e, model m) {
+void print_ev2_sum(ev2 e, model m) {
     for (int i = 0; i < e.size(); ++i) {
         cout << m.eval(sum(e[i])) << ", ";
+    }
+    cout << endl;
+}
+
+void print_ev2(ev2 e, model m) {
+    for (int i = 0; i < e.size(); ++i) {
+        cout <<"[" << i << "]: ";
+        for (int j = 0; j < e[0].size(); ++j) {
+            cout << m.eval(e[i][j]) << ", ";
+        }
+        cout << endl;
     }
     cout << endl;
 }
@@ -72,7 +83,8 @@ expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
 
 expr query_val(SmtSolver &slv, ev3 &path_C) {
     expr s = slv.s.ctx().int_val(0);
-    int t = TIME_STEPS - 1 - OFFSET;
+    // int t = TIME_STEPS - 1 - OFFSET;
+    int t = TIME_STEPS - 1;
     for (int i = 0; i < path_C.size(); ++i) {
         s = s + sum(path_C[i][t]);
     }
@@ -80,7 +92,7 @@ expr query_val(SmtSolver &slv, ev3 &path_C) {
 }
 
 expr query(SmtSolver &slv, ev3 &path_C) {
-    int thresh = 0;
+    int thresh = 10;
     cout << "QUERY THRESHOLD:" << thresh << endl;
     expr q = query_val(slv, path_C) >= thresh;
     return q;
@@ -288,7 +300,7 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     );
 
     // exit(0);
-    LeafBase *s1;
+    FperfLeafSts *s1;
     map<tuple<int, int>, vector<int> > s1_ports = {
         {{0, 1}, {2, 3}},
         {{0, 2}, {4, 5}},
@@ -428,19 +440,72 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
             cout << endl;
         }
         cout << "L1" << endl;
-        print_ev2(l1->buffs[{0,2}]->E, mod);
-        print_ev2(l1->buffs[{0,2}]->O, mod);
-        print_ev2(l1->buffs[{0,2}]->C, mod);
+        cout << "E: ";
+        print_ev2_sum(l1->buffs[{0,2}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(l1->buffs[{0,2}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(l1->buffs[{0,2}]->C, mod);
 
-        cout << "S1" << endl;
-        print_ev2(s1->buffs[{0,2}]->E, mod);
-        print_ev2(s1->buffs[{0,2}]->O, mod);
-        print_ev2(s1->buffs[{0,2}]->C, mod);
+        cout << "S1 0 -> 2" << endl;
+        cout << "E: ";
+        print_ev2_sum(s1->buffs[{0,2}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(s1->buffs[{0,2}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(s1->buffs[{0,2}]->C, mod);
 
-        cout << "L3" << endl;
-        print_ev2(l3->buffs[{2,1}]->E, mod);
-        print_ev2(l3->buffs[{2,1}]->O, mod);
-        print_ev2(l3->buffs[{2,1}]->C, mod);
+        cout << "S1 1 -> 2" << endl;
+        cout << "E: ";
+        print_ev2_sum(s1->buffs[{1,2}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(s1->buffs[{1,2}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(s1->buffs[{1,2}]->C, mod);
+
+        cout << "L2" << endl;
+        cout << "E: ";
+        print_ev2_sum(l2->buffs[{0,2}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(l2->buffs[{0,2}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(l2->buffs[{0,2}]->C, mod);
+
+        cout << "L3 0 -> " << endl;
+        cout << "E: ";
+        print_ev2_sum(l3->buffs[{0,1}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(l3->buffs[{0,1}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(l3->buffs[{0,1}]->C, mod);
+
+        cout << "L3 -> 1" << endl;
+        cout << "E: ";
+        print_ev2_sum(l3->buffs[{2,1}]->E, mod);
+        cout << "O: ";
+        print_ev2_sum(l3->buffs[{2,1}]->O, mod);
+        cout << "C: ";
+        print_ev2_sum(l3->buffs[{2,1}]->C, mod);
+
+        cout << "Out prio head:" << endl;
+        print_ev2(s1->out_prio_head_[2], mod);
+        print_ev2(s1->out_from_in_[2], mod);
+
+        cout << "Out prio head:" << endl;
+        print_ev2(s1->out_prio_head_[1], mod);
+        print_ev2(s1->out_from_in_[1], mod);
+
+        cout << "In prio head:" << endl;
+        print_ev2(s1->in_prio_head_[0], mod);
+        print_ev2(s1->in_to_out_[0], mod);
+
+        cout << "In prio head:" << endl;
+        print_ev2(s1->in_prio_head_[1], mod);
+        print_ev2(s1->in_to_out_[1], mod);
+
+        cout << "In prio head:" << endl;
+        print_ev2(s1->in_prio_head_[2], mod);
+        print_ev2(s1->in_to_out_[2], mod);
 
         cout << "Query" << endl;
         cout << mod.eval(query_val(slv, path_C)) << endl;

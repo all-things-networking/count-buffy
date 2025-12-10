@@ -384,14 +384,19 @@ vector<NamedExp> LeafBase::bl_size(const int i) const {
     const auto Oi = get_buff_list()[i]->O;
     vector<NamedExp> res;
     // [6]
-    auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0]);
+    // auto ne = NamedExp(Ci[0] == Ei[0] - Oi[0]);
+    auto ne = NamedExp(sum(Ci[0]) == 0);
+    res.push_back(ne);
+    ne = (!Bi[0]);
     res.push_back(ne);
     for (int j = 1; j < timesteps; ++j) {
         // [7]
-        ne = NamedExp(Bi[j] == (Ci[j - 1] + Ei[j] > 0));
+        // ne = NamedExp(Bi[j] == (Ci[j - 1] + Ei[j] > 0));
+        ne = NamedExp(Bi[j] == (sum(Ci[j]) > 0));
         res.push_back(ne);
         // [8]
-        ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]));
+        // ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j] - Oi[j]));
+        ne = NamedExp(Ci[j] == (Ci[j - 1] + Ei[j - 1] - Oi[j - 1]));
         res.push_back(ne);
     }
     return {merge(res, slv.ctx, format("BL Size[{}]", i))};
@@ -406,12 +411,14 @@ vector<NamedExp> LeafBase::enqs(const int i) const {
     vector<NamedExp> res;
 
     // [9]
-    expr e0 = (Ei[0] <= buff_cap) && (Bi[0] == (Ei[0] > 0));
+    // expr e0 = (Ei[0] <= buff_cap) && (Bi[0] == (Ei[0] > 0));
+    expr e0 = (Ei[0] <= buff_cap) && (!Bi[0]);
     res.emplace_back(e0);
 
     for (int j = 1; j < timesteps; ++j) {
         // [10]
-        expr lt_cap = ((Ei[j] + Ci[j - 1]) <= buff_cap);
+        // expr lt_cap = ((Ei[j] + Ci[j - 1]) <= buff_cap);
+        expr lt_cap = ((Ei[j] + Ci[j]) <= buff_cap);
         expr ej = lt_cap;
         res.emplace_back(ej);
     }
@@ -427,13 +434,13 @@ vector<NamedExp> LeafBase::drops(int i) {
 
     vector<NamedExp> res;
 
-    expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == buff_cap), Di[0] == 0);
+    // expr d0 = ite(Bi[0], implies(Di[0] > 0, Ei[0] == buff_cap), Di[0] == 0);
+    expr d0 = (Di[0] == 0);
     res.emplace_back(d0);
 
     for (int j = 1; j < timesteps; ++j) {
-        expr dj = ite(Bi[j],
-                      implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == buff_cap),
-                      Di[j] == 0);
+        // expr dj = ite(Bi[j], implies(Di[j] > 0, (Ci[j - 1] + Ei[j]) == buff_cap), Di[j] == 0);
+        expr dj = ite(Bi[j], implies(Di[j] > 0, (Ci[j] + Ei[j]) == buff_cap), Di[j] == 0);
         res.emplace_back(dj);
     }
     return {merge(res, slv.ctx, format("Drops[{}]", i))};
