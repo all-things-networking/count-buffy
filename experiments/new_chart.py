@@ -14,14 +14,27 @@ plt.rcParams["lines.linewidth"] = 3
 plt.rcParams["legend.fontsize"] = 16
 plt.rcParams['legend.title_fontsize'] = 16
 
+PERCENTILE = 92
 
-def add_buffy_df(tc, buf_size, dfs):
+def add_buffy_nw_df(tc, buf_size, dfs):
+    p = f"../{tc}/buffy_nw/{tc}.{buf_size}.txt"
+    if os.path.exists(p):
+        df = pd.read_csv(p)
+        df['model'] = 'Buffy: No Win'
+        df.columns = df.columns.str.strip()
+        dfs.append(df)
+    else:
+        print("PATH NOT EXIST!", p)
+
+def add_buffy_win_df(tc, buf_size, dfs):
     p = f"../{tc}/buffy/{tc}.{buf_size}.txt"
     if os.path.exists(p):
         df = pd.read_csv(p)
-        df['model'] = 'Ours: With Windows'
+        df['model'] = 'Buffy: Win'
         df.columns = df.columns.str.strip()
         dfs.append(df)
+    else:
+        print("PATH NOT EXIST!", p)
 
 
 def add_fperf_df(tc, buf_size, dfs):
@@ -47,14 +60,15 @@ def add_fperf_df(tc, buf_size, dfs):
 
 dfs = []
 for i in range(501):
-    add_buffy_df(TC, i, dfs)
+    add_buffy_nw_df(TC, i, dfs)
+    add_buffy_win_df(TC, i, dfs)
     add_fperf_df(TC, i, dfs)
 
 df = pd.concat(dfs)
 df['time'] = df['time_millis'] / 1000
 df = df[['model', 'buf_size', 'time']]
 
-summary = df.groupby(['model', 'buf_size'])['time'].agg(['mean', lambda x: np.percentile(x, 95)])
+summary = df.groupby(['model', 'buf_size'])['time'].agg(['mean', lambda x: np.percentile(x, PERCENTILE)])
 summary.rename(columns={'<lambda_0>': 'p95'}, inplace=True)
 summary = summary.reset_index()
 summary = summary.astype({
@@ -65,6 +79,11 @@ summary = summary.astype({
 print(summary)
 height = 5.5
 plt.figure(figsize=(1.6 * height, height))  # double-column example
+palette = {
+    "Buffy: Win": "#1f77b4",   # blue
+    "FPerf": "#ff7f0e",   # orange
+    "Buffy: No Win": "#2ca02c",   # green
+}
 # Plot mean line
 sns.lineplot(
     x='buf_size',
@@ -72,20 +91,21 @@ sns.lineplot(
     hue='model',
     data=summary,
     markers=True,
+    palette=palette
 )
 # plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:.0f}k'))
 ax = plt.gca()
 ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
 # ax.set_xticks(list(range(100, 501, 100)))
 # ax.set_xticks(range(100, 501, 100))
-palette = sns.color_palette()
+# palette = sns.color_palette()
 for i, (model, group) in enumerate(summary.groupby("model")):
     ax.fill_between(
         group["buf_size"],
         group["mean"],
         group["p95"],
         alpha=0.3,
-        color=palette[i]  # same color as line
+        color=palette[model]  # same color as line
     )
 # for i,(model, group) in enumerate(summary.groupby("model")):
 #     ax.errorbar(
@@ -103,8 +123,7 @@ for i, (model, group) in enumerate(summary.groupby("model")):
 leg = plt.legend()
 leg.set_title(None)
 # plt.ylim(0, 2000)
-# plt.ylabel("Verification Time (s)")
-plt.ylabel("")
+plt.ylabel("Verification Time (s)")
 plt.tight_layout()
 plt.savefig(f"{TC}.png", dpi=300, bbox_inches='tight')
 plt.show()
