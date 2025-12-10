@@ -5,9 +5,10 @@ TARGET=$1
 
 cmake --build $BUILD_DIR --target $TARGET -- -j 6
 
-for i in {10..500}; do
-  if [ -f "wls/$TARGET.${i}.txt" ]; then
-    echo "${i}.txt exists"
-    ./$BUILD_DIR/$TARGET $i
-  fi
+for i in 75 100 150; do
+  echo "Running for size=$i"
+  ./$BUILD_DIR/$TARGET $i
+#  if [ -f "wls/$TARGET.${i}.txt" ]; then
+#    echo "${i}.txt exists"
+#  fi
 done
