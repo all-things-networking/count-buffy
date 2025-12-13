@@ -1,0 +1,5 @@
+.venv
+archive
+.cmake
+cmake-build-debug
+build

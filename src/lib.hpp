@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include<vector>
+#include <format>
 
 #include "named_expr.hpp"
 #include"z3++.h"

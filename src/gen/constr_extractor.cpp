@@ -2,6 +2,7 @@
 
 #include "fperfBaseVisitor.h"
 #include <iostream>
+#include <format>
 
 #include "../smt_solver.hpp"
 #include "../lib.hpp"

@@ -8,6 +8,7 @@
 
 #include "utils.hpp"
 #include "gen/wl_parser.hpp"
+#include <chrono>
 
 LoomStsRunner::LoomStsRunner(SmtSolver &slv, ev3 &I, ev2 &O, string model, int buff_cap): slv(slv), model(model), I(I),
     O(O), buff_cap(buff_cap) {

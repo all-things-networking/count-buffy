@@ -3,6 +3,7 @@
 //
 
 #include "leaf_workload_parser.hpp"
+#include <format>
 
 #include <ANTLRInputStream.h>
 

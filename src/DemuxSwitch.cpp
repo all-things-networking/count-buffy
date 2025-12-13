@@ -3,6 +3,7 @@
 //
 
 #include "DemuxSwitch.hpp"
+#include <format>
 
 DemuxSwitch::DemuxSwitch(SmtSolver &slv, const string &var_prefix, vector<tuple<int, int> > port_list, int time_steps,
                          int pkt_types, int buf_cap, int max_enq, int max_deq,

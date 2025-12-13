@@ -9,6 +9,7 @@
 #include "gen/wl_parser.hpp"
 #include "sts_checker.hpp"
 #include "utils.hpp"
+#include <chrono>
 
 StsRunner::StsRunner(STSChecker *sts, string model, int buf_cap): sts(sts), model(model), buf_cap(buf_cap) {
 }

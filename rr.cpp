@@ -1,8 +1,8 @@
 #include <iostream>
 #include<vector>
 
-#include "antlr4-runtime.h"
-#include"z3++.h"
+#include <antlr4-runtime.h>
+#include <z3++.h>
 #include "src/params.hpp"
 #include "src/prio_sts.hpp"
 #include "src/rr_checker.hpp"
@@ -31,7 +31,7 @@ int main(const int argc, const char *argv[]) {
     STSChecker *sts;
     SmtSolver slv;
     sts = new RRChecker(slv, model, NUM_BUFS, TIMESTEPS, PKT_TYPES, buf_cap, MAX_ENQ, MAX_DEQ);
-    sts->use_win = true;
+    sts->use_win = false;
     StsRunner runner(sts, model, buf_cap);
     runner.run(NUM_BUFS, TIMESTEPS);
 }

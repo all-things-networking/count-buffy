@@ -5,6 +5,7 @@
 #include "FqChecker.hpp"
 
 #include <support/CPPUtils.h>
+#include <format>
 
 FqChecker::FqChecker(SmtSolver &slv, const string &var_prefix, int n, int m, int k, int c, int me, int md)
     : STSChecker(slv, var_prefix, n, m, k, c, me, md) {

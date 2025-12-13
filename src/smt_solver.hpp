@@ -8,7 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include<vector>
-#include"z3++.h"
+#include <z3++.h>
 #include "lib.hpp"
 #include "named_expr.hpp"
 

@@ -3,11 +3,12 @@
 //
 
 #include "named_expr.hpp"
+#include <format>
 
 NamedExp NamedExp::prefix(const string &prefix) {
-    return {e, prefix + "_" + name};
+    return NamedExp(e, prefix + "_" + name);
 }
 
 NamedExp NamedExp::negate() {
-    return {!e, format("Not ", name)};
+    return NamedExp(!e, format("Not ", name));
 }

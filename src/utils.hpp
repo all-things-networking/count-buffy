@@ -5,9 +5,12 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include <vector>
+#include <string>
 
-std::vector<std::vector<std::string>> read_wl_file(std::string file_path);
+using namespace std;
 
-std::string join_vec(const std::vector<int>& v);
+vector<vector<string>> read_wl_file(string file_path);
+
+string join_vec(const vector<int>& v);
 
 #endif //UTILS_HPP

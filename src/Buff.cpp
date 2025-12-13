@@ -3,8 +3,10 @@
 //
 
 #include "Buff.hpp"
-
 #include "smt_solver.hpp"
+#include <format>
+
+using namespace std;
 
 const int MAX_I = 10;
 
