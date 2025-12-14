@@ -1,8 +1,8 @@
 FROM ubuntu:24.04
 
-#RUN apt-get update && \
-#    apt-get install -y python3 python3-pip g++ cmake pipx && \
-#    pipx install conan
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip g++ cmake pipx && \
+    pipx install conan
 
 #ENV PATH="/root/.local/bin:$PATH"
 
