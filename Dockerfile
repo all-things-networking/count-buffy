@@ -14,6 +14,6 @@ RUN conan profile detect --force
 
 RUN conan install . --build=missing -s compiler.cppstd=20
 
-#COPY . .
+COPY . .
 
 ENTRYPOINT /bin/bash
