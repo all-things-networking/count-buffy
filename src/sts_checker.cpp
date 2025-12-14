@@ -235,7 +235,28 @@ void STSChecker::check_unsat(const vector<NamedExp> &v) const {
     slv.s.pop();
 }
 
-void STSChecker::print(model m) const {
+model STSChecker::check_wl_and_query_sat() {
+
+    slv.s.push();
+    slv.add(this->workload());
+    slv.add(this->base_constrs());
+    slv.add(this->query());
+    auto m = slv.check_sat();
+    slv.s.pop();
+    return m;
+}
+
+void STSChecker::check_wl_and_not_query_unsat() {
+    slv.s.push();
+    slv.add(this->workload());
+    slv.add(this->base_constrs());
+    auto query_vector = this->query();
+    auto query = merge(query_vector, "query");
+    slv.add(query.negate());
+    slv.check_unsat();
+}
+
+void STSChecker::print(model m) const{
     cout << "E:" << endl;
     cout << str(E, m).str();
     cout << "WE:" << endl;

@@ -18,6 +18,9 @@ COPY . .
 
 RUN cmake --preset conan-release
 
-RUN cmake --build --preset conan-release -- -j6
+RUN cmake --build --preset conan-release --parallel
+
+ENV BUFFY_WLS_DIR="data/wls"
+ENV BUFFY_LOGS_DIR="data/logs"
 
 ENTRYPOINT /bin/bash

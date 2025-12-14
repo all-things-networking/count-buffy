@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include "gen/wl_parser.hpp"
 #include <chrono>
+#include <filesystem>
 
 const string WORKLOADS_DIR = getenv("BUFFY_WLS_DIR");
 const string LOGS_DIR = getenv("BUFFY_LOGS_DIR");

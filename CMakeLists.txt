@@ -41,6 +41,7 @@ find_package(antlr4-runtime REQUIRED)
 
 file(GLOB SRC_FILES src/*.cpp src/gen/*.cpp)
 file(GLOB HPP_FILES src/*.hpp src/gen/*.hpp)
+file(GLOB EXAMPLE_FILES examples/*.cpp examples/*.hpp)
 
 
 function(add_target name source_file)
@@ -61,3 +62,12 @@ add_target(fq fq.cpp)
 add_target(loom loom.cpp)
 add_target(prio prio.cpp)
 add_target(rr rr.cpp)
+
+add_executable(bar ${EXAMPLE_FILES} ${SRC_FILES} ${HPP_FILES})
+target_link_libraries(bar PRIVATE z3::libz3)
+target_link_libraries(bar PRIVATE antlr4_static)
+
+#add_executable(hello_world prio.cpp ${SRC_FILES} )
+#target_compile_options(hello_world PRIVATE -g)
+#target_link_libraries(hello_world PRIVATE z3::libz3)
+#target_link_libraries(hello_world PRIVATE antlr4_static)

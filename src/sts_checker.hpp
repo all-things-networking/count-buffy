@@ -81,6 +81,10 @@ public:
 
     void check_unsat(const vector<NamedExp> &v) const;
 
+    model check_wl_and_query_sat();
+
+    void check_wl_and_not_query_unsat();
+
     virtual void print(model m) const;
 };
 
