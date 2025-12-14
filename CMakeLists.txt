@@ -57,5 +57,7 @@ function(add_target name source_file)
 ##    target_link_libraries(${name} PRIVATE z3::libz3)
 endfunction()
 
+add_target(fq fq.cpp)
+add_target(loom loom.cpp)
+add_target(prio prio.cpp)
 add_target(rr rr.cpp)
-#

@@ -3,3 +3,4 @@ archive
 .cmake
 cmake-build-debug
 build
+local

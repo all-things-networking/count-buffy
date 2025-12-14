@@ -10,7 +10,10 @@
 #include "gen/wl_parser.hpp"
 #include <chrono>
 
-LoomStsRunner::LoomStsRunner(SmtSolver &slv, ev3 &I, ev2 &O, string model, int buff_cap): slv(slv), model(model), I(I),
+const string WORKLOADS_DIR = getenv("BUFFY_WLS_DIR");
+const string LOGS_DIR = getenv("BUFFY_LOGS_DIR");
+
+LoomStsRunner::LoomStsRunner(SmtSolver &slv, ev3 &I, ev2 &O, string model, int buff_cap) : slv(slv), model(model), I(I),
     O(O), buff_cap(buff_cap) {
 }
 
@@ -52,9 +55,11 @@ vector<NamedExp> LoomStsRunner::query(SmtSolver &slv, ev2 &out) {
 void LoomStsRunner::run() {
     auto bwl = base_wl(slv, I);
     slv.add(bwl);
-    string wl_file = format("wls/{}.{}.txt", model, buff_cap);
+    string wl_file = format("{}/{}/{}.{}.txt", WORKLOADS_DIR, model, model, buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file);
-    string out_file_path = format("logs/{}.{}.txt", model, buff_cap);
+    string parent_dir = format("{}/{}", LOGS_DIR, model);
+    filesystem::create_directories(parent_dir);
+    string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buff_cap);
     ofstream out(out_file_path, ios::out);
     out << "scheduler,buf_size,wl_idx,time_millis,solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {

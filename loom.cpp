@@ -31,7 +31,7 @@ public:
     int random_seed;
 
 public:
-    Composed(int buffer_size, unsigned int random_seed): slv(random_seed) {
+    Composed(int buffer_size, unsigned int random_seed) : slv(random_seed) {
         this->buffer_size = buffer_size;
         this->random_seed = random_seed;
         I = slv.ivvv(4 * PKT_TYPES, TIME_STEPS, PKT_TYPES, "INS");
@@ -70,6 +70,6 @@ public:
 int main(const int argc, const char *argv[]) {
     int buff_cap = stoi(argv[1]);
     Composed c(buff_cap, 50000);
-    LoomStsRunner runner(c.slv, c.I, c.O, "loom_mem", buff_cap);
+    LoomStsRunner runner(c.slv, c.I, c.O, "loom", buff_cap);
     runner.run();
 }

@@ -1,0 +1,14 @@
+scheduler, buf_size, wl_idx, time_millis, solver_res
+rr,300, 0, 15, SAT
+rr,300, 1, 3, SAT
+rr,300, 2, 3, SAT
+rr,300, 3, 3, SAT
+rr,300, 4, 11, SAT
+rr,300, 5, 12, SAT
+rr,300, 6, 17, SAT
+rr,300, 7, 8, SAT
+rr,300, 8, 20, SAT
+rr,300, 9, 23, SAT
+rr,300, 10, 26, UNSAT
+rr,300, 11, 13, SAT
+rr,300, 12, 6, UNSAT

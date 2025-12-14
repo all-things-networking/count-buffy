@@ -1,0 +1,17 @@
+scheduler, buf_size, wl_idx, time_millis, solver_res
+prio,25, 0, 7, SAT
+prio,25, 1, 3, SAT
+prio,25, 2, 3, SAT
+prio,25, 3, 3, SAT
+prio,25, 4, 2, SAT
+prio,25, 5, 2, UNSAT
+prio,25, 6, 4, SAT
+prio,25, 7, 1, UNSAT
+prio,25, 8, 1, UNSAT
+prio,25, 9, 1, UNSAT
+prio,25, 10, 1, UNSAT
+prio,25, 11, 0, UNSAT
+prio,25, 12, 2, SAT
+prio,25, 13, 4, UNSAT
+prio,25, 14, 4, SAT
+prio,25, 15, 8, SAT

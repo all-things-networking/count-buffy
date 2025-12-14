@@ -16,4 +16,8 @@ RUN conan install . --build=missing -s compiler.cppstd=20
 
 COPY . .
 
+RUN cmake --preset conan-release
+
+RUN cmake --build --preset conan-release -- -j6
+
 ENTRYPOINT /bin/bash

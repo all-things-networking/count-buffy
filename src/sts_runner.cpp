@@ -10,15 +10,25 @@
 #include "sts_checker.hpp"
 #include "utils.hpp"
 #include <chrono>
+#include <filesystem>
 
-StsRunner::StsRunner(STSChecker *sts, string model, int buf_cap): sts(sts), model(model), buf_cap(buf_cap) {
+
+const string WORKLOADS_DIR = getenv("BUFFY_WLS_DIR");
+const string LOGS_DIR = getenv("BUFFY_LOGS_DIR");
+
+
+StsRunner::StsRunner(STSChecker *sts, string model, int buf_cap) : sts(sts), model(model), buf_cap(buf_cap) {
 }
 
 void StsRunner::run(int num_buffers, int timesteps) {
     SmtSolver &slv = sts->slv;
-    string wl_file_path = format("./wls/{}.{}.txt", model, buf_cap);
+    string wl_file_path = format("{}/{}/{}.{}.txt", WORKLOADS_DIR, model, model, buf_cap);
+    cout << "Reading wls from:" << wl_file_path << endl;
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./logs/{}.{}.txt", model, buf_cap);
+    string parent_dir = format("{}/{}", LOGS_DIR, model);
+    filesystem::create_directories(parent_dir);
+    string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buf_cap);
+    cout << "Writing logs to:" << out_file_path << endl;
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     slv.add(sts->base_constrs());

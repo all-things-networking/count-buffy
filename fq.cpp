@@ -28,7 +28,7 @@ int main(const int argc, const char *argv[]) {
     STSChecker *sts;
     SmtSolver slv;
     sts = new FqChecker(slv, model, NUM_BUFS, TIMESTEPS, PKT_TYPES, buf_cap, MAX_ENQ, MAX_DEQ);
-    sts->use_win = true;
+    sts->use_win = false;
     StsRunner runner(sts, model, buf_cap);
     runner.run(NUM_BUFS, TIMESTEPS);
 }
