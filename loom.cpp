@@ -31,6 +31,11 @@ public:
     int random_seed;
 
 public:
+    void print_stats() {
+        cout << "Buffers: " << I.size() + prio->I.size() << endl;
+        slv.print_stats();
+        cout << "Timestesp: " << I[0].size() << endl;
+    }
     Composed(int buffer_size, unsigned int random_seed) : slv(random_seed) {
         this->buffer_size = buffer_size;
         this->random_seed = random_seed;
@@ -70,6 +75,7 @@ public:
 int main(const int argc, const char *argv[]) {
     int buff_cap = stoi(argv[1]);
     Composed c(buff_cap, 50000);
+    c.print_stats();
     LoomStsRunner runner(c.slv, c.I, c.O, "loom", buff_cap);
     runner.run();
 }

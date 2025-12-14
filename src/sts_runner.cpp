@@ -20,7 +20,15 @@ const string LOGS_DIR = getenv("BUFFY_LOGS_DIR");
 StsRunner::StsRunner(STSChecker *sts, string model, int buf_cap) : sts(sts), model(model), buf_cap(buf_cap) {
 }
 
+void StsRunner::print_stats() {
+    cout << "Buffers: " << sts->num_bufs << endl;
+    sts->slv.print_stats();
+    cout << "Timestesp: " << sts->timesteps << endl;
+}
+
 void StsRunner::run(int num_buffers, int timesteps) {
+    print_stats();
+
     SmtSolver &slv = sts->slv;
     string wl_file_path = format("{}/{}/{}.{}.txt", WORKLOADS_DIR, model, model, buf_cap);
     cout << "Reading wls from:" << wl_file_path << endl;

@@ -1,17 +1,11 @@
 #include <iostream>
-#include<vector>
 
 #include <antlr4-runtime.h>
 #include <z3++.h>
 #include "src/params.hpp"
-#include "src/prio_sts.hpp"
 #include "src/rr_checker.hpp"
 #include "src/sts_runner.hpp"
-#include "src/utils.hpp"
 #include "src/gen/constr_extractor.hpp"
-#include "src/gen/fperfLexer.h"
-#include "src/gen/fperfParser.h"
-#include "src/gen/wl_parser.hpp"
 
 class fperfVisitor;
 using namespace std;

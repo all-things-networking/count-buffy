@@ -17,6 +17,8 @@ private:
 public:
     StsRunner(STSChecker *sts, string model, int buf_cap);
 
+    void print_stats();
+
     void run(int num_buffers, int timesteps);
 };
 

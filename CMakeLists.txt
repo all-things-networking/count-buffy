@@ -67,6 +67,10 @@ add_executable(bar ${EXAMPLE_FILES} ${SRC_FILES} ${HPP_FILES})
 target_link_libraries(bar PRIVATE z3::libz3)
 target_link_libraries(bar PRIVATE antlr4_static)
 
+add_executable(main main.cpp ${SRC_FILES} ${HPP_FILES})
+target_link_libraries(main PRIVATE z3::libz3)
+target_link_libraries(main PRIVATE antlr4_static)
+
 #add_executable(hello_world prio.cpp ${SRC_FILES} )
 #target_compile_options(hello_world PRIVATE -g)
 #target_link_libraries(hello_world PRIVATE z3::libz3)
