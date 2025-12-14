@@ -11,7 +11,9 @@ WORKDIR /buffy
 COPY conanfile.txt .
 
 RUN conan profile detect --force
-#RUN conan install . --build=missing -s compiler.cppstd=20
+
+RUN conan install . --build=missing -s compiler.cppstd=20
+
 #COPY . .
 
 ENTRYPOINT /bin/bash
