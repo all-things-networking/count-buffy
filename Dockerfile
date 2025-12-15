@@ -9,20 +9,25 @@ ENV PATH="/root/.local/bin:$PATH"
 WORKDIR /buffy
 
 COPY conanfile.txt .
+COPY Makefile .
 
-RUN conan profile detect --force
+RUN make init
 
-RUN conan install . --build=missing -s compiler.cppstd=20
+RUN make install-deps
 
 RUN  pip install --no-cache-dir --break-system-packages matplotlib numpy pandas seaborn
 
-COPY . .
+COPY src src
+COPY examples examples
+COPY CMakeLists.txt *.cpp ./
 
-RUN cmake --preset conan-release
+RUN make build
 
-RUN cmake --build --preset conan-release --parallel
+COPY scripts scripts
 
 ENV BUFFY_WLS_DIR="data/wls"
 ENV BUFFY_LOGS_DIR="data/logs"
+ENV PATH="/buffy/build/Release/bin:$PATH"
+ENV PATH="/buffy/scripts:$PATH"
 
 CMD ["tail", "-f", "/dev/null"]

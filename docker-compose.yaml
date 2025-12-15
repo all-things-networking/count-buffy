@@ -1,7 +1,7 @@
 services:
-  count-buffy:
+  buffy:
     build: .
-    image: count-buffy
+    image: buffy
     volumes:
       - ./data:/buffy/data
     command: tail -f /dev/null

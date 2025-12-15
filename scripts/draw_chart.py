@@ -100,11 +100,15 @@ class ChartDrawer:
             )
         leg = plt.legend()
         leg.set_title(None)
+        plt.title(f"Experiment: {self.expr_name}")
         # plt.ylim(0, 250)
         plt.ylabel("Verification Time (s)")
         plt.xlabel("Buffer Size")
         plt.tight_layout()
-        plt.savefig(f"{self.save_dir}/{self.expr_name}.png", dpi=300, bbox_inches='tight')
+        os.makedirs(self.save_dir, exist_ok=True)
+        chart_path = f"{self.save_dir}/{self.expr_name}.png"
+        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+        print(f"Saved chart for {self.expr_name} to {chart_path}")
         plt.show()
 
 

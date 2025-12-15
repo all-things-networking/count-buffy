@@ -1,30 +1,32 @@
-# Installation
+# Count Buffy
 
-### Install Z3
-```shell
-sudo apt update && sudo apt install build-essential
-```
+## Getting Started
 
-Download and install Z3 v4.8.11 [link](https://github.com/Z3Prover/z3/releases/tag/z3-4.8.11).
+### Hello World Example
 
-### Build 
-Target is one of the following:
-- `rr`
-- `prio`
-- `loom`
-- `fq`
-- `leaf`
+The `examples` directory includes a simple example of using count-buffy to
+model a rate-limiter scheduler and verify certain workload and queries.
 
 ```shell
-cmake 
-cmake --build . --target $TARGET -- -j6
+docker compose run --rm buffy hello-world
 ```
-### Run
+
+### Run Experiments
+Clear existing log files:
 ```shell
-
-./$TARGET $BUF_SIZE
+rm -rf data/logs
 ```
 
-`wls` directory includes workloads extracted from FPerf.
-File names have the following format: `$TARGET.$BUF_SIZE.txt`
+Run all experiments (rr and prio):
+```shell
+docker compose run --rm buffy run_all_experiments.sh
+```
+Logs files are created in the `data/logs` directory.
+
+Draw all charts (rr and prio):
+```shell
+docker compose run --rm buffy draw_all_charts.sh
+```
+
+Charts are saved in the `data/charts` directory.
 

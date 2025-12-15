@@ -91,7 +91,7 @@ expr sum(const ev &v, const int limit) {
 }
 
 expr sum(const ev2 &vv) {
-    return sum(vv, vv.size());
+    return sum(vv, vv.size() - 1);
 }
 
 expr sum(const ev2 &vv, const int limit) {
