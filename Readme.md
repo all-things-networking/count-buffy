@@ -6,6 +6,12 @@
 
 Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
+### Pull the Buffy Image
+
+```shell
+docker compose pull
+```
+
 ### Hello World Example
 
 The `examples` directory includes a simple example of using count-buffy to
