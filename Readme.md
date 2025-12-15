@@ -2,6 +2,10 @@
 
 ## Getting Started
 
+### Requirements
+
+Install [Docker](https://docs.docker.com/get-started/get-docker/)
+
 ### Hello World Example
 
 The `examples` directory includes a simple example of using count-buffy to

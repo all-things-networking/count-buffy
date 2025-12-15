@@ -1,7 +1,7 @@
 services:
   buffy:
     build: .
-    image: ghcr.io/all-things-networking/count-buffy:ci
+    image: buffy-local
     volumes:
       - ./data:/buffy/data
     command: tail -f /dev/null
