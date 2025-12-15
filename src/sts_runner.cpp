@@ -30,10 +30,11 @@ void StsRunner::run(int num_buffers, int timesteps) {
     print_stats();
 
     SmtSolver &slv = sts->slv;
+    string win_dir = sts->use_win ? "win" : "no_win";
     string wl_file_path = format("{}/{}/{}.{}.txt", WORKLOADS_DIR, model, model, buf_cap);
     cout << "Reading wls from:" << wl_file_path << endl;
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string parent_dir = format("{}/{}", LOGS_DIR, model);
+    string parent_dir = format("{}/{}/{}", LOGS_DIR, model, win_dir);
     filesystem::create_directories(parent_dir);
     string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buf_cap);
     cout << "Writing logs to:" << out_file_path << endl;

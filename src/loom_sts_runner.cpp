@@ -58,7 +58,7 @@ void LoomStsRunner::run() {
     slv.add(bwl);
     string wl_file = format("{}/{}/{}.{}.txt", WORKLOADS_DIR, model, model, buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file);
-    string parent_dir = format("{}/{}", LOGS_DIR, model);
+    string parent_dir = format("{}/{}/win", LOGS_DIR, model);
     filesystem::create_directories(parent_dir);
     string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buff_cap);
     ofstream out(out_file_path, ios::out);
