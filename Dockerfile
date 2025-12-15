@@ -14,6 +14,8 @@ RUN conan profile detect --force
 
 RUN conan install . --build=missing -s compiler.cppstd=20
 
+RUN  pip install --no-cache-dir --break-system-packages matplotlib numpy pandas seaborn
+
 COPY . .
 
 RUN cmake --preset conan-release
@@ -23,4 +25,4 @@ RUN cmake --build --preset conan-release --parallel
 ENV BUFFY_WLS_DIR="data/wls"
 ENV BUFFY_LOGS_DIR="data/logs"
 
-ENTRYPOINT /bin/bash
+CMD ["tail", "-f", "/dev/null"]

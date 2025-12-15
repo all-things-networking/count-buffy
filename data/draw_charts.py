@@ -15,10 +15,11 @@ plt.rcParams['legend.title_fontsize'] = 16
 
 
 class ChartDrawer:
-    def __init__(self, wls_dir, logs_dir, expr_name):
+    def __init__(self, wls_dir, logs_dir, save_dir, expr_name):
         self.wls_dir = wls_dir
         self.logs_dir = logs_dir
         self.expr_name = expr_name
+        self.save_dir = save_dir
 
     def __add_buffy_df_win(self, buf_size, dfs):
         p = f"{self.logs_dir}/{self.expr_name}/win/{self.expr_name}.{buf_size}.txt"
@@ -103,19 +104,20 @@ class ChartDrawer:
         plt.ylabel("Verification Time (s)")
         plt.xlabel("Buffer Size")
         plt.tight_layout()
-        plt.savefig(f"{self.expr_name}.png", dpi=300, bbox_inches='tight')
+        plt.savefig(f"{self.save_dir}/{self.expr_name}.png", dpi=300, bbox_inches='tight')
         plt.show()
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--workloads", default="data/wls", help="Path to workloads directory")
-    parser.add_argument("-l", "--logs", required=True, help="Path to logs directory")
+    parser.add_argument("-w", "--workloads", default="data/wls", help="Workloads directory")
+    parser.add_argument("-s", "--save-dir", default="data/charts", help="Charts directory")
+    parser.add_argument("-l", "--logs", required=True, help="Logs directory")
     parser.add_argument("-n", "--name", required=True, help="Experiment name")
 
     args = parser.parse_args()
 
-    drawer = ChartDrawer(args.workloads, args.logs, args.name)
+    drawer = ChartDrawer(args.workloads, args.logs, args.save_dir, args.name)
     drawer.draw()
 
 

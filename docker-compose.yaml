@@ -1,0 +1,7 @@
+services:
+  count-buffy:
+    build: .
+    image: count-buffy
+    volumes:
+      - ./data:/buffy/data
+    command: tail -f /dev/null
