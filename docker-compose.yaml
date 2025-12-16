@@ -1,6 +1,5 @@
 services:
   buffy:
-    build: .
     image: ghcr.io/all-things-networking/count-buffy:ci
     volumes:
       - ./data:/buffy/data
