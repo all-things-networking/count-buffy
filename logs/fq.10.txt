@@ -1,9 +1,0 @@
-scheduler, buf_size, wl_idx, time_millis, solver_res
-fq,10, 0, 4100, SAT
-fq,10, 1, 5670, SAT
-fq,10, 2, 3365, SAT
-fq,10, 3, 6286, SAT
-fq,10, 4, 2764, SAT
-fq,10, 5, 3215, SAT
-fq,10, 6, 6405, SAT
-fq,10, 7, 6095, SAT

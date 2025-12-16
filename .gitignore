@@ -8,3 +8,5 @@ archive
 .cmake
 *.zip
 local
+*.png
+CMakeUserPresets.json

@@ -21,7 +21,7 @@ int main(const int argc, const char *argv[]) {
     if (argc < 3)
         throw invalid_argument("Invalid arguments");
     int buf_cap = atoi(argv[1]);
-    bool use_win = (string(argv[2]) == "true");
+    bool use_win = (string(argv[2]) == "win");
     string model = "prio";
     cout << "Starting experiment [" << model << "] " << "Buffer size = " << buf_cap
             << ", windows = " << use_win << endl;

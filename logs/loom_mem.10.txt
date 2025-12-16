@@ -1,2 +1,0 @@
-scheduler,buf_size,wl_idx,time_millis,solver_res
-Loom[mem],10,0,10673,UNSAT

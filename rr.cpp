@@ -18,14 +18,17 @@ constexpr int PKT_TYPES = 1;
 
 
 int main(const int argc, const char *argv[]) {
-    if (argc < 2)
-        return 1;
+    if (argc < 3)
+        throw invalid_argument("Invalid arguments");
     int buf_cap = atoi(argv[1]);
+    bool use_win = (string(argv[2]) == "win");
     string model = "rr";
+    cout << "Starting experiment [" << model << "] " << "Buffer size = " << buf_cap
+            << ", windows = " << use_win << endl;
     STSChecker *sts;
     SmtSolver slv;
     sts = new RRChecker(slv, model, NUM_BUFS, TIMESTEPS, PKT_TYPES, buf_cap, MAX_ENQ, MAX_DEQ);
-    sts->use_win = false;
+    sts->use_win = use_win;
     StsRunner runner(sts, model, buf_cap);
     runner.run(NUM_BUFS, TIMESTEPS);
 }
