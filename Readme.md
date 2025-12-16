@@ -1,5 +1,81 @@
 # Count Buffy 🧛‍♀️
 
+Count Buffy (🧛‍♀️) is a verification tool for performance verification of packet
+schedulers in the network.
+
+Terminology:
+- Buffer: A fifo queue of packets with finite capacity
+- Packet Stream: A sequence of packets 
+- Packet Scheduler: A processing unit that reads packet from a set of input Buffers and
+produces a set of output packet streams
+- Query: A predicate over output packet stream 
+- Workload: A predicate over input packet stream
+
+On a high level, input and output of a packet scheduler is a set of packet streams.
+Input packet streams are fed into Buffers and scheduler reads the buffered packets, and don't
+directly have access to the input stream.
+Scheduler the processes the packets and produces output stream accordingly.
+Workload/Query is an abstract representation of a set of inputs/outputs to/from the scheduler.
+
+Queries are performance properties, i.e., they specify performance related properties of 
+the output like throughput.
+
+The goal of verification task is to verify whenever we fed traffic consistent with the workload
+into the scheduler, the output of the scheduler satisfies the Query.
+
+For instance, assume that we have a rate limiter that limits the output traffic rate to 
+1 packet per two timesteps. 
+Our goal is to verify that even if we feed consistent traffic of 1 packet every timestep into 
+the network, we see at most one packet every two timesteps in the output.
+
+Without verification, we need to manually construct some input traffic with these specification,
+feed them into the network, and then check if the output is rate-limited.
+
+With verification, we represent all possible traffic that with a few lines of specification, and
+use the verification tool to verify that the output of all of such traffic is satisfies the query.
+
+### Okay! That's typical formal methodsy stuff! What is 🧛‍♀️'s novelty?
+
+Efficient verification of schedulers with arbitrary large buffer sizes.
+
+The main novelty of 🧛‍♀️modeling is that it allows analysis when considering
+buffer sizes of arbitrary large sizes. 
+The previous tool for performance verification, only capable of very small and unrealistic
+buffer sizes (≤1K).
+
+## Experiments
+
+### FPerf
+
+FPerf uses a certain grammar to specify workloads. 
+Using a CEGIS style search through the state space of the possible
+workloads allowed by the grammar, FPerf finds a Workload that
+always results in the Query.
+
+FPerf works by using a search loop, inside the loop FPerf generates
+a new random workload, and then verifies whether workload always 
+result in the query.
+To verify most of the workloads generated during the search, FPerf calls
+a verification engine.
+
+We show that using 🧛‍♀️gives significantly better verification time
+than the scheduler model used in FPerf when we increase the buffer size.
+We showed that, size of buffer has negligible effect on the verification
+time in 🧛‍♀️while FPerf verification time increases by increasing the buffer
+size and becomes intractable for larger and realistic buffer sizes.
+
+### How the experiments work?
+
+In each test-case, FPerf generates a set of workloads and verifies each using
+Z3.
+We record those workloads and verify them in 🧛‍♀️, simulating the situation where
+we keep the FPerf's search algorithm, while replacing the formal model of network
+as designed in 🧛‍♀️.
+
+We compare the average verification time of individual calls to the verification engine
+for each buffer size.
+
+
 ## Getting Started
 
 ### Requirements
@@ -120,4 +196,3 @@ draw the charts again:
 ```shell
 docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy draw_all_charts.sh
 ```
-
