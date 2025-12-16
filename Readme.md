@@ -6,7 +6,13 @@
 
 Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
-### Pull the Buffy Image
+#### Update submodules
+
+```shell
+git submodule update --init --recursive
+```
+
+#### Pull the Buffy Image
 
 ```shell
 docker compose pull
@@ -46,10 +52,19 @@ docker compose run --rm buffy draw_all_charts.sh
 Charts are saved in the `data/charts` directory.
 
 ### Check workloads with FPerf
+
 Check workloads with FPerf:
 
 ```shell
 docker compose run --rm buffy check_all_workloads_with_fperf.sh
+```
+
+### Generate workloads with FPerf
+
+Generate workloads of FPerf during the search:
+
+```shell
+docker compose run --rm buffy run_all_fperf.sh
 ```
 
 

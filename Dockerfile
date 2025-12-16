@@ -23,21 +23,22 @@ COPY CMakeLists.txt *.cpp ./
 
 RUN make build
 
-ENV BUFFY_WLS_DIR="data/wls"
-ENV BUFFY_LOGS_DIR="data/logs"
-ENV PATH="/buffy/build/Release/bin:$PATH"
-
 COPY fperf /fperf
 
 WORKDIR /fperf
 
 RUN make
 
-ENV PATH="/fperf/build/Release/bin:$PATH"
-
 WORKDIR /buffy
 
 COPY scripts scripts
+
+ENV BUFFY_WLS_DIR="data/sub_wls"
+ENV BUFFY_LOGS_DIR="data/logs"
+ENV BUFFY_MIN_BUF_SIZE=10
+ENV BUFFY_MAX_BUF_SIZE=501
+ENV PATH="/buffy/build/Release/bin:$PATH"
+ENV PATH="/fperf/build/Release/bin:$PATH"
 
 ENV PATH="/buffy/scripts:$PATH"
 

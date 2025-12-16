@@ -15,11 +15,13 @@ plt.rcParams['legend.title_fontsize'] = 16
 
 
 class ChartDrawer:
-    def __init__(self, wls_dir, logs_dir, save_dir, expr_name):
+    def __init__(self, wls_dir, logs_dir, save_dir, expr_name, min_buf_size, max_buf_size):
         self.wls_dir = wls_dir
         self.logs_dir = logs_dir
         self.expr_name = expr_name
         self.save_dir = save_dir
+        self.min_buf_size = min_buf_size
+        self.max_buf_size = max_buf_size
 
     def __add_buffy_df_win(self, buf_size, dfs):
         p = f"{self.logs_dir}/{self.expr_name}/win/{self.expr_name}.{buf_size}.txt"
@@ -59,7 +61,7 @@ class ChartDrawer:
 
     def draw(self):
         dfs = []
-        for i in range(501):
+        for i in range(self.min_buf_size, self.max_buf_size):
             self.__add_buffy_df_win(i, dfs)
             self.__add_buffy_df_no_win(i, dfs)
             self.__add_fperf_df(i, dfs)
@@ -88,7 +90,7 @@ class ChartDrawer:
         )
         ax = plt.gca()
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
-        ax.set_xticks(range(100, 501, 100))
+        # ax.set_xticks(range(self.min_buf_size, self.max_buf_size, s))
         palette = sns.color_palette()
         for i, (model, group) in enumerate(summary.groupby("model")):
             ax.fill_between(
@@ -114,14 +116,16 @@ class ChartDrawer:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--workloads", default="data/wls", help="Workloads directory")
     parser.add_argument("-s", "--save-dir", default="data/charts", help="Charts directory")
+    parser.add_argument("-w", "--workloads", required=True, help="Workloads directory")
     parser.add_argument("-l", "--logs", required=True, help="Logs directory")
     parser.add_argument("-n", "--name", required=True, help="Experiment name")
+    parser.add_argument("--min", type=int, required=True, help="Min Buffer size")
+    parser.add_argument("--max", type=int, required=True, help="Max Buffer size")
 
     args = parser.parse_args()
 
-    drawer = ChartDrawer(args.workloads, args.logs, args.save_dir, args.name)
+    drawer = ChartDrawer(args.workloads, args.logs, args.save_dir, args.name, args.min, args.max)
     drawer.draw()
 
 
