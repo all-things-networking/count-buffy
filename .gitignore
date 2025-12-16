@@ -10,3 +10,4 @@ archive
 local
 *.png
 CMakeUserPresets.json
+__pycache__

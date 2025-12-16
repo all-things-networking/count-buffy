@@ -30,12 +30,12 @@ docker compose run --rm buffy hello-world
 ### Run Experiments
 
 For performance evaluation of 🧛‍♀️ we used the 4 case studies used
-in FPerf. 
+in FPerf.
 For each case study, we run the FPerf search for various buffers sizes
-and recorded all workloads generated during the search. 
-Then we checked these workloads using 🧛‍♀️ to first ensure that we get the 
+and recorded all workloads generated during the search.
+Then we checked these workloads using 🧛‍♀️ to first ensure that we get the
 same SAT/UNSAT result and also compare the time of each call to the backend
-verification engine. 
+verification engine.
 This way we can compare the efficiency of 🧛‍♀️'s model against FPerf.
 
 Data for our experimental results include:
@@ -53,29 +53,38 @@ To reproduce the result claimed in the paper, we provide 4 levels:
 
 ### 1- Generate Charts
 
+- `data/sub_logs` includes the output of 🧛‍♀️ (logs generated for submission)
+- `data/sub_wls` includes the output of FPerf that we already
+
 ```shell
-docker compose run --rm buffy draw_all_charts.sh
+docker compose run --rm -e BUFFY_LOGS_DIR=data/sub_logs buffy draw_all_charts.sh
 ```
 
 Charts are saved in the `data/charts` directory.
 
+> Here we are using previously generated data used for the submission (`data/sub_logs` and `data/sub_wls`)
+
 ### 2- Verify Workloads in 🧛‍♀️
 
-- `data/logs` includes the output of 🧛‍♀️
-- `data/sub_wls` includes the output of FPerf that we already
-generated and stored here
-
+- `data/logs` includes the output of 🧛‍♀️ (new logs that you generate)
+  generated and stored here
 
 Clear existing log files:
 
 ```shell
-rm -rf data/logs
+rm -rf data/logs data/charts
 ```
 
 Verify all workloads in 🧛‍♀️:
 
 ```shell
 docker compose run --rm buffy run_all_experiments.sh
+```
+
+draw the charts again:
+
+```shell
+docker compose run --rm buffy draw_all_charts.sh
 ```
 
 ### 3- Check Workloads in FPerf
@@ -96,4 +105,15 @@ docker compose run --rm buffy run_all_fperf.sh
 
 FPerf new workloads are saved into the `data/new_wls` directory.
 
+Verify newly generated workloads in 🧛‍♀️:
+
+```shell
+docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy run_all_experiments.sh
+```
+
+draw the charts again:
+
+```shell
+docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy draw_all_charts.sh
+```
 
