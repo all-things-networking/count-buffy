@@ -1,4 +1,4 @@
 [submodule "fperf"]
 	path = fperf
-	url = git@github.com:all-things-networking/fperf.git
+	url = https://github.com/all-things-networking/fperf.git
 	branch = wl-output
