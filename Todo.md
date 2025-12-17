@@ -1,0 +1,9 @@
+- Have two sections one with up to stage 3 and one with step 4
+- Simple Improve the readme
+- Add high-level explanation
+- Add leaf case study
+- Better readme
+- Add instruction explaining the code
+- Fix the mina's issues
+- Try some refactoring
+- 
