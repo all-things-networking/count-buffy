@@ -33,7 +33,7 @@ void print_ev2_sum(ev2 e, model m) {
 
 void print_ev2(ev2 e, model m) {
     for (int i = 0; i < e.size(); ++i) {
-        cout <<"[" << i << "]: ";
+        cout << "[" << i << "]: ";
         for (int j = 0; j < e[0].size(); ++j) {
             cout << m.eval(e[i][j]) << ", ";
         }
@@ -399,14 +399,14 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     slv.s.push();
     add_workload(slv, I, TIME_STEPS, pkt_type_to_dst, pkt_type_to_ecmp, wl);
 
-    bool debug = true;
+    bool debug = false;
 
     auto start_t = high_resolution_clock::now();
 
     if (sat && debug) {
         slv.s.push();
-        // slv.add(NamedExp(query(slv, path_C), "query").negate());
-        slv.add(NamedExp(query(slv, path_C), "query"));
+        slv.add(NamedExp(query(slv, path_C), "query").negate());
+        // slv.add(NamedExp(query(slv, path_C), "query"));
         auto mod = slv.check_sat();
         slv.s.pop();
         cout << "SAT: WL is SAT" << endl;
@@ -440,51 +440,51 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
         }
         cout << "L1" << endl;
         cout << "E: ";
-        print_ev2_sum(l1->buffs[{0,2}]->E, mod);
+        print_ev2_sum(l1->buffs[{0, 2}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(l1->buffs[{0,2}]->O, mod);
+        print_ev2_sum(l1->buffs[{0, 2}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(l1->buffs[{0,2}]->C, mod);
+        print_ev2_sum(l1->buffs[{0, 2}]->C, mod);
 
         cout << "S1 0 -> 2" << endl;
         cout << "E: ";
-        print_ev2_sum(s1->buffs[{0,2}]->E, mod);
+        print_ev2_sum(s1->buffs[{0, 2}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(s1->buffs[{0,2}]->O, mod);
+        print_ev2_sum(s1->buffs[{0, 2}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(s1->buffs[{0,2}]->C, mod);
+        print_ev2_sum(s1->buffs[{0, 2}]->C, mod);
 
         cout << "S1 1 -> 2" << endl;
         cout << "E: ";
-        print_ev2_sum(s1->buffs[{1,2}]->E, mod);
+        print_ev2_sum(s1->buffs[{1, 2}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(s1->buffs[{1,2}]->O, mod);
+        print_ev2_sum(s1->buffs[{1, 2}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(s1->buffs[{1,2}]->C, mod);
+        print_ev2_sum(s1->buffs[{1, 2}]->C, mod);
 
         cout << "L2" << endl;
         cout << "E: ";
-        print_ev2_sum(l2->buffs[{0,2}]->E, mod);
+        print_ev2_sum(l2->buffs[{0, 2}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(l2->buffs[{0,2}]->O, mod);
+        print_ev2_sum(l2->buffs[{0, 2}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(l2->buffs[{0,2}]->C, mod);
+        print_ev2_sum(l2->buffs[{0, 2}]->C, mod);
 
         cout << "L3 0 -> " << endl;
         cout << "E: ";
-        print_ev2_sum(l3->buffs[{0,1}]->E, mod);
+        print_ev2_sum(l3->buffs[{0, 1}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(l3->buffs[{0,1}]->O, mod);
+        print_ev2_sum(l3->buffs[{0, 1}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(l3->buffs[{0,1}]->C, mod);
+        print_ev2_sum(l3->buffs[{0, 1}]->C, mod);
 
         cout << "L3 -> 1" << endl;
         cout << "E: ";
-        print_ev2_sum(l3->buffs[{2,1}]->E, mod);
+        print_ev2_sum(l3->buffs[{2, 1}]->E, mod);
         cout << "O: ";
-        print_ev2_sum(l3->buffs[{2,1}]->O, mod);
+        print_ev2_sum(l3->buffs[{2, 1}]->O, mod);
         cout << "C: ";
-        print_ev2_sum(l3->buffs[{2,1}]->C, mod);
+        print_ev2_sum(l3->buffs[{2, 1}]->C, mod);
 
         cout << "Out prio head:" << endl;
         print_ev2(s1->out_prio_head_[2], mod);
@@ -509,13 +509,14 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
         cout << "Query" << endl;
         cout << mod.eval(query_val(slv, path_C)) << endl;
     }
-    // if (sat) {
-        // slv.s.push();
-        // slv.add(NamedExp(query(slv, path_C), "query").negate());
-        // slv.check_sat();
-        // slv.s.pop();
-        // cout << "SAT: WL & !Q is SAT" << endl;
-    // }
+    if (sat) {
+        cout << "Checking WL & !Q is SAT" << endl;
+        slv.s.push();
+        slv.add(NamedExp(query(slv, path_C), "query").negate());
+        slv.check_sat();
+        slv.s.pop();
+        cout << "SAT: WL & !Q is SAT" << endl;
+    }
     // if (!sat && debug) {
     //     slv.s.push();
     //     slv.add(NamedExp(query(slv, O), "query"));
@@ -523,19 +524,21 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     //     slv.s.pop();
     //     cout << "UNSAT: WL & Q is SAT" << endl;
     // }
-    // if (!sat) {
-    //     slv.s.push();
-    //     slv.add(NamedExp(query(slv, O), "query").negate());
-    //     slv.check_unsat();
-    //     slv.s.pop();
-    //     cout << "UNSAT: WL & !Q is UNSAT" << endl;
-    // }
+    if (!sat) {
+        cout << "Checking WL & !Q is UNSAT" << endl;
+        slv.s.push();
+        slv.add(NamedExp(query(slv, path_C), "query").negate());
+        slv.check_unsat();
+        slv.s.pop();
+        cout << "UNSAT: WL & !Q is UNSAT" << endl;
+    }
 
     auto end_t = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end_t - start_t);
     long result = duration.count();
     return result;
 }
+
 int main(const int argc, const char *argv[]) {
     if (argc < 2)
         return 1;
@@ -558,6 +561,9 @@ int main(const int argc, const char *argv[]) {
             continue;
         }
         bool sat = res_stat == "SAT";
+        wl.emplace_back("[1, 10]: cenq(0, t) <= t");
+        wl.emplace_back("[1, 10]: dst(0, t)  == 5");
+        wl.emplace_back("[1, 10]: ecmp(0, t) == 0");
         // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
         // wl.emplace_back("[1, 10]: dst(0, t) == 5");
         // wl.emplace_back("[1, 10]: cenq(1, t) <= 0");

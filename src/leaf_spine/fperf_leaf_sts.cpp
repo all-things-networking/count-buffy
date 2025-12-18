@@ -90,11 +90,11 @@ vector<NamedExp> FperfLeafSts::out(int t) {
             auto buff = dst_buffs[i];
             if (buff->empty)
                 continue;
-            auto constr_name = format("{}_in_{}_deq_cnt[{}]_is_one", var_prefix, i, t);
+            auto constr_name = format("{}_{}_in_{}_deq_cnt[{}]_is_one", var_prefix,src_port, i, t);
             expr constr_expr = implies(in_to_out_[src_port][i][t], sum(buff->O[t]) == 1);
             constrs.emplace_back(constr_expr, constr_name);
 
-            constr_name = format("{}_in_{}_deq_cnt[{}]_is_zero", var_prefix, i, t);
+            constr_name = format("{}_{}_in_{}_deq_cnt[{}]_is_zero", var_prefix, src_port, i, t);
             constr_expr = implies(!in_to_out_[src_port][i][t], sum(buff->O[t]) == 0);
             constrs.emplace_back(constr_expr, constr_name);
         }

@@ -63,7 +63,7 @@ expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
 expr query(SmtSolver &slv, ev3 &O) {
     expr s = slv.s.ctx().int_val(0);
     int i = 5;
-    for (int t = 0; t < TIME_STEPS - 1; ++t)
+    for (int t = 0; t < TIME_STEPS; ++t)
         s = s + sum(O[i][t]);
     int thresh = TIME_STEPS / 2;
     cout << "QUERY THRESHOLD:" << thresh << endl;
