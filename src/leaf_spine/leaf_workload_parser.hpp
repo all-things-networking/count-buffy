@@ -5,24 +5,28 @@
 #ifndef LEAF_WORKLOAD_PARSER_HPP
 #define LEAF_WORKLOAD_PARSER_HPP
 #include <map>
-
-#include "wl_parser.hpp"
+#include <set>
+#include "../smt_solver.hpp"
 
 
 class LeafWorkloadParser {
 public:
     SmtSolver &slv;
     int timesteps;
-    int num_buffs;
-    int num_spines;
-    int num_leafs;
-    int host_per_leaf;
+    vector<int> max_t_with_zero_cenq;
     map<int, vector<int> > dst_to_pkt_type;
     map<int, vector<int> > ecmp_to_pkt_type;
     vector<int> all_pkt_types;
+    vector<tuple<int, int, string, int> > dst_constrs;
+    vector<tuple<int, int, string, int> > ecmp_constrs;
     ev3 I;
 
-    LeafWorkloadParser(SmtSolver &slv, ev3 &I, int num_spines, int num_leafs, int host_per_leaf, int timesteps);
+    void merge(vector<int> max_t_update);
+
+    set<int> get_zero_inputs();
+
+    LeafWorkloadParser(SmtSolver &slv, ev3 &I, int timesteps, map<int, int> pkt_type_to_dst,
+                       map<int, int> pkt_type_to_ecmp);
 
     vector<NamedExp> parse(string prefix, string wl_line);
 

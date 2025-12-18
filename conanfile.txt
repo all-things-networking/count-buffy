@@ -1,6 +1,7 @@
 [requires]
 antlr4-cppruntime/4.13.2
 z3/4.9.1
+exprtk/0.0.3
 
 [generators]
 CMakeDeps
