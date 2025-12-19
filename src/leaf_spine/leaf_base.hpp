@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include "LeafBuff.hpp"
+#include "leaf_buff.hpp"
 #include "../sts_checker.hpp"
 
 class SmtSolver;

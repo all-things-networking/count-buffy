@@ -2,7 +2,7 @@
 // Created by Amir Hossein Seyhani on 8/25/25.
 //
 
-#include "DemuxSwitch.hpp"
+#include "demux_switch.hpp"
 
 void DemuxSwitch::add_some_constraint(SmtSolver &slv, const string &var_prefix, int pkt_types,
                                       vector<int> pkt_type_to_nxt_hop) {

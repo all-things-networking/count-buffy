@@ -2,7 +2,7 @@
 // Created by Amir Hossein Seyhani on 8/24/25.
 //
 
-#include "LeafBuff.hpp"
+#include "leaf_buff.hpp"
 
 #include "../smt_solver.hpp"
 

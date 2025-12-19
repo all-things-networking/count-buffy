@@ -30,4 +30,27 @@ set<int> get_zero_inputs(map<int, map<string, set<int> > > &m);
 
 void printSet(set<int> &s);
 
+
+void fix(map<tuple<int, int>, vector<int> > &ports,
+         vector<int> pkt_type_to_nxt_hop,
+         set<int> used_dsts,
+         set<int> used_ecmps,
+         map<int, int> pkt_type_to_dst,
+         map<int, int> pkt_type_to_ecmp,
+         vector<int> port_to_ecmp,
+         vector<int> src_port_to_input,
+         set<int> zero_inputs
+);
+
+void update_ports(vector<map<string, set<int> > > vals_per_input,
+                  map<tuple<int, int>, vector<int> > &ports,
+                  vector<int> port_to_input,
+                  vector<int> pkt_type_to_next_hop,
+                  vector<int> port_to_ecmp
+);
+
+void printPorts(const map<tuple<int, int>, vector<int> > &ports);
+
+expr link_ports(ev2 out, ev2 in);
+
 // void add_workload(Am);

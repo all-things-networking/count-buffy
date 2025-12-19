@@ -4,7 +4,7 @@
 
 #include "antlr4-runtime.h"
 #include"z3++.h"
-#include "src/leaf_spine/DemuxSwitch.hpp"
+#include "src/leaf_spine/demux_switch.hpp"
 #include "src/leaf_spine/leaf_sts.hpp"
 #include "src/leaf_spine/leaf_utils.hpp"
 #include "src/prio_sts.hpp"
@@ -25,43 +25,6 @@ constexpr int TIME_STEPS = 10;
 constexpr int PKT_TYPES = 12;
 constexpr int RANDOM_SEED = 6000;
 
-bool contains(vector<vector<int> > &container, vector<int> value) {
-    if (ranges::find(container, value) != container.end()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-expr link_ports(ev2 out, ev2 in) {
-    auto e = out[0][0].ctx().bool_val(true);
-    for (int i = 0; i < out.size(); ++i) {
-        for (int j = 0; j < out[0].size(); ++j) {
-            e = e && (out[i][j] == in[i][j]);
-        }
-    }
-    return e;
-}
-
-expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
-    expr e = sts->slv.ctx.bool_val(true);
-    auto in_ports = sts->get_in_ports();
-    for (int port: in_ports) {
-        auto in_port = sts->get_in_port(port);
-        for (int t = 0; t < TIME_STEPS; ++t) {
-            for (int k = 0; k < PKT_TYPES; ++k) {
-                int val = 0;
-                if (inp.contains({port, t, k})) {
-                    val = inp[{port, t, k}];
-                    cout << "INCLUDES: " << port << "@" << t << " -> " << k << endl;
-                }
-                e = e && in_port[t][k] == val;
-            }
-        }
-    }
-    return e;
-}
-
 expr query(SmtSolver &slv, ev3 &O) {
     expr s = slv.s.ctx().int_val(0);
     int i = 5;
@@ -73,90 +36,6 @@ expr query(SmtSolver &slv, ev3 &O) {
     return q;
 }
 
-void printPorts(const map<tuple<int, int>, vector<int> > &ports) {
-    for (const auto &[key, values]: ports) {
-        auto [a, b] = key;
-        cout << "(" << a << ", " << b << "): ";
-        for (int v: values) cout << v << " ";
-        cout << "\n";
-    }
-}
-
-void fix(map<tuple<int, int>, vector<int> > &ports,
-         vector<int> pkt_type_to_nxt_hop,
-         set<int> used_dsts,
-         set<int> used_ecmps,
-         map<int, int> pkt_type_to_dst,
-         map<int, int> pkt_type_to_ecmp,
-         vector<int> port_to_ecmp,
-         vector<int> src_port_to_input,
-         set<int> zero_inputs
-) {
-    for (auto &[src_dst, p]: ports) {
-        int src_port = get<0>(src_dst);
-        int dst_port = get<1>(src_dst);
-        if (src_port < 2)
-            continue;
-        for (int k = 0; k < PKT_TYPES; ++k) {
-            int ecmp_value = pkt_type_to_ecmp[k];
-            int dst_value = pkt_type_to_dst[k];
-            if (used_dsts.contains(dst_value) && used_ecmps.contains(ecmp_value) && (pkt_type_to_nxt_hop[k] == dst_port)
-                && (port_to_ecmp[src_port] == ecmp_value) && (!zero_inputs.contains(
-                    src_port_to_input[src_port]))) {
-                if (find(p.begin(), p.end(), k) == p.end()) {
-                    p.push_back(k);
-                }
-            }
-        }
-    }
-}
-
-void update_ports(vector<map<string, set<int> > > vals_per_input,
-                  map<tuple<int, int>, vector<int> > &ports,
-                  vector<int> port_to_input,
-                  vector<int> pkt_type_to_next_hop,
-                  vector<int> port_to_ecmp
-) {
-    for (auto &[src_dst, pkt_types]: ports) {
-        int src_port = get<0>(src_dst);
-        int dst_port = get<1>(src_dst);
-        int src_input = port_to_input[src_port];
-        int src_input_idx = src_input % vals_per_input.size();
-        int dst_input = port_to_input[dst_port];
-        if (src_input == -1)
-            continue;
-
-        set<int> used_dst_vals = vals_per_input[src_input_idx]["dst"];
-        set<int> used_ecmps = vals_per_input[src_input_idx]["ecmp"];
-
-        // int dst_ecmp = dst_port % 2;
-        int dst_ecmp = port_to_ecmp[dst_port];
-
-        vector<int> dst_ecmps;
-        if (dst_ecmp != -1)
-            dst_ecmps.push_back(dst_ecmp);
-        else
-            for (auto ecmp: used_ecmps)
-                dst_ecmps.push_back(ecmp);
-
-        for (auto dst_ecmp_val: dst_ecmps) {
-            if (!used_ecmps.contains(dst_ecmp_val))
-                continue;
-
-            int ecmp_offset = dst_ecmp_val * 6;
-            for (auto used_dst_val: used_dst_vals) {
-                int pkt_type = ecmp_offset + used_dst_val;
-                int nxt_hop_port = pkt_type_to_next_hop[pkt_type];
-                if (dst_port != nxt_hop_port)
-                    continue;
-
-                if (find(pkt_types.begin(), pkt_types.end(), pkt_type) == pkt_types.end()) {
-                    pkt_types.push_back(pkt_type);
-                }
-            }
-        }
-    }
-}
 
 int check_wl(vector<string> wl, bool sat, int buff_cap) {
     ev3 I;

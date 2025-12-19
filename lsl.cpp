@@ -4,7 +4,7 @@
 
 #include "antlr4-runtime.h"
 #include"z3++.h"
-#include "src/leaf_spine/DemuxSwitch.hpp"
+#include "src/leaf_spine/demux_switch.hpp"
 #include "src/leaf_spine/leaf_sts.hpp"
 #include "src/leaf_spine/leaf_utils.hpp"
 #include "src/utils.hpp"
@@ -24,62 +24,6 @@ constexpr int PKT_TYPES = 12;
 constexpr int RANDOM_SEED = 6000;
 
 
-void print_ev2_sum(ev2 e, model m) {
-    for (int i = 0; i < e.size(); ++i) {
-        cout << m.eval(sum(e[i])) << ", ";
-    }
-    cout << endl;
-}
-
-void print_ev2(ev2 e, model m) {
-    for (int i = 0; i < e.size(); ++i) {
-        cout << "[" << i << "]: ";
-        for (int j = 0; j < e[0].size(); ++j) {
-            cout << m.eval(e[i][j]) << ", ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-}
-
-
-bool contains(vector<vector<int> > &container, vector<int> value) {
-    if (ranges::find(container, value) != container.end()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-expr link_ports(ev2 out, ev2 in) {
-    auto e = out[0][0].ctx().bool_val(true);
-    for (int i = 0; i < out.size(); ++i) {
-        for (int j = 0; j < out[0].size(); ++j) {
-            e = e && (out[i][j] == in[i][j]);
-        }
-    }
-    return e;
-}
-
-expr add_constr(LeafBase *sts, map<tuple<int, int, int>, int> inp) {
-    expr e = sts->slv.ctx.bool_val(true);
-    auto in_ports = sts->get_in_ports();
-    for (int port: in_ports) {
-        auto in_port = sts->get_in_port(port);
-        for (int t = 0; t < TIME_STEPS; ++t) {
-            for (int k = 0; k < PKT_TYPES; ++k) {
-                int val = 0;
-                if (inp.contains({port, t, k})) {
-                    val = inp[{port, t, k}];
-                    cout << "INCLUDES: " << port << "@" << t << " -> " << k << endl;
-                }
-                e = e && in_port[t][k] == val;
-            }
-        }
-    }
-    return e;
-}
-
 expr query_val(SmtSolver &slv, ev3 &path_C) {
     expr s = slv.s.ctx().int_val(0);
     // int t = TIME_STEPS - 1 - OFFSET;
@@ -95,91 +39,6 @@ expr query(SmtSolver &slv, ev3 &path_C) {
     cout << "QUERY THRESHOLD:" << thresh << endl;
     expr q = query_val(slv, path_C) >= thresh;
     return q;
-}
-
-void printPorts(const map<tuple<int, int>, vector<int> > &ports) {
-    for (const auto &[key, values]: ports) {
-        auto [a, b] = key;
-        cout << "(" << a << ", " << b << "): ";
-        for (int v: values) cout << v << " ";
-        cout << "\n";
-    }
-}
-
-void fix(map<tuple<int, int>, vector<int> > &ports,
-         vector<int> pkt_type_to_nxt_hop,
-         set<int> used_dsts,
-         set<int> used_ecmps,
-         map<int, int> pkt_type_to_dst,
-         map<int, int> pkt_type_to_ecmp,
-         vector<int> port_to_ecmp,
-         vector<int> src_port_to_input,
-         set<int> zero_inputs
-) {
-    for (auto &[src_dst, p]: ports) {
-        int src_port = get<0>(src_dst);
-        int dst_port = get<1>(src_dst);
-        if (src_port < 2)
-            continue;
-        for (int k = 0; k < PKT_TYPES; ++k) {
-            int ecmp_value = pkt_type_to_ecmp[k];
-            int dst_value = pkt_type_to_dst[k];
-            if (used_dsts.contains(dst_value) && used_ecmps.contains(ecmp_value) && (pkt_type_to_nxt_hop[k] == dst_port)
-                && (port_to_ecmp[src_port] == ecmp_value) && (!zero_inputs.contains(
-                    src_port_to_input[src_port]))) {
-                if (find(p.begin(), p.end(), k) == p.end()) {
-                    p.push_back(k);
-                }
-            }
-        }
-    }
-}
-
-void update_ports(vector<map<string, set<int> > > vals_per_input,
-                  map<tuple<int, int>, vector<int> > &ports,
-                  vector<int> port_to_input,
-                  vector<int> pkt_type_to_next_hop,
-                  vector<int> port_to_ecmp
-) {
-    for (auto &[src_dst, pkt_types]: ports) {
-        int src_port = get<0>(src_dst);
-        int dst_port = get<1>(src_dst);
-        int src_input = port_to_input[src_port];
-        int src_input_idx = src_input % vals_per_input.size();
-        int dst_input = port_to_input[dst_port];
-        if (src_input == -1)
-            continue;
-
-        set<int> used_dst_vals = vals_per_input[src_input_idx]["dst"];
-        set<int> used_ecmps = vals_per_input[src_input_idx]["ecmp"];
-
-        // int dst_ecmp = dst_port % 2;
-        int dst_ecmp = port_to_ecmp[dst_port];
-
-        vector<int> dst_ecmps;
-        if (dst_ecmp != -1)
-            dst_ecmps.push_back(dst_ecmp);
-        else
-            for (auto ecmp: used_ecmps)
-                dst_ecmps.push_back(ecmp);
-
-        for (auto dst_ecmp_val: dst_ecmps) {
-            if (!used_ecmps.contains(dst_ecmp_val))
-                continue;
-
-            int ecmp_offset = dst_ecmp_val * 6;
-            for (auto used_dst_val: used_dst_vals) {
-                int pkt_type = ecmp_offset + used_dst_val;
-                int nxt_hop_port = pkt_type_to_next_hop[pkt_type];
-                if (dst_port != nxt_hop_port)
-                    continue;
-
-                if (find(pkt_types.begin(), pkt_types.end(), pkt_type) == pkt_types.end()) {
-                    pkt_types.push_back(pkt_type);
-                }
-            }
-        }
-    }
 }
 
 int check_wl(vector<string> wl, bool sat, int buff_cap) {
@@ -403,112 +262,6 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
 
     auto start_t = high_resolution_clock::now();
 
-    if (sat && debug) {
-        slv.s.push();
-        slv.add(NamedExp(query(slv, path_C), "query").negate());
-        // slv.add(NamedExp(query(slv, path_C), "query"));
-        auto mod = slv.check_sat();
-        slv.s.pop();
-        cout << "SAT: WL is SAT" << endl;
-
-        cout << "Input" << endl;
-        for (int i = 0; i < I.size(); ++i) {
-            for (int t = 0; t < TIME_STEPS; ++t) {
-                auto dst = dst_val(I, slv, dst_to_pkt_type, i, t);
-                auto ecmp = ecmp_val(I, slv, ecmp_to_pkt_type, i, t);
-                cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-            }
-            cout << endl;
-        }
-
-        cout << "Output" << endl;
-        for (int i = 0; i < O.size(); ++i) {
-            for (int t = 0; t < TIME_STEPS; ++t) {
-                auto dst = dst_val(O, slv, dst_to_pkt_type, i, t);
-                auto ecmp = ecmp_val(O, slv, ecmp_to_pkt_type, i, t);
-                cout << "(" << setw(5) << mod.eval(dst) << "," << setw(5) << mod.eval(ecmp) << ")" << ", ";
-            }
-            cout << endl;
-        }
-
-        cout << "Cap" << endl;
-        for (int i = 0; i < path_C.size(); ++i) {
-            for (int t = 0; t < TIME_STEPS; ++t) {
-                cout << "(" << setw(5) << mod.eval(sum(path_C[i][t])) << ")" << ", ";
-            }
-            cout << endl;
-        }
-        cout << "L1" << endl;
-        cout << "E: ";
-        print_ev2_sum(l1->buffs[{0, 2}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(l1->buffs[{0, 2}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(l1->buffs[{0, 2}]->C, mod);
-
-        cout << "S1 0 -> 2" << endl;
-        cout << "E: ";
-        print_ev2_sum(s1->buffs[{0, 2}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(s1->buffs[{0, 2}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(s1->buffs[{0, 2}]->C, mod);
-
-        cout << "S1 1 -> 2" << endl;
-        cout << "E: ";
-        print_ev2_sum(s1->buffs[{1, 2}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(s1->buffs[{1, 2}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(s1->buffs[{1, 2}]->C, mod);
-
-        cout << "L2" << endl;
-        cout << "E: ";
-        print_ev2_sum(l2->buffs[{0, 2}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(l2->buffs[{0, 2}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(l2->buffs[{0, 2}]->C, mod);
-
-        cout << "L3 0 -> " << endl;
-        cout << "E: ";
-        print_ev2_sum(l3->buffs[{0, 1}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(l3->buffs[{0, 1}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(l3->buffs[{0, 1}]->C, mod);
-
-        cout << "L3 -> 1" << endl;
-        cout << "E: ";
-        print_ev2_sum(l3->buffs[{2, 1}]->E, mod);
-        cout << "O: ";
-        print_ev2_sum(l3->buffs[{2, 1}]->O, mod);
-        cout << "C: ";
-        print_ev2_sum(l3->buffs[{2, 1}]->C, mod);
-
-        cout << "Out prio head:" << endl;
-        print_ev2(s1->out_prio_head_[2], mod);
-        print_ev2(s1->out_from_in_[2], mod);
-
-        cout << "Out prio head:" << endl;
-        print_ev2(s1->out_prio_head_[1], mod);
-        print_ev2(s1->out_from_in_[1], mod);
-
-        cout << "In prio head:" << endl;
-        print_ev2(s1->in_prio_head_[0], mod);
-        print_ev2(s1->in_to_out_[0], mod);
-
-        cout << "In prio head:" << endl;
-        print_ev2(s1->in_prio_head_[1], mod);
-        print_ev2(s1->in_to_out_[1], mod);
-
-        cout << "In prio head:" << endl;
-        print_ev2(s1->in_prio_head_[2], mod);
-        print_ev2(s1->in_to_out_[2], mod);
-
-        cout << "Query" << endl;
-        cout << mod.eval(query_val(slv, path_C)) << endl;
-    }
     if (sat) {
         cout << "Checking WL & !Q is SAT" << endl;
         slv.s.push();
@@ -517,13 +270,13 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
         slv.s.pop();
         cout << "SAT: WL & !Q is SAT" << endl;
     }
-    // if (!sat && debug) {
-    //     slv.s.push();
-    //     slv.add(NamedExp(query(slv, O), "query"));
-    //     slv.check_sat();
-    //     slv.s.pop();
-    //     cout << "UNSAT: WL & Q is SAT" << endl;
-    // }
+    if (!sat && debug) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query"));
+        slv.check_sat();
+        slv.s.pop();
+        cout << "UNSAT: WL & Q is SAT" << endl;
+    }
     if (!sat) {
         cout << "Checking WL & !Q is UNSAT" << endl;
         slv.s.push();
@@ -549,10 +302,6 @@ int main(const int argc, const char *argv[]) {
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
-        // if (i + 1 < 95)
-        // continue;
-        // if (i > 50)
-        // break;
         auto wl = wls[i];
         string res_stat = wl[0];
         cout << "WL: " << i + 1 << "/" << wls.size() << " " << res_stat << endl;
@@ -564,19 +313,7 @@ int main(const int argc, const char *argv[]) {
         wl.emplace_back("[1, 10]: cenq(0, t) <= t");
         wl.emplace_back("[1, 10]: dst(0, t)  == 5");
         wl.emplace_back("[1, 10]: ecmp(0, t) == 0");
-        // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
-        // wl.emplace_back("[1, 10]: dst(0, t) == 5");
-        // wl.emplace_back("[1, 10]: cenq(1, t) <= 0");
-        // wl.emplace_back("[1, 10]: cenq(2, t) <= 0");
-        // wl.emplace_back("[1, 10]: cenq(3, t) <= 0");
-        // wl.emplace_back("[1, 10]: cenq(4, t) <= 0");
-        // wl.emplace_back("[1, 10]: cenq(5, t) <= 0");
         int res = check_wl(wl, sat, buff_cap);
-        // if (res > 0) {
-        // cout << "FAILED:" << i << endl;
-        // exit(1);
-        // }
         out << "leaf" << "," << buff_cap << ", " << i << ", " << res << ", " << res_stat << endl;
-        // exit(0);
     }
 }
