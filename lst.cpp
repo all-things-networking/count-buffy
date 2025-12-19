@@ -37,17 +37,152 @@ expr query(SmtSolver &slv, ev3 &O) {
 }
 
 
+map<tuple<int, int>, vector<int> > get_leaf_ports(int hosts_per_leaf, int num_spines) {
+    map<tuple<int, int>, vector<int> > leaf_ports;
+
+    int total_ports = hosts_per_leaf + num_spines;
+
+    for (int host_port = 0; host_port < hosts_per_leaf; ++host_port) {
+        for (int i = 0; i < total_ports; ++i) {
+            if (host_port != i) {
+                leaf_ports[{host_port, i}] = {};
+                leaf_ports[{i, host_port}] = {};
+            }
+        }
+    }
+
+    return leaf_ports;
+}
+
+vector<int> get_port_to_ecmp(int host_per_leaf, int num_spines) {
+    vector<int> result;
+    for (int i = 0; i < host_per_leaf; ++i) {
+        result.push_back(-1);
+    }
+    for (int i = 0; i < num_spines; ++i) {
+        result.push_back(i);
+    }
+    return result;
+}
+
+void print_vec(vector<int> vec) {
+    for (int i = 0; i < vec.size(); ++i) {
+        cout << vec[i] << ",";
+    }
+    cout << endl;
+}
+
+vector<int> get_pkt_type_to_next_hop_port(int num_spines, int leafs_per_spine, int hosts_per_leaf, int leaf_index) {
+    vector<int> result;
+    int total_hosts = leafs_per_spine * hosts_per_leaf;
+    int pkt_types = num_spines * total_hosts;
+    for (int i = 0; i < pkt_types; ++i) {
+        int host_index = i % total_hosts;
+        bool host_is_in_leaf = (host_index >= leaf_index * hosts_per_leaf) && (
+                                   host_index < (leaf_index + 1) * hosts_per_leaf);
+        if (host_is_in_leaf) {
+            int host_index_in_leaf = host_index % hosts_per_leaf;
+            result.push_back(host_index_in_leaf);
+        } else {
+            int spine_index = i / total_hosts;
+            int spine_port = hosts_per_leaf + spine_index;
+            result.push_back(spine_port);
+        }
+    }
+    return result;
+}
+
+map<int, int> get_pkt_type_to_dst_index(int num_spines, int leafs_per_spine, int hosts_per_leaf) {
+    map<int, int> result;
+    int total_hosts = leafs_per_spine * hosts_per_leaf;
+    int pkt_types = num_spines * total_hosts;
+    for (int i = 0; i < pkt_types; ++i) {
+        int host_index = i % total_hosts;
+        result[i] = host_index;
+    }
+    return result;
+}
+
+map<int, int> get_pkt_type_to_spine_index(int num_spines, int leafs_per_spine, int hosts_per_leaf) {
+    map<int, int> result;
+    int total_hosts = leafs_per_spine * hosts_per_leaf;
+    int pkt_types = num_spines * total_hosts;
+    for (int i = 0; i < pkt_types; ++i) {
+        int spine_index = i / total_hosts;
+        result[i] = spine_index;
+    }
+    return result;
+}
+
+vector<int> get_port_index_to_input_index(int num_spines, int leafs_per_spine, int hosts_per_leaf, int leaf_index) {
+    vector<int> result;
+    for (int i = 0; i < hosts_per_leaf; ++i) {
+        int host_index = hosts_per_leaf * leaf_index + i;
+        result.push_back(host_index);
+    }
+    for (int i = 0; i < num_spines; ++i)
+        result.push_back(-1);
+
+    return result;
+}
+
+map<tuple<int, int>, vector<int> > get_spine_port_map(int leafs_per_spine, int host_per_leaf, int spine_index) {
+    int total_hosts = host_per_leaf * leafs_per_spine;
+    map<tuple<int, int>, vector<int> > result;
+    for (int i = 0; i < leafs_per_spine; ++i) {
+        for (int j = 0; j < leafs_per_spine; ++j) {
+            if (i != j) {
+                result[{i, j}] = {};
+                for (int k = 0; k < host_per_leaf; ++k) {
+                    int host_index = host_per_leaf * j + k;
+                    int host_pkt_type = spine_index * total_hosts + host_index;
+                    result[{i, j}].push_back(host_pkt_type);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+void print_ports(map<tuple<int, int>, vector<int> > ports) {
+    for (auto &[src_dst, pkt_types]: ports) {
+        cout << get<0>(src_dst) << "->" << get<1>(src_dst) << " : ";
+        print_vec(pkt_types);
+        cout << endl;
+    }
+}
+
+
+vector<int> get_pkt_type_to_next_hop_port_spine(int num_spines, int leafs_per_spine, int host_per_leaf,
+                                                int spine_index) {
+    vector<int> result;
+    int total_hosts = leafs_per_spine * host_per_leaf;
+    int pkt_types = num_spines * total_hosts;
+    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
+    for (int i = 0; i < pkt_types; ++i) {
+        int host_index = i % total_hosts;
+        int leaf_index = host_index / host_per_leaf;
+        result.push_back(leaf_index);
+    }
+    return result;
+}
+
 int check_wl(vector<string> wl, bool sat, int buff_cap) {
     ev3 I;
+    int num_spines = 2;
+    int leafs_per_spine = 3;
+    int hosts_per_leaf = 2;
 
-    map<int, int> pkt_type_to_dst = {
-        {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5},
-        {6, 0}, {7, 1}, {8, 2}, {9, 3}, {10, 4}, {11, 5}
-    };
-    map<int, int> pkt_type_to_ecmp = {
-        {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0},
-        {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}
-    };
+    map<int, int> pkt_type_to_dst = get_pkt_type_to_dst_index(num_spines, leafs_per_spine, hosts_per_leaf);
+    //     {
+    //     {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5},
+    //     {6, 0}, {7, 1}, {8, 2}, {9, 3}, {10, 4}, {11, 5}
+    // };
+    map<int, int> pkt_type_to_ecmp = get_pkt_type_to_spine_index(num_spines, leafs_per_spine, hosts_per_leaf);
+    //     {
+    //     {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0},
+    //     {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1}
+    // };
 
     SmtSolver slv(RANDOM_SEED);
 
@@ -73,24 +208,20 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     // set<int> used_dsts = {3, 5};
     // set<int> used_ecmps = {0, 1};
 
+    // vector port_to_ecmp = {-1, -1, 0, 1};
+    vector port_to_ecmp = get_port_to_ecmp(hosts_per_leaf, num_spines);
+    print_vec(port_to_ecmp);
 
     LeafBase *l1;
-    map<tuple<int, int>, vector<int> > l1_ports = {
-        {{0, 1}, {}},
-        {{0, 2}, {}},
-        {{0, 3}, {}},
-        {{1, 0}, {}},
-        {{1, 2}, {}},
-        {{1, 3}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
-    };
+    map<tuple<int, int>, vector<int> > l1_ports = get_leaf_ports(hosts_per_leaf, num_spines);
 
-    vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
-    vector port_to_ecmp = {-1, -1, 0, 1};
-    vector l1_src_port_to_input = {0, 1, -1, -1};
+    // vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
+    vector l1_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 0);
+    print_vec(l1_pkt_type_to_nxt_hop);
+    // exit(0);
+    // {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
+    vector l1_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 0);
+    // {0, 1, -1, -1};
     fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l1_src_port_to_input, zero_inputs);
     update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
@@ -102,21 +233,13 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
 
 
     LeafBase *l2;
-    map<tuple<int, int>, vector<int> > l2_ports = {
-        {{0, 1}, {}},
-        {{0, 2}, {}},
-        {{0, 3}, {}},
-        {{1, 0}, {}},
-        {{1, 2}, {}},
-        {{1, 3}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
-    };
+    map<tuple<int, int>, vector<int> > l2_ports = get_leaf_ports(hosts_per_leaf, num_spines);
 
-    vector l2_pkt_type_to_nxt_hop = {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
-    vector l2_src_port_to_input = {2, 3, -1, -1};
+    vector l2_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
+
+    vector l2_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // {2, 3, -1, -1};
     fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l2_src_port_to_input, zero_inputs);
     update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
@@ -128,21 +251,14 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
 
 
     LeafBase *l3;
-    map<tuple<int, int>, vector<int> > l3_ports = {
-        {{0, 1}, {}},
-        {{0, 2}, {}},
-        {{0, 3}, {}},
-        {{1, 0}, {}},
-        {{1, 2}, {}},
-        {{1, 3}, {}},
-        {{2, 0}, {}},
-        {{2, 1}, {}},
-        {{3, 0}, {}},
-        {{3, 1}, {}}
-    };
+    map<tuple<int, int>, vector<int> > l3_ports = get_leaf_ports(hosts_per_leaf, num_spines);
 
-    vector l3_pkt_type_to_nxt_hop = {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
-    vector l3_src_port_to_input = {4, 5, -1, -1};
+    vector l3_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 2);
+    // {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
+    // print_vec(l3_pkt_type_to_nxt_hop);
+    // exit(0);
+    vector l3_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // {4, 5, -1, -1};
     fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
         l3_src_port_to_input, zero_inputs);
     update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
@@ -154,34 +270,49 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     );
 
     // exit(0);
+    cout << "Before ports" << endl;
     LeafBase *s1;
-    map<tuple<int, int>, vector<int> > s1_ports = {
-        {{0, 1}, {2, 3}},
-        {{0, 2}, {4, 5}},
-        {{1, 0}, {0, 1}},
-        {{1, 2}, {4, 5}},
-        {{2, 0}, {0, 1}},
-        {{2, 1}, {2, 3}}
-    };
+    map<tuple<int, int>, vector<int> > s1_ports =
+            get_spine_port_map(leafs_per_spine, hosts_per_leaf, 0);
+    // {
+    // {{0, 1}, {2, 3}},
+    // {{0, 2}, {4, 5}},
+    // {{1, 0}, {0, 1}},
+    // {{1, 2}, {4, 5}},
+    // {{2, 0}, {0, 1}},
+    // {{2, 1}, {2, 3}}
+    // };
+    print_ports(s1_ports);
+    // exit(0);
 
-    vector s1_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
+    vector s1_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port_spine(num_spines, leafs_per_spine, hosts_per_leaf, 0);
+    print_vec(s1_pkt_type_to_nxt_hop);
+    // {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop);
 
     LeafBase *s2;
-    map<tuple<int, int>, vector<int> > s2_ports = {
-        {{0, 1}, {8, 9}},
-        {{0, 2}, {10, 11}},
-        {{1, 0}, {6, 7}},
-        {{1, 2}, {10, 11}},
-        {{2, 0}, {6, 7}},
-        {{2, 1}, {8, 9}}
-    };
-
-    vector s2_pkt_type_to_nxt_hop = {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
+    map<tuple<int, int>, vector<int> > s2_ports =
+            get_spine_port_map(leafs_per_spine, hosts_per_leaf, 1);
+    //     {
+    //     {{0, 1}, {8, 9}},
+    //     {{0, 2}, {10, 11}},
+    //     {{1, 0}, {6, 7}},
+    //     {{1, 2}, {10, 11}},
+    //     {{2, 0}, {6, 7}},
+    //     {{2, 1}, {8, 9}}
+    // };
+    print_ports(s2_ports);
+    // exit(0);
+    //
+    vector s2_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port_spine(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
+
+    vector<LeafBase *> leafs = {l1, l2, l3};
+    vector<LeafBase *> spines = {s1, s2};
 
 
     auto base_l1 = l1->base_constrs();
@@ -204,39 +335,69 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     auto base_s2_merged = merge(base_s2, slv.ctx, "base_s2");
     slv.add(base_s2_merged);
 
-    slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
-    slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
-    slv.add({link_ports(s1->get_out_port(0), l1->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l1_2")});
-    slv.add({link_ports(s2->get_out_port(0), l1->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l1_3")});
+    for (int i = 0; i < leafs.size(); ++i) {
+        for (int j = 0; j < spines.size(); ++j) {
+            auto leaf = leafs[i];
+            auto spine = spines[j];
+            int spine_port_in_leaf = hosts_per_leaf + j;
+            int leaf_port_in_spine = i;
+            slv.add({
+                link_ports(leaf->get_out_port(spine_port_in_leaf), spine->get_in_port(leaf_port_in_spine)),
+                format("Link: {}_{} -> {}_{}", i, spine_port_in_leaf, j, leaf_port_in_spine)
+            });
+            slv.add({
+                link_ports(spine->get_out_port(leaf_port_in_spine), leaf->get_in_port(spine_port_in_leaf)),
+                format("Link: {}_{} -> {}_{}", j, leaf_port_in_spine, i, spine_port_in_leaf)
+            });
+        }
+    }
 
-    slv.add({link_ports(l2->get_out_port(2), s1->get_in_port(1)), format("Link: {} -> {}", "l2_2", "s1_0")});
-    slv.add({link_ports(l2->get_out_port(3), s2->get_in_port(1)), format("Link: {} -> {}", "l2_3", "s2_0")});
-    slv.add({link_ports(s1->get_out_port(1), l2->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l2_2")});
-    slv.add({link_ports(s2->get_out_port(1), l2->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l2_3")});
-
-    slv.add({link_ports(l3->get_out_port(2), s1->get_in_port(2)), format("Link: {} -> {}", "l3_2", "s1_0")});
-    slv.add({link_ports(l3->get_out_port(3), s2->get_in_port(2)), format("Link: {} -> {}", "l3_3", "s2_0")});
-    slv.add({link_ports(s1->get_out_port(2), l3->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l3_2")});
-    slv.add({link_ports(s2->get_out_port(2), l3->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l3_3")});
+    // slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
+    // slv.add({link_ports(s1->get_out_port(0), l1->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l1_2")});
+    // slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
+    // slv.add({link_ports(s2->get_out_port(0), l1->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l1_3")});
+    //
+    // slv.add({link_ports(l2->get_out_port(2), s1->get_in_port(1)), format("Link: {} -> {}", "l2_2", "s1_0")});
+    // slv.add({link_ports(l2->get_out_port(3), s2->get_in_port(1)), format("Link: {} -> {}", "l2_3", "s2_0")});
+    // slv.add({link_ports(s1->get_out_port(1), l2->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l2_2")});
+    // slv.add({link_ports(s2->get_out_port(1), l2->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l2_3")});
+    //
+    // slv.add({link_ports(l3->get_out_port(2), s1->get_in_port(2)), format("Link: {} -> {}", "l3_2", "s1_0")});
+    // slv.add({link_ports(l3->get_out_port(3), s2->get_in_port(2)), format("Link: {} -> {}", "l3_3", "s2_0")});
+    // slv.add({link_ports(s1->get_out_port(2), l3->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l3_2")});
+    // slv.add({link_ports(s2->get_out_port(2), l3->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l3_3")});
 
 
     // slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
     // slv.add({link_ports(s2->get_out_port(1), l3->get_in_port(3)), format("Link: {} -> {}", "s2_1", "l3_3")});
 
-    I.push_back(l1->get_in_port(0));
-    I.push_back(l1->get_in_port(1));
-    I.push_back(l2->get_in_port(0));
-    I.push_back(l2->get_in_port(1));
-    I.push_back(l3->get_in_port(0));
-    I.push_back(l3->get_in_port(1));
+
+    for (auto l: leafs) {
+        for (int i = 0; i < hosts_per_leaf; ++i) {
+            I.push_back(l->get_in_port(i));
+        }
+    }
+
+    // I.push_back(l1->get_in_port(0));
+    // I.push_back(l1->get_in_port(1));
+    // I.push_back(l2->get_in_port(0));
+    // I.push_back(l2->get_in_port(1));
+    // I.push_back(l3->get_in_port(0));
+    // I.push_back(l3->get_in_port(1));
 
     ev3 O;
-    O.push_back(l1->get_out_port(0));
-    O.push_back(l1->get_out_port(1));
-    O.push_back(l2->get_out_port(0));
-    O.push_back(l2->get_out_port(1));
-    O.push_back(l3->get_out_port(0));
-    O.push_back(l3->get_out_port(1));
+
+    for (auto l: leafs) {
+        for (int i = 0; i < hosts_per_leaf; ++i) {
+            O.push_back(l->get_out_port(i));
+        }
+    }
+    // O.push_back(l1->get_out_port(0));
+    // O.push_back(l1->get_out_port(1));
+    // O.push_back(l2->get_out_port(0));
+    // O.push_back(l2->get_out_port(1));
+    // O.push_back(l3->get_out_port(0));
+    // O.push_back(l3->get_out_port(1));
 
     map<int, vector<int> > dst_to_pkt_type;
     for (auto &[pkt_type,dst]: pkt_type_to_dst)
