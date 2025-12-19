@@ -205,127 +205,110 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
     printSet(zero_inputs);
     cout << endl;
 
-    // set<int> used_dsts = {3, 5};
-    // set<int> used_ecmps = {0, 1};
-
-    // vector port_to_ecmp = {-1, -1, 0, 1};
     vector port_to_ecmp = get_port_to_ecmp(hosts_per_leaf, num_spines);
     print_vec(port_to_ecmp);
 
-    LeafBase *l1;
-    map<tuple<int, int>, vector<int> > l1_ports = get_leaf_ports(hosts_per_leaf, num_spines);
+    vector<LeafBase *> leafs;
 
-    // vector l1_pkt_type_to_nxt_hop = {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
-    vector l1_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 0);
-    print_vec(l1_pkt_type_to_nxt_hop);
-    // exit(0);
-    // {0, 1, 2, 2, 2, 2, 0, 1, 3, 3, 3, 3};
-    vector l1_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 0);
-    // {0, 1, -1, -1};
-    fix(l1_ports, l1_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-        l1_src_port_to_input, zero_inputs);
-    update_ports({vals_map[0], vals_map[1]}, l1_ports, l1_src_port_to_input, l1_pkt_type_to_nxt_hop, port_to_ecmp);
-    cout << "L1 Ports:" << endl;
-    printPorts(l1_ports);
-    l1 = new DemuxSwitch(slv, "l1", l1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
-                         l1_pkt_type_to_nxt_hop
-    );
+    for (int i = 0; i < leafs_per_spine; ++i) {
+        LeafBase *leaf;
+        map<tuple<int, int>, vector<int> > leaf_ports = get_leaf_ports(hosts_per_leaf, num_spines);
 
-
-    LeafBase *l2;
-    map<tuple<int, int>, vector<int> > l2_ports = get_leaf_ports(hosts_per_leaf, num_spines);
-
-    vector l2_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 1);
-    // {2, 2, 0, 1, 2, 2, 3, 3, 0, 1, 3, 3};
-
-    vector l2_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
-    // {2, 3, -1, -1};
-    fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-        l2_src_port_to_input, zero_inputs);
-    update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
-    cout << "L2 Ports:" << endl;
-    printPorts(l2_ports);
-    l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
-                         l2_pkt_type_to_nxt_hop
-    );
+        vector pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, i);
+        print_vec(pkt_type_to_nxt_hop);
+        vector src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, i);
+        fix(leaf_ports, pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+            src_port_to_input, zero_inputs);
+        vector<map<string, set<int> > > vals_per_input;
+        for (int j = 0; j < hosts_per_leaf; ++j) {
+            int host_index = i * hosts_per_leaf + j;
+            cout << "HI: " << host_index << endl;
+            vals_per_input.push_back(vals_map[host_index]);
+        }
+        update_ports(vals_per_input, leaf_ports, src_port_to_input, pkt_type_to_nxt_hop, port_to_ecmp);
+        printPorts(leaf_ports);
+        string leaf_var_prefix = format("l{}", i);
+        cout << leaf_var_prefix << " Ports:" << endl;
+        leaf = new DemuxSwitch(slv, leaf_var_prefix, leaf_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
+                               pkt_type_to_nxt_hop
+        );
+        leafs.push_back(leaf);
+    }
 
 
-    LeafBase *l3;
-    map<tuple<int, int>, vector<int> > l3_ports = get_leaf_ports(hosts_per_leaf, num_spines);
+    // LeafBase *l2;
+    // map<tuple<int, int>, vector<int> > l2_ports = get_leaf_ports(hosts_per_leaf, num_spines);
+    //
+    // vector l2_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    //
+    // vector l2_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // fix(l2_ports, l2_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+    //     l2_src_port_to_input, zero_inputs);
+    // update_ports({vals_map[2], vals_map[3]}, l2_ports, l2_src_port_to_input, l2_pkt_type_to_nxt_hop, port_to_ecmp);
+    // cout << "L2 Ports:" << endl;
+    // printPorts(l2_ports);
+    // l2 = new DemuxSwitch(slv, "l2", l2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
+    //                      l2_pkt_type_to_nxt_hop
+    // );
+    //
 
-    vector l3_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 2);
-    // {2, 2, 2, 2, 0, 1, 3, 3, 3, 3, 0, 1};
-    // print_vec(l3_pkt_type_to_nxt_hop);
-    // exit(0);
-    vector l3_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
-    // {4, 5, -1, -1};
-    fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
-        l3_src_port_to_input, zero_inputs);
-    update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
-    cout << "L3 Ports:" << endl;
-    printPorts(l3_ports);
+    // LeafBase *l3;
+    // map<tuple<int, int>, vector<int> > l3_ports = get_leaf_ports(hosts_per_leaf, num_spines);
+    //
+    // vector l3_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port(num_spines, leafs_per_spine, hosts_per_leaf, 2);
+    // vector l3_src_port_to_input = get_port_index_to_input_index(num_spines, leafs_per_spine, hosts_per_leaf, 1);
+    // fix(l3_ports, l3_pkt_type_to_nxt_hop, used_dsts, used_ecmps, pkt_type_to_dst, pkt_type_to_ecmp, port_to_ecmp,
+    //     l3_src_port_to_input, zero_inputs);
+    // update_ports({vals_map[4], vals_map[5]}, l3_ports, l3_src_port_to_input, l3_pkt_type_to_nxt_hop, port_to_ecmp);
+    // cout << "L3 Ports:" << endl;
+    // printPorts(l3_ports);
+    //
+    // l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
+    //                      l3_pkt_type_to_nxt_hop
+    // );
 
-    l3 = new DemuxSwitch(slv, "l3", l3_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
-                         l3_pkt_type_to_nxt_hop
-    );
-
-    // exit(0);
     cout << "Before ports" << endl;
     LeafBase *s1;
     map<tuple<int, int>, vector<int> > s1_ports =
             get_spine_port_map(leafs_per_spine, hosts_per_leaf, 0);
-    // {
-    // {{0, 1}, {2, 3}},
-    // {{0, 2}, {4, 5}},
-    // {{1, 0}, {0, 1}},
-    // {{1, 2}, {4, 5}},
-    // {{2, 0}, {0, 1}},
-    // {{2, 1}, {2, 3}}
-    // };
     print_ports(s1_ports);
-    // exit(0);
 
     vector s1_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port_spine(num_spines, leafs_per_spine, hosts_per_leaf, 0);
     print_vec(s1_pkt_type_to_nxt_hop);
-    // {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s1 = new DemuxSwitch(slv, "s1", s1_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s1_pkt_type_to_nxt_hop);
 
     LeafBase *s2;
     map<tuple<int, int>, vector<int> > s2_ports =
             get_spine_port_map(leafs_per_spine, hosts_per_leaf, 1);
-    //     {
-    //     {{0, 1}, {8, 9}},
-    //     {{0, 2}, {10, 11}},
-    //     {{1, 0}, {6, 7}},
-    //     {{1, 2}, {10, 11}},
-    //     {{2, 0}, {6, 7}},
-    //     {{2, 1}, {8, 9}}
-    // };
     print_ports(s2_ports);
-    // exit(0);
-    //
     vector s2_pkt_type_to_nxt_hop = get_pkt_type_to_next_hop_port_spine(num_spines, leafs_per_spine, hosts_per_leaf, 1);
-    // {0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2};
     s2 = new DemuxSwitch(slv, "s2", s2_ports, TIME_STEPS, PKT_TYPES, buff_cap, MAX_ENQ, MAX_DEQ,
                          s2_pkt_type_to_nxt_hop
     );
 
-    vector<LeafBase *> leafs = {l1, l2, l3};
-    vector<LeafBase *> spines = {s1, s2};
+    // vector leafs = {l1, l2, l3};
+    vector spines = {s1, s2};
 
+    for (auto leaf: leafs) {
+        cout << leaf->var_prefix << endl;
+        auto base_constrs = leaf->base_constrs();
+        auto base_constrs_merged = merge(base_constrs, slv.ctx, leaf->var_prefix);
+        slv.add(base_constrs_merged);
+    }
+    // exit(0);
 
-    auto base_l1 = l1->base_constrs();
+    // auto base_l1 = l1->base_constrs();
     // auto base_l1_merged = merge(base_l1, slv.ctx, "base_l1");
-    slv.add(base_l1);
-
-    auto base_l2 = l2->base_constrs();
-    auto base_l2_merged = merge(base_l2, slv.ctx, "base_l2");
-    slv.add(base_l2_merged);
-
-    auto base_l3 = l3->base_constrs();
-    auto base_l3_merged = merge(base_l3, slv.ctx, "base_l3");
-    slv.add(base_l3_merged);
+    // slv.add(base_l1_merged);
+    //
+    // auto base_l2 = l2->base_constrs();
+    // auto base_l2_merged = merge(base_l2, slv.ctx, "base_l2");
+    // slv.add(base_l2_merged);
+    //
+    // auto base_l3 = l3->base_constrs();
+    // auto base_l3_merged = merge(base_l3, slv.ctx, "base_l3");
+    // slv.add(base_l3_merged);
 
     auto base_s1 = s1->base_constrs();
     auto base_s1_merged = merge(base_s1, slv.ctx, "base_s1");
@@ -352,38 +335,12 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
         }
     }
 
-    // slv.add({link_ports(l1->get_out_port(2), s1->get_in_port(0)), format("Link: {} -> {}", "l1_2", "s1_0")});
-    // slv.add({link_ports(s1->get_out_port(0), l1->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l1_2")});
-    // slv.add({link_ports(l1->get_out_port(3), s2->get_in_port(0)), format("Link: {} -> {}", "l1_3", "s2_0")});
-    // slv.add({link_ports(s2->get_out_port(0), l1->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l1_3")});
-    //
-    // slv.add({link_ports(l2->get_out_port(2), s1->get_in_port(1)), format("Link: {} -> {}", "l2_2", "s1_0")});
-    // slv.add({link_ports(l2->get_out_port(3), s2->get_in_port(1)), format("Link: {} -> {}", "l2_3", "s2_0")});
-    // slv.add({link_ports(s1->get_out_port(1), l2->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l2_2")});
-    // slv.add({link_ports(s2->get_out_port(1), l2->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l2_3")});
-    //
-    // slv.add({link_ports(l3->get_out_port(2), s1->get_in_port(2)), format("Link: {} -> {}", "l3_2", "s1_0")});
-    // slv.add({link_ports(l3->get_out_port(3), s2->get_in_port(2)), format("Link: {} -> {}", "l3_3", "s2_0")});
-    // slv.add({link_ports(s1->get_out_port(2), l3->get_in_port(2)), format("Link: {} -> {}", "s1_0", "l3_2")});
-    // slv.add({link_ports(s2->get_out_port(2), l3->get_in_port(3)), format("Link: {} -> {}", "s2_0", "l3_3")});
-
-
-    // slv.add({link_ports(s1->get_out_port(1), l3->get_in_port(2)), format("Link: {} -> {}", "s1_1", "l3_2")});
-    // slv.add({link_ports(s2->get_out_port(1), l3->get_in_port(3)), format("Link: {} -> {}", "s2_1", "l3_3")});
-
 
     for (auto l: leafs) {
         for (int i = 0; i < hosts_per_leaf; ++i) {
             I.push_back(l->get_in_port(i));
         }
     }
-
-    // I.push_back(l1->get_in_port(0));
-    // I.push_back(l1->get_in_port(1));
-    // I.push_back(l2->get_in_port(0));
-    // I.push_back(l2->get_in_port(1));
-    // I.push_back(l3->get_in_port(0));
-    // I.push_back(l3->get_in_port(1));
 
     ev3 O;
 
@@ -392,12 +349,6 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
             O.push_back(l->get_out_port(i));
         }
     }
-    // O.push_back(l1->get_out_port(0));
-    // O.push_back(l1->get_out_port(1));
-    // O.push_back(l2->get_out_port(0));
-    // O.push_back(l2->get_out_port(1));
-    // O.push_back(l3->get_out_port(0));
-    // O.push_back(l3->get_out_port(1));
 
     map<int, vector<int> > dst_to_pkt_type;
     for (auto &[pkt_type,dst]: pkt_type_to_dst)
