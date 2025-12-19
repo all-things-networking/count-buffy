@@ -101,7 +101,7 @@ void LeafWorkloadParser::parse(vector<string> wl) {
     }
 
     int num_buffs = I.size();
-    // slv.add(uniq(I, slv, dst_to_pkt_type, num_buffs, timesteps));
+    slv.add(uniq(I, slv, dst_to_pkt_type, num_buffs, timesteps));
     slv.add(valid(I, slv, num_buffs, timesteps));
     slv.add(same(I, slv, dst_to_pkt_type, num_buffs, timesteps));
 }

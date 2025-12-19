@@ -7,9 +7,11 @@
 #include "src/leaf_spine/DemuxSwitch.hpp"
 #include "src/leaf_spine/leaf_sts.hpp"
 #include "src/leaf_spine/leaf_utils.hpp"
+#include "src/prio_sts.hpp"
 #include "src/utils.hpp"
 #include "src/gen/constr_extractor.hpp"
 #include "src/gen/wl_parser.hpp"
+#include "src/leaf_spine/leaf_utils.hpp"
 
 class fperfVisitor;
 using namespace std;
@@ -413,9 +415,9 @@ int main(const int argc, const char *argv[]) {
     if (argc < 2)
         return 1;
     int buff_cap = atoi(argv[1]);
-    string wl_file_path = format("./local/leaf/fperf/leaf.{}.txt", buff_cap);
+    string wl_file_path = format("./data/sub_wls/lst/lst.{}.txt", buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./local/leaf/buffy_nw/leaf.{}.txt", buff_cap);
+    string out_file_path = format("./data/logs/lst/lst.{}.txt", buff_cap);
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
@@ -431,8 +433,8 @@ int main(const int argc, const char *argv[]) {
             continue;
         }
         bool sat = res_stat == "SAT";
-        // wl.emplace_back("[1, 10]: cenq(0, t) >= t");
-        // wl.emplace_back("[1, 10]: dst(0, t) == 5");
+        wl.emplace_back("[1, 10]: cenq(0, t) >= t");
+        wl.emplace_back("[1, 10]: dst(0, t) == 5");
         // wl.emplace_back("[1, 10]: cenq(2, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(3, t) <= 0");
         // wl.emplace_back("[1, 10]: cenq(4, t) <= 0");
