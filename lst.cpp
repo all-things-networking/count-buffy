@@ -374,6 +374,8 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
 
     auto start_t = high_resolution_clock::now();
 
+    slv.add(uniq(I, slv, dst_to_pkt_type, I.size(), TIME_STEPS));
+
     if (sat && debug) {
         slv.s.push();
         // slv.add(NamedExp(query(slv, O), "query").negate());

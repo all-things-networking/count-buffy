@@ -111,6 +111,16 @@ Each sequence shows the number of packets at each time step.
 In the output traffic, there should be at most on packet 
 within each two subsequent time steps.
 
+## Experiments Summary
+| Experiment id | Description                            |
+|---------------|----------------------------------------|
+| rr            | Round-Robin Scheduler                  |
+| prio          | Strict-Priority Scheduler              |
+| fq            | FqCoDel Scheduler                      |
+| loom          | Compositional                          |
+| lst           | Leaf-Spine Topology - Throughput Query |
+| lsl           | Compositional - Latency Query          |
+
 
 ### Run Experiments
 

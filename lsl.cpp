@@ -543,9 +543,9 @@ int main(const int argc, const char *argv[]) {
     if (argc < 2)
         return 1;
     int buff_cap = atoi(argv[1]);
-    string wl_file_path = format("./local/late/fperf/late.{}.txt", buff_cap);
+    string wl_file_path = format("./data/sub_wls/lsl/lsl.{}.txt", buff_cap);
     vector<vector<string> > wls = read_wl_file(wl_file_path);
-    string out_file_path = format("./local/late/buffy_nw/late.{}.txt", buff_cap);
+    string out_file_path = format("./data/logs/lsl/lsl.{}.txt", buff_cap);
     ofstream out(out_file_path, ios::out);
     out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
