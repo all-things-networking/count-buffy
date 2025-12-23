@@ -175,7 +175,7 @@ The following scripts verifies all workload files for all case studies
 in FPerf:
 
 ```shell
-docker compose run --rm buffy check_all_workloads_with_fperf.sh
+docker compose run --rm buffy fperf_verify_all_workloads.sh
 ```
 
 ### 2- Verify Workloads in 🧛‍♀️
@@ -202,7 +202,7 @@ rm -rf data/logs data/plots
 Next, we verify all workloads in the `data/sub_logs` in 🧛‍♀️:
 
 ```shell
-docker compose run --rm buffy run_all_experiments.sh
+docker compose run --rm buffy buffy_verify_all_workloads.sh
 ```
 
 After a successful execution, 🧛‍♀️ log files are saved into the `data/logs` directory.
@@ -231,7 +231,7 @@ To generate a fresh version these files, we need to execute the FPerf search.
 Use the following command to generate the workloads:
 
 ```shell
-docker compose run --rm buffy run_all_fperf.sh
+docker compose run --rm buffy fperf_search_all.sh
 ```
 
 After a successful execution, workloads generated during the search are saved into the 
@@ -246,7 +246,7 @@ newly generate workloads.
 
 Verify newly generated workloads in Buffy:
 ```shell
-docker compose run --rm buffy check_all_workloads_with_fperf.sh
+docker compose run --rm buffy fperf_verify_all_workloads.sh
 ```
 
 > We can skip this step since we just generated the workloads using FPerf itself.
@@ -254,7 +254,7 @@ docker compose run --rm buffy check_all_workloads_with_fperf.sh
 Verify newly generated workloads in 🧛‍♀️:
 
 ```shell
-docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy run_all_experiments.sh
+docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy buffy_verify_all_workloads.sh
 ```
 
 draw the plots again:
