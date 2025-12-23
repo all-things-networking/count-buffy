@@ -1,14 +1,19 @@
 .PHONY: all install-deps build init
 
-all: init install-deps build
+all: build
+
+clean:
+	rm -rf build
 
 init:
 	conan profile detect --force
 
-install-deps:
+install-deps: init
 	conan install . --build=missing -s compiler.cppstd=20
 	cp build/Release/generators/CMakePresets.json ./CMakeUserPresets.json
 
-build:
+config: install-deps
 	cmake --preset conan-release
+
+build: config
 	cmake --build --preset conan-release --parallel

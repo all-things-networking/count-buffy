@@ -14,7 +14,7 @@ plt.rcParams["legend.fontsize"] = 16
 plt.rcParams['legend.title_fontsize'] = 16
 
 
-class ChartDrawer:
+class PlotDrawer:
     def __init__(self, wls_dir, logs_dir, save_dir, expr_name, min_buf_size, max_buf_size):
         self.wls_dir = wls_dir
         self.logs_dir = logs_dir
@@ -61,7 +61,7 @@ class ChartDrawer:
 
     def draw(self):
         dfs = []
-        for i in range(self.min_buf_size, self.max_buf_size):
+        for i in range(self.min_buf_size, self.max_buf_size + 1):
             self.__add_buffy_df_win(i, dfs)
             self.__add_buffy_df_no_win(i, dfs)
             self.__add_fperf_df(i, dfs)
@@ -116,7 +116,7 @@ class ChartDrawer:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--save-dir", default="data/charts", help="Charts directory")
+    parser.add_argument("-s", "--save-dir", default="data/plots", help="Plots directory")
     parser.add_argument("-w", "--workloads", required=True, help="Workloads directory")
     parser.add_argument("-l", "--logs", required=True, help="Logs directory")
     parser.add_argument("-n", "--name", required=True, help="Experiment name")
@@ -125,7 +125,7 @@ def main():
 
     args = parser.parse_args()
 
-    drawer = ChartDrawer(args.workloads, args.logs, args.save_dir, args.name, args.min, args.max)
+    drawer = PlotDrawer(args.workloads, args.logs, args.save_dir, args.name, args.min, args.max)
     drawer.draw()
 
 

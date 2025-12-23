@@ -1,66 +1,49 @@
 #pragma once
 
-#include "fperfBaseVisitor.h"
+#include "../gen/fperfBaseVisitor.h"
 #include <iostream>
-#include <format>
 
 #include "../smt_solver.hpp"
 #include "../lib.hpp"
-#include "constr_extractor.hpp"
+#include "leaf_constr_extractor.hpp"
+#include "../gen/constr_extractor.hpp"
 
 #include "../utils.hpp"
-#include "../leaf_spine/leaf_utils.hpp"
+#include "leaf_utils.hpp"
 
 using namespace std;
 
-ConstrExtractor::ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps): slv(slv), num_buffs(num_bufs),
-    timesteps(timesteps), I(I) {
-    IT = slv.ivv(num_bufs, timesteps, "Workload");
+LeafConstrExtractor::LeafConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps, map<int, vector<int> > dst_to_pkt_type,
+                                 map<int, vector<int> > ecmp_to_pkt_type) : slv(slv), timesteps(timesteps), I(I),
+                                                                            dst_to_pkt_type(dst_to_pkt_type),
+                                                                            ecmp_to_pkt_type(ecmp_to_pkt_type) {
+    IT = slv.ivv(I.size(), timesteps, "Workload");
     for (int i = 0; i < IT.size(); ++i) {
         auto cenqs_i = get_cenqs_for_buff(IT[i]);
         cenqs.push_back(cenqs_i);
         auto aipgs_i = get_aipgs_for_buf(IT[i]);
         aipgs.push_back(aipgs_i);
+        max_t_with_zero_cenq.push_back(-1);
     }
-    // for (int i = 0; i < num_bufs; ++i) {
-    //     ev buf_ev;
-    //     for (int t = 0; t < timesteps; ++t) {
-    //         buf_ev.push_back(dst_val(I, slv, i, t, num_buffs));
-    //     }
-    //     dsts.push_back(buf_ev);
-    // }
-    //
-    // for (int i = 0; i < num_bufs; ++i) {
-    //     ev buf_ev;
-    //     for (int t = 0; t < timesteps; ++t) {
-    //         buf_ev.push_back(ecmp_val(I, slv, i, t, num_buffs));
-    //     }
-    //     ecmps.push_back(buf_ev);
-    // }
-    // constrs.emplace_back(uniq(I, slv, num_buffs, timesteps));
-    // constrs.emplace_back(same(I, slv, num_buffs, timesteps));
-    // DST = slv.ivv(n, m, "Dest");
-    // ECMP = slv.ivv(n, m, "Dest");
+    for (int i = 0; i < I.size(); ++i) {
+        ev buf_ev;
+        for (int t = 0; t < timesteps; ++t) {
+            buf_ev.push_back(dst_val(I, slv, dst_to_pkt_type, i, t));
+        }
+        dsts.push_back(buf_ev);
+    }
+
+    for (int i = 0; i < I.size(); ++i) {
+        ev buf_ev;
+        for (int t = 0; t < timesteps; ++t) {
+            buf_ev.push_back(ecmp_val(I, slv, ecmp_to_pkt_type, i, t));
+        }
+        ecmps.push_back(buf_ev);
+    }
+    num_buffs = IT.size();
 }
 
-expr binop(const expr &left, const std::string &op, const expr &right) {
-    if (op == "<")
-        return left < right;
-    if (op == "<=")
-        return left <= right;
-    if (op == ">")
-        return left > right;
-    if (op == ">=")
-        return left >= right;
-    if (op == "==")
-        return left == right;
-    if (op == "!=")
-        return left != right;
-    throw std::invalid_argument("Unknown comparison operator: " + op);
-}
-
-
-void ConstrExtractor::print(model m) const {
+void LeafConstrExtractor::print(model m) const {
     cout << "IT:" << endl;
     cout << str(IT, m, "\n").str();
     // cout << "ECMP:" << endl;
@@ -70,7 +53,7 @@ void ConstrExtractor::print(model m) const {
 }
 
 
-ev ConstrExtractor::get_cenqs_for_buff(ev it) {
+ev LeafConstrExtractor::get_cenqs_for_buff(ev it) {
     ev cenqs_i;
     expr cenq = it[0];
     cenqs_i.push_back(cenq);
@@ -81,7 +64,7 @@ ev ConstrExtractor::get_cenqs_for_buff(ev it) {
     return cenqs_i;
 }
 
-ev ConstrExtractor::get_aipgs_for_buf(ev it) const {
+ev LeafConstrExtractor::get_aipgs_for_buf(ev it) const {
     int total_time = it.size();
     ev aipgs_i;
     aipgs_i.push_back(slv.ctx.int_val(0));
@@ -103,7 +86,7 @@ ev ConstrExtractor::get_aipgs_for_buf(ev it) const {
     return aipgs_i;
 }
 
-void ConstrExtractor::parse_cenq() {
+void LeafConstrExtractor::parse_cenq() {
     assert(begin > 0);
     for (int t = begin; t <= end; ++t) {
         int t_index = t - 1;
@@ -120,9 +103,15 @@ void ConstrExtractor::parse_cenq() {
         constrs.emplace_back(e, constr_name);
         // cout << "Adding constraint:" << "@[" << t << "]" << metric << "(" << ")" << op << rhs << endl;
     }
+    if (op == "<" || op == "<=" || op == "==") {
+        if (rhs <= 0) {
+            for (auto i: tmp_ids)
+                max_t_with_zero_cenq[i] = max(max_t_with_zero_cenq[i], end);
+        }
+    }
 }
 
-void ConstrExtractor::parse_aipg() {
+void LeafConstrExtractor::parse_aipg() {
     assert(begin > 0);
     for (int t = begin; t <= end; ++t) {
         int t_index = t - 1;
@@ -140,34 +129,46 @@ void ConstrExtractor::parse_aipg() {
     }
 }
 
-void ConstrExtractor::parse_dst() {
+void LeafConstrExtractor::parse_dst() {
+    assert(begin > 0);
+    // for (int t = begin; t <= end; ++t) {
+    int t = 1;
+    int t_index = t - 1;
+    assert(tmp_ids.size() == 1);
+    assert(!rhs_linear);
+    int buf_index = tmp_ids[0];
+    expr dst_value = dst_val(I, slv, dst_to_pkt_type, buf_index, t_index);
+    expr e = binop(dst_value, op, slv.ctx.int_val(rhs));
+    expr v = valid_meta(I, slv, buf_index, t_index);;
+    expr not_empty = (sum(I[buf_index][t_index]) > 0);
+    // constrs.emplace_back(v, format("DST[{}][{}] valid", buf_index, t_index));
+    constrs.emplace_back(NamedExp(not_empty).prefix(format("DST[{}][{}] Not Empty", buf_index, t_index)));
+    constrs.emplace_back(NamedExp(e).prefix(format("DST[{}][{}] {} {}", buf_index, t_index, op, rhs)));
+    dst_constrs.emplace_back(t, buf_index, op, rhs);
+    // }
+}
+
+void LeafConstrExtractor::parse_ecmp() {
     assert(begin > 0);
     for (int t = begin; t <= end; ++t) {
         int t_index = t - 1;
         assert(tmp_ids.size() == 1);
         assert(!rhs_linear);
         int buf_index = tmp_ids[0];
-        expr e = binop(dsts[buf_index][t_index], op, slv.ctx.int_val(rhs));
-        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
-                             format("DST[{}][{}] {} {}", t_index, buf_index, op, rhs));
-    }
-}
-
-void ConstrExtractor::parse_ecmp() {
-    assert(begin > 0);
-    for (int t = begin; t <= end; ++t) {
-        int t_index = t - 1;
-        assert(tmp_ids.size() == 1);
-        assert(!rhs_linear);
-        int buf_index = tmp_ids[0];
-        expr e = binop(ecmps[buf_index][t_index], op, slv.ctx.int_val(rhs));
-        constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
-                             format("ECMP[{}][{}] {} {}", t_index, buf_index, op, rhs));
+        expr ecmp_value = ecmp_val(I, slv, ecmp_to_pkt_type, buf_index, t_index);
+        expr e = binop(ecmp_value, op, slv.ctx.int_val(rhs));
+        expr not_empty = (sum(I[buf_index][t_index]) > 0);
+        // constrs.emplace_back(implies(valid_meta(I, slv, buf_index, t_index), e),
+        // format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        // constrs.emplace_back(e, format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs));
+        constrs.emplace_back(NamedExp(not_empty).prefix(format("ECMP[{}][{}] Not Empty", buf_index, t_index)));
+        constrs.emplace_back(NamedExp(e).prefix(format("ECMP[{}]@[{}] {} {}", buf_index, t_index, op, rhs)));
+        ecmp_constrs.emplace_back(t, buf_index, op, rhs);
     }
 }
 
 
-any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
+any LeafConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
     auto result = visitChildren(ctx);
     constrs.clear();
     if (metric == "cenq") {
@@ -191,27 +192,27 @@ any ConstrExtractor::visitCon(fperfParser::ConContext *ctx) {
     return result;
 }
 
-any ConstrExtractor::visitLhs(fperfParser::LhsContext *ctx) {
+any LeafConstrExtractor::visitLhs(fperfParser::LhsContext *ctx) {
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitM(fperfParser::MContext *ctx) {
+any LeafConstrExtractor::visitM(fperfParser::MContext *ctx) {
     metric = ctx->getText();
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitMm(fperfParser::MmContext *ctx) {
+any LeafConstrExtractor::visitMm(fperfParser::MmContext *ctx) {
     metric = ctx->getText();
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitQ(fperfParser::QContext *ctx) {
+any LeafConstrExtractor::visitQ(fperfParser::QContext *ctx) {
     int q = stoi(ctx->INT()->getText());
     tmp_ids.push_back(q);
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitRhs(fperfParser::RhsContext *ctx) {
+any LeafConstrExtractor::visitRhs(fperfParser::RhsContext *ctx) {
     rhs_linear = false;
     if (ctx->INT() && ctx->children.size() == 1)
         rhs = std::stoull(ctx->INT()->getText());
@@ -225,20 +226,20 @@ any ConstrExtractor::visitRhs(fperfParser::RhsContext *ctx) {
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitInterval(fperfParser::IntervalContext *ctx) {
+any LeafConstrExtractor::visitInterval(fperfParser::IntervalContext *ctx) {
     begin = stoi(ctx->INT(0)->getText());
     end = stoi(ctx->INT(1)->getText());
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitSet(fperfParser::SetContext *ctx) {
+any LeafConstrExtractor::visitSet(fperfParser::SetContext *ctx) {
     for (auto intNode: ctx->INT()) {
         tmp_ids.push_back(stoi(intNode->getText()));
     }
     return visitChildren(ctx);
 }
 
-any ConstrExtractor::visitComp_op(fperfParser::Comp_opContext *ctx) {
+any LeafConstrExtractor::visitComp_op(fperfParser::Comp_opContext *ctx) {
     op = ctx->getText();
     return visitChildren(ctx);
 }

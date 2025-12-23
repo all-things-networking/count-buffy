@@ -1,18 +1,17 @@
 #pragma once
 
-#include "fperfBaseVisitor.h"
+#include "../gen/fperfBaseVisitor.h"
 
 #include "../smt_solver.hpp"
 #include "../lib.hpp"
 
 using namespace std;
 
-expr binop(const expr &left, const string &op, const expr &right);
-
-
-class ConstrExtractor : public fperfBaseVisitor {
+class LeafConstrExtractor : public fperfBaseVisitor {
+public:
     SmtSolver &slv;
     vector<int> tmp_ids;
+    vector<int> max_t_with_zero_cenq;
     int begin;
     int end;
     string metric;
@@ -23,6 +22,10 @@ class ConstrExtractor : public fperfBaseVisitor {
     ev2 aipgs;
     int num_buffs;
     int timesteps;
+    map<int, vector<int> > dst_to_pkt_type;
+    map<int, vector<int> > ecmp_to_pkt_type;
+    vector<tuple<int, int,string, int>> dst_constrs;
+    vector<tuple<int, int,string, int>> ecmp_constrs;
 
 public:
     vector<NamedExp> constrs;
@@ -31,7 +34,9 @@ public:
     ev2 dsts;
     ev2 ecmps;
 
-    ConstrExtractor(SmtSolver &slv, ev3 &I, int num_bufs, int timesteps);
+    LeafConstrExtractor(SmtSolver &slv, ev3 &I, int timesteps,
+                    map<int, vector<int> > dst_to_pkt_type,
+                    map<int, vector<int> > ecmp_to_pkt_type);
 
     void print(model m) const;
 

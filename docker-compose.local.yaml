@@ -1,7 +1,13 @@
 services:
   buffy:
-    build: .
-    image: buffy-local
+    container_name: buffy
+    build:
+      context: .
+      cache_from:
+        - buffy
+    image: buffy
     volumes:
       - ./data:/buffy/data
+      - ./scripts:/buffy/scripts
     command: tail -f /dev/null
+    env_file: .env
