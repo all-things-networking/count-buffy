@@ -18,7 +18,7 @@ using namespace z3;
 using namespace antlr4;
 using namespace chrono;
 
-constexpr int MAX_ENQ = 5;
+constexpr int MAX_ENQ = 4;
 constexpr int MAX_DEQ = 1;
 constexpr int TIME_STEPS = 10;
 constexpr int PKT_TYPES = 12;
@@ -293,6 +293,13 @@ int check_wl(vector<string> wl, bool sat, int buff_cap) {
         slv.check_sat();
         slv.s.pop();
         cout << "SAT: WL & !Q is SAT" << endl;
+    }
+    if (!sat && true) {
+        slv.s.push();
+        slv.add(NamedExp(query(slv, O), "query"));
+        slv.check_sat();
+        slv.s.pop();
+        cout << "UNSAT: WL & Q is SAT" << endl;
     }
     if (!sat) {
         slv.s.push();
