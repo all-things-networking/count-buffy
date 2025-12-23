@@ -4,5 +4,5 @@ set -euo pipefail
 
 source "$(dirname "$0")/lib.sh"
 
-draw_experiment_chart "$1"
+draw_plot "$1"
 

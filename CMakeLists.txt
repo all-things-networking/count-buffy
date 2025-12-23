@@ -19,13 +19,14 @@ function(add_target name source_file)
     target_link_libraries(${name} PRIVATE z3::libz3 antlr4_static exprtk::exprtk)
 endfunction()
 
-add_target(fq fq.cpp)
-add_target(loom loom.cpp)
+add_executable(hello-world ${EXAMPLE_FILES} ${SRC_FILES} ${HPP_FILES})
+target_link_libraries(hello-world PRIVATE z3::libz3 antlr4_static exprtk::exprtk)
+
 add_target(prio prio.cpp)
 add_target(rr rr.cpp)
-add_target(lsl lsl.cpp)
-add_target(lst lst.cpp)
+add_target(fq fq.cpp)
+add_target(loom loom.cpp)
+#add_target(lsl lsl.cpp)
+#add_target(lst lst.cpp)
 
-add_executable(hello-world ${EXAMPLE_FILES} ${SRC_FILES} ${HPP_FILES})
-target_link_libraries(hello-world PRIVATE z3::libz3 antlr4_static)
 

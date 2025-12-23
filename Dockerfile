@@ -21,7 +21,7 @@ COPY src src
 COPY examples examples
 COPY CMakeLists.txt *.cpp ./
 
-RUN make build
+RUN make build -j1
 
 COPY fperf /fperf
 

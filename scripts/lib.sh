@@ -70,9 +70,9 @@ function check_with_fperf() {
   echo "Workloads checked with fperf Successfully!"
 }
 
-function draw_experiment_chart(){
+function draw_plot(){
   local name=$1
-  python3 "$PARENT_DIR/draw_chart.py" -w "$BUFFY_WLS_DIR" -l "$BUFFY_LOGS_DIR" \
+  python3 "$PARENT_DIR/draw_plot.py" -w "$BUFFY_WLS_DIR" -l "$BUFFY_LOGS_DIR" \
   -n "$name" \
   --min "$BUFFY_MIN_BUF_SIZE" \
   --max "$BUFFY_MAX_BUF_SIZE"
