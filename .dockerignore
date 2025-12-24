@@ -5,3 +5,4 @@ cmake-build-debug
 build
 local
 docker-compose.yaml
+*.md

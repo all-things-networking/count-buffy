@@ -1,10 +1,10 @@
 ## Table of Contents
 
-- [Background and Motivation 🧛‍♀️](#B️)
-- [Description of Experiments](#experiments)
-- [Hello World Example](#getting-started)
-- [Reproducing the Results](#experiments-1)
-- [How 🧛‍♀️is Implemented](#walkthrough-of-the-prio-case-study)
+- [Background and Motivation 🧛‍♀️](#background-and-motivation)
+- [Description of Experiments](#description-of-experiments)
+- [Hello World Example](#hello-world-example)
+- [Reproducing the Results](#reproducing-the-results)
+- [How 🧛‍♀️is Implemented](#how-is-implemented)
 
 # Background and Motivation
 
@@ -106,7 +106,7 @@ cp .env.example .env
 docker compose pull
 ```
 
-# Hello World Example
+## Run the Hello World Example
 
 The `examples` directory includes a simple example of using 🧛‍♀️ to
 model a rate-limiter CP and verify certain workload and query.
@@ -206,8 +206,8 @@ The steps are as follows:
 #### Small vs All Experiments
 
 To make sure the setup is correct and everything is working,
-run the following command to run the all the following steps only for the `prio`
-case study and only for buffer sizes `10,25,50`:
+use the following command to so that all the following steps run only for the `prio`
+case study and for buffer sizes `10,25,50`:
 
 ```bash
 cp .env.example.small .env
@@ -215,7 +215,7 @@ cp .env.example.small .env
 
 This way you can quickly run all the following commands and make sure everything
 is working.
-Then to run all experiments use the following command:
+Next, to run all experiments use the following command:
 
 ```bash
 cp .env.example .env
