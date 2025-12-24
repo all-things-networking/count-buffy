@@ -1,95 +1,94 @@
 ## Table of Contents
-- [Background and Motiviation 🧛‍♀️](#count-buffy-️)
+- [Background and Motivation 🧛‍♀️](#B️)
 - [Description of Experiments](#experiments)
 - [Hello World Example](#getting-started)
-- [Running the Experiments to Reproduce the Results](#experiments-1)
+- [Reproducing the Results](#experiments-1)
 - [How 🧛‍♀️is Implemented](#walkthrough-of-the-prio-case-study)
 
-# Count Buffy 🧛‍♀️
+# Background and Motivation
 
-Count Buffy (🧛‍♀️) is a verification tool for performance verification of packet
-schedulers in the network.
+Count Buffy (🧛‍♀️) is a verification tool for performance verification of contention points (CPs) in the network.
 
 Terminology:
 
 - Buffer: A fifo queue of packets with finite capacity
 - Packet Stream: A sequence of packets
-- Packet Scheduler: A processing unit that reads packet from a set of input Buffers and
+- Contention Point: A processing unit that reads packet from a set of input Buffers and
   produces a set of output packet streams
-- Query: A predicate over output packet stream
-- Workload: A predicate over input packet stream
+- Workload: A predicate over free input buffers of the contention point (those that are not connected to another contention point)
+- Query: A predicate over the buffers of the contention point
 
-On a high level, input and output of a packet scheduler is a set of packet streams.
-Input packet streams are fed into Buffers and scheduler reads the buffered packets, and don't
+On a high level, input and output of a contention point is a set of packet streams.
+Input packet streams are fed into Buffers and CP reads the buffered packets, and don't
 directly have access to the input stream.
-Scheduler the processes the packets and produces output stream accordingly.
-Workload/Query is an abstract representation of a set of inputs/outputs to/from the scheduler.
+CP then processes the packets and produces output stream accordingly.
+Workload/Query is an abstract representation of a set of inputs/outputs to/from the CP.
 
 Queries are performance properties, i.e., they specify performance related properties of
-the output like throughput.
+the buffers like throughput.
 
-The goal of verification task is to verify whenever we fed traffic consistent with the workload
-into the scheduler, the output of the scheduler satisfies the Query.
+The goal of verification task is to verify whenever we feed traffic consistent with the workload
+into the CP, the Query is satisfied (a performance property defined over the buffers).
 
 For instance, assume that we have a rate limiter that limits the output traffic rate to
 1 packet per two timesteps.
 Our goal is to verify that even if we feed consistent traffic of 1 packet every timestep into
-the network, we see at most one packet every two timesteps in the output.
+the rate limiter, we see at most one packet every two timesteps in the output.
 
 Without verification, we need to manually construct some input traffic with these specification,
-feed them into the network, and then check if the output is rate-limited.
+feed them into the rate-limiter, and then check if the output is rate-limited.
 
-With verification, we represent all possible traffic that with a few lines of specification, and
-use the verification tool to verify that the output of all of such traffic is satisfies the query.
+With verification, we represent all possible traffic that with a few lines of specification (workload), and
+use the verification tool to verify that the CP satisfies the performance query.
 
-### Okay! That's typical formal methodsy stuff! What is 🧛‍♀️'s novelty?
+## Okay! That's typical formal methodsy stuff! What is 🧛‍♀️'s novelty?
 
-Efficient verification of schedulers with arbitrary large buffer sizes.
+Efficient verification of CPs with arbitrary large buffer sizes.
 
-The main novelty of 🧛‍♀️modeling is that it allows analysis when considering
-buffer sizes of arbitrary large sizes.
-The previous tool for performance verification, only capable of very small and unrealistic
-buffer sizes (≤1K).
+The main novelty of 🧛‍♀️modeling is that it allows scaling the buffer size and efficiently analysing CPs with large
+buffer sizes.
+The previous tool for performance verification (FPerf), was only capable of very small and unrealistic
+buffer sizes (≤10).
 
-## Experiments
+# Description of Experiments
 
-### FPerf
+## FPerf
 
 FPerf uses a certain grammar to specify workloads.
 Using a CEGIS style search through the state space of the possible
 workloads allowed by the grammar, FPerf finds a Workload that
-always results in the Query.
+always satisfies the Query.
 
-FPerf works by using a search loop, inside the loop FPerf generates
+FPerf works by using a search loop. Inside the loop FPerf generates
 a new random workload, and then verifies whether workload always
-result in the query.
+satisfies the query.
 To verify most of the workloads generated during the search, FPerf calls
 a verification engine.
 
 We show that using 🧛‍♀️gives significantly better verification time
-than the scheduler model used in FPerf when we increase the buffer size.
-We showed that, size of buffer has negligible effect on the verification
-time in 🧛‍♀️while FPerf verification time increases by increasing the buffer
-size and becomes intractable for larger and realistic buffer sizes.
+than the formal model of CP used in FPerf when we increase the buffer size.
+In fact, we show that, size of buffer has negligible effect on the verification
+time in 🧛‍♀️while FPerf verification time increases significantly when buffer size 
+gets larger and becomes intractable for larger and realistic buffer sizes.
 
-### How the experiments work?
+## How do the experiments work?
 
 In each test-case, FPerf generates a set of workloads and verifies each using
 Z3.
-We record those workloads and verify them in 🧛‍♀️, simulating the situation where
-we keep the FPerf's search algorithm, while replacing the formal model of network
+We record those workloads and verify them using 🧛‍♀️, simulating the situation where
+we keep the FPerf's search algorithm, while replacing the formal model of CP
 as designed in 🧛‍♀️.
 
-We compare the average verification time of individual calls to the verification engine
-for each buffer size.
+We compare the average and P95 percentile verification time of individual calls to the verification engine
+for increasing buffer sizes.
 
-## Getting Started
+# Hello World Example
 
-### Requirements
+## Requirements
 
 Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
-### Clone
+## Clone the Repository
 
 ```shell
 git clone https://github.com/all-things-networking/count-buffy.git
@@ -98,16 +97,16 @@ git submodule update --init --recursive
 cp .env.example .env
 ```
 
-### Pull 🧛‍♀️ Image
+## Pull 🧛‍♀️ Image
 
 ```shell
 docker compose pull
 ```
 
-### Hello World Example
+# Hello World Example
 
 The `examples` directory includes a simple example of using 🧛‍♀️ to
-model a rate-limiter scheduler and verify certain workload and queries.
+model a rate-limiter CP and verify certain workload and queries.
 
 ```shell
 docker compose run --rm buffy hello-world
@@ -118,9 +117,9 @@ Each sequence shows the number of packets at each time step.
 In the output traffic, there should be at most one packet
 within each two subsequent time steps.
 
-## Experiments 
+# Reproducing the Results 
 
-### Summary of Experiments
+## Summary of Experiments
 
 | Experiment id | Description                            |
 |---------------|----------------------------------------|
@@ -129,9 +128,9 @@ within each two subsequent time steps.
 | fq            | FqCoDel Scheduler                      |
 | loom          | Compositional                          |
 
-### Run Experiments
+## Running the Experiments
 
-For performance evaluation of 🧛‍♀️ we used the 4 case studies used
+For performance evaluation of 🧛‍♀️ we use the 4 case studies used
 in FPerf.
 For each case study, we run the FPerf search for various buffers sizes
 and recorded all workloads generated during the search.
@@ -161,6 +160,8 @@ For this experiment, we are using a set of pre-recorded workloads generated duri
 `data/sub_wls`.
 The directory includes sub-directories for each experiment.
 For each case study we have separate workloads file for different buffer sizes.
+We used the queries as defined in [FPerf](https://mina.arashloo.net/docs/fperf.pdf) and implemented
+as the `query` method in the sub-classes of the `STSChecker`.
 These workloads files include an entry for each workload that FPerf generates and verify with Z3.
 The following is an example a workload entry.
 The header line (starting with `###`) includes the verification time of FPerf (in ms) and verification result (
@@ -194,7 +195,7 @@ We feed a workload file into 🧛‍♀️ and output is a log file that include
 a line per workload specifying the verification time and the SAT/UNSAT result:
 
 ```text
-scheduler, buf_size, wl_idx, time_millis, solver_res
+CP, buf_size, wl_idx, time_millis, solver_res
 prio,10, 0, 27, SAT
 prio,10, 1, 33, SAT
 prio,10, 2, 9, SAT
@@ -272,7 +273,7 @@ draw the plots again:
 docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy draw_all_plots.sh
 ```
 
-## Walkthrough of the Prio Case-Study
+# How 🧛‍♀️is Implemented
 
 To explain how the implementation works and explain the code we walk through 
 the implementation of the `prio` case study.
@@ -282,34 +283,34 @@ The program accepts two arguments: buffer size and a flag specifying whether
 use window constraints or not.
 
 To implement the strict priority scheduler, we derive the sub-class from `STSChecker`.
-An `STSChecker` includes the model of the scheduler as well as methods for verifying
+An `STSChecker` includes the model of the CP as well as methods for verifying
 combinations of workloads and queries.
 
 We then use `StsRunner` to read workloads of the case study for a single buffer size,
 verify each workload, and save the verification times in a log file.
 
-### `STSChecker`
+## `STSChecker`
 
-This class includes the scheduler model, base workload and query for a specific case
+This class includes the CP's model, base workload and query for a specific case
 study. 
-Scheduler is implemented as a transition system described below.
+Each CP is implemented as a transition system described below.
 
-#### Scheduler Logic
+### Contention Point Logic
 
-To implement scheduler behavior, we need to override three methods of the `STSChecker`: `init`, `trs` and `out`.
+To implement the CP's behavior, we need to override three methods of the `STSChecker`: `init`, `trs` and `out`.
 Each of these methods, return a set of constraints to be added to solver.
 
-##### Initial State:
+#### Initial State:
 
 ```cpp
 vector<NamedExp> init(ev const &b0, ev const &s0)
 ```
-This method specifies the initial state of the scheduler.
+This method specifies the initial state of the CP.
 `b0` is a vector of boolean expressions, one for each input 
-buffer of the scheduler.
+buffer of the CP.
 Each `b0[i]` specifies whether the `i`th input buffer is backlogged at time zero.
 `s0` is a vector of numeric expressions, representing arbitrary state variables
-of the scheduler at time zero.
+of the CP at time zero.
 For instance, in the round-robin scheduler, we use the state variable to record 
 the index of the last dequeued buffer, so we can find the buffer that should 
 dequeue next.
@@ -324,7 +325,7 @@ vector<NamedExp> PrioSTS::init(const ev &b0, const ev &s0) {
 }
 ```
 
-#### Transition Relation:
+### Transition Relation:
 
 This method defines the transition relation, i.e., the relation between
 each pair of subsequent states.
@@ -360,16 +361,16 @@ enforcing that if a lower priority buffer is backlogged, then no lower
 priority buffer can dequeue a packet in current time step (`b[l] => bp[l]`). 
 
 
-#### Output Constraints:
+### Output Constraints:
 
 The final method for a complete implementation of the priority scheduler, is
 the `out` method:
 ```cpp
 vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) 
 ```
-The `out` method includes constraints for specifying how the scheduler's output
+The `out` method includes constraints for specifying how the CP's output
 (packets to be dequeued) should be calculated based on the current state of the
-scheduler.
+CP.
 So, it receives the vector of backlogs `bv`, vector of state variables `sv` and
 the vector of output packets `ov` for timestep `t`. 
 `out` should return constraints that relate `bv` and `sv` with `ov`.
@@ -392,11 +393,11 @@ vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) 
 Simply, we start from the first buffer, and dequeue a packet from the first 
 non-empty buffer.
 
-These methods together define the logic of the scheduler, independent of how
+These methods together define the logic of the CP, independent of how
 the underlying buffers are modelled.
 
 The constraints for modelling the buffer behavior are implemented in the `STSChecker`,
-and shared by all derived schedulers.
+and shared by all derived CPs.
 
 Finally, to complete the case study, we need to implement the base workload and query methods.
 
@@ -406,7 +407,7 @@ and query returns a set of constraints over the outputs from the buffers.
 The case study for the priority scheduler doesn't include a base workload,
 so here we only explain the query.
 
-#### Query
+### Query
 The following method shows the query method of the priority scheduler.
 The query in the case study specifies whether there exists a timestep
 `t` where the third input buffer is blocked for more than five timesteps.
@@ -430,12 +431,12 @@ vector<NamedExp> PrioSTS::query() {
 To know whether a buffer is blocked we check if it is backlogged and 
 it doesn't output any packets.
 
-#### `StsRunner` class
+### `StsRunner` class
 
 This class is responsible for reading the individual workloads from file,
 and translating them into constraints over the input buffers.
 
-It then uses the Z3 solver, to verify the model of the scheduler alongside the 
+It then uses the Z3 solver, to verify the model of the CP alongside the 
 base workload, query and the workload generated by FPerf. 
 We also read the expected verification result from the FPerf's output, and
 raise an exception if our result is different from FPerf.
