@@ -39,7 +39,7 @@ void StsRunner::run(int num_buffers, int timesteps) {
     string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buf_cap);
     cout << "Writing logs to:" << out_file_path << endl;
     ofstream out(out_file_path, ios::out);
-    out << "scheduler, buf_size, wl_idx, time_millis, solver_res" << endl;
+    out << "contention_point, buf_size, wl_idx, time_millis, solver_res" << endl;
     slv.add(sts->base_constrs());
     slv.add(sts->base_wl());
     slv.add(merge(sts->query(), "Query").negate());
@@ -48,7 +48,7 @@ void StsRunner::run(int num_buffers, int timesteps) {
         auto wl = wls[i];
         slv.s.push();
         string res_stat = wl[0];
-        cout << "WL: " << i + 1 << "/" << wls.size() << " " << res_stat << endl;
+        cout << "Verifying WL for buf size = " << buf_cap << ": " << i + 1 << "/" << wls.size() << ", expected result=" << res_stat << endl;
         wl.erase(wl.begin());
         parser.parse(wl);
 

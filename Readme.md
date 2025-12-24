@@ -1,4 +1,5 @@
 ## Table of Contents
+
 - [Background and Motivation 🧛‍♀️](#B️)
 - [Description of Experiments](#experiments)
 - [Hello World Example](#getting-started)
@@ -15,7 +16,8 @@ Terminology:
 - Packet Stream: A sequence of packets
 - Contention Point: A processing unit that reads packet from a set of input Buffers and
   produces a set of output packet streams
-- Workload: A predicate over free input buffers of the contention point (those that are not connected to another contention point)
+- Workload: A predicate over free input buffers of the contention point (those that are not connected to another
+  contention point)
 - Query: A predicate over the buffers of the contention point
 
 On a high level, input and output of a contention point is a set of packet streams.
@@ -32,8 +34,9 @@ into the CP, the Query is satisfied (a performance property defined over the buf
 
 For instance, assume that we have a rate limiter that limits the output traffic rate to
 1 packet per two timesteps.
-Our goal is to verify that even if we feed consistent traffic of 1 packet every timestep into
-the rate limiter, we see at most one packet every two timesteps in the output.
+Assume that we analyze the rate limiter for 10 time step.
+Our goal is to verify that with any traffic that sends at least 5 packets (within the 10 timesteps)
+into the rate limiter, we see at most 5 packets in the output traffic, i.e., at most one packet every two timesteps.
 
 Without verification, we need to manually construct some input traffic with these specification,
 feed them into the rate-limiter, and then check if the output is rate-limited.
@@ -68,7 +71,7 @@ a verification engine.
 We show that using 🧛‍♀️gives significantly better verification time
 than the formal model of CP used in FPerf when we increase the buffer size.
 In fact, we show that, size of buffer has negligible effect on the verification
-time in 🧛‍♀️while FPerf verification time increases significantly when buffer size 
+time in 🧛‍♀️while FPerf verification time increases significantly when buffer size
 gets larger and becomes intractable for larger and realistic buffer sizes.
 
 ## How do the experiments work?
@@ -106,7 +109,7 @@ docker compose pull
 # Hello World Example
 
 The `examples` directory includes a simple example of using 🧛‍♀️ to
-model a rate-limiter CP and verify certain workload and queries.
+model a rate-limiter CP and verify certain workload and query.
 
 ```shell
 docker compose run --rm buffy hello-world
@@ -114,19 +117,37 @@ docker compose run --rm buffy hello-world
 
 The output shows a sequence of input and output traffic.
 Each sequence shows the number of packets at each time step.
+
+In this example we verify if we have at least five input packets
+within 10 timesteps, always we have at most 5 packets in the output.
+
+In the `examples/main.cpp`, first we verify the satisfiability of the
+workload and query to see an example of how input and output traffic 
+that satisfy both workload and query looks like:
+```cpp
+    auto m = sts->check_wl_and_query_sat();
+    sts->print(m);
+```
+
 In the output traffic, there should be at most one packet
 within each two subsequent time steps.
 
-# Reproducing the Results 
+Next, we verify that this workload always satisfies the query. 
+To verify this, we check for the unsatisfiability of the workload and
+negation of the query, i.e., we verify that it is impossible to feed
+at least five packets into the rate-limiter and have more than five 
+packets in the output.
+
+# Reproducing the Results
 
 ## Summary of Experiments
 
-| Experiment id | Description                            |
-|---------------|----------------------------------------|
-| rr            | Round-Robin Scheduler                  |
-| prio          | Strict-Priority Scheduler              |
-| fq            | FqCoDel Scheduler                      |
-| loom          | Compositional                          |
+| Experiment id | Description               | Entry Point File |
+|---------------|---------------------------|------------------|
+| rr            | Round-Robin Scheduler     | `rr.cpp`         |
+| prio          | Strict-Priority Scheduler | `prio.cpp`       |
+| fq            | FqCoDel Scheduler         | `fq.cpp`         |
+| loom          | Compositional             | `loom.cpp`       |
 
 ## Running the Experiments
 
@@ -185,14 +206,17 @@ The steps are as follows:
 #### Small vs All Experiments
 
 To make sure the setup is correct and everything is working,
-run the following command to run the all the following steps only for the `prio` 
+run the following command to run the all the following steps only for the `prio`
 case study and only for buffer sizes `10,25,50`:
+
 ```bash
 cp .env.example.small .env
 ```
+
 This way you can quickly run all the following commands and make sure everything
-is working. 
+is working.
 Then to run all experiments use the following command:
+
 ```bash
 cp .env.example .env
 ```
@@ -262,7 +286,7 @@ Use the following command to generate the workloads:
 docker compose run --rm buffy fperf_search_all.sh
 ```
 
-After a successful execution, workloads generated during the search are saved into the 
+After a successful execution, workloads generated during the search are saved into the
 `data/new_wls`.
 
 Now, we can execute the previous steps again to compare the verification times using the
@@ -273,6 +297,7 @@ newly generate workloads.
 
 
 Verify newly generated workloads in Buffy:
+
 ```shell
 docker compose run --rm buffy fperf_verify_all_workloads.sh
 ```
@@ -293,7 +318,7 @@ docker compose run --rm -e BUFFY_WLS_DIR=data/new_wls buffy draw_all_plots.sh
 
 # How 🧛‍♀️is Implemented
 
-To explain how the implementation works and explain the code we walk through 
+To explain how the implementation works and explain the code we walk through
 the implementation of the `prio` case study.
 
 The entry point is the `prio.cpp` file.
@@ -310,7 +335,7 @@ verify each workload, and save the verification times in a log file.
 ## `STSChecker`
 
 This class includes the CP's model, base workload and query for a specific case
-study. 
+study.
 Each CP is implemented as a transition system described below.
 
 ### Contention Point Logic
@@ -323,20 +348,22 @@ Each of these methods, return a set of constraints to be added to solver.
 ```cpp
 vector<NamedExp> init(ev const &b0, ev const &s0)
 ```
+
 This method specifies the initial state of the CP.
-`b0` is a vector of boolean expressions, one for each input 
+`b0` is a vector of boolean expressions, one for each input
 buffer of the CP.
 Each `b0[i]` specifies whether the `i`th input buffer is backlogged at time zero.
 `s0` is a vector of numeric expressions, representing arbitrary state variables
 of the CP at time zero.
-For instance, in the round-robin scheduler, we use the state variable to record 
-the index of the last dequeued buffer, so we can find the buffer that should 
+For instance, in the round-robin scheduler, we use the state variable to record
+the index of the last dequeued buffer, so we can find the buffer that should
 dequeue next.
 For the strict priority, we don't need state variables.
 
 The following method shows the `init` method of the priority scheduler.
-Basically, here we are allowing any initial state, so we are returning a 
+Basically, here we are allowing any initial state, so we are returning a
 single `true` constraint.
+
 ```cpp
 vector<NamedExp> PrioSTS::init(const ev &b0, const ev &s0) {
   return {slv.ctx.bool_val(true)};
@@ -348,11 +375,11 @@ vector<NamedExp> PrioSTS::init(const ev &b0, const ev &s0) {
 This method defines the transition relation, i.e., the relation between
 each pair of subsequent states.
 
-Similar to init, it receives the backlog and state variables vectors. 
-However, it receives two pair of such variables, one for timestep `t` and 
+Similar to init, it receives the backlog and state variables vectors.
+However, it receives two pair of such variables, one for timestep `t` and
 another pair for timestep `t+1`.
 
-The method should then return constraints that relate these variables between 
+The method should then return constraints that relate these variables between
 timestep `t` and `t+1`.
 
 ```cpp
@@ -360,6 +387,7 @@ vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &
 ```
 
 The following method shows the transition relation of the `prio` scheduler:
+
 ```cpp
 vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &sp, int tp) {
     vector<NamedExp> rv;
@@ -373,27 +401,30 @@ vector<NamedExp> PrioSTS::trs(ev const &b, ev const &s, ev const &bp, ev const &
     return rv;
 }
 ```
-Here we are enforcing the constraint `b[i] => (b[l] => bp[l])` for all `l > i`.
-Assuming that lower indices have higher priority, basically here we are 
-enforcing that if a lower priority buffer is backlogged, then no lower
-priority buffer can dequeue a packet in current time step (`b[l] => bp[l]`). 
 
+Here we are enforcing the constraint `b[i] => (b[l] => bp[l])` for all `l > i`.
+Assuming that lower indices have higher priority, basically here we are
+enforcing that if a lower priority buffer is backlogged, then no lower
+priority buffer can dequeue a packet in current time step (`b[l] => bp[l]`).
 
 ### Output Constraints:
 
 The final method for a complete implementation of the priority scheduler, is
 the `out` method:
+
 ```cpp
 vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) 
 ```
+
 The `out` method includes constraints for specifying how the CP's output
 (packets to be dequeued) should be calculated based on the current state of the
 CP.
 So, it receives the vector of backlogs `bv`, vector of state variables `sv` and
-the vector of output packets `ov` for timestep `t`. 
+the vector of output packets `ov` for timestep `t`.
 `out` should return constraints that relate `bv` and `sv` with `ov`.
 
 The following method shows the `out` method of the priority scheduler:
+
 ```cpp
 vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) {
     vector<NamedExp> rv;
@@ -408,7 +439,7 @@ vector<NamedExp> PrioSTS::out(const ev &bv, const ev &sv, const ev2 &ov, int t) 
 }
 ```
 
-Simply, we start from the first buffer, and dequeue a packet from the first 
+Simply, we start from the first buffer, and dequeue a packet from the first
 non-empty buffer.
 
 These methods together define the logic of the CP, independent of how
@@ -426,6 +457,7 @@ The case study for the priority scheduler doesn't include a base workload,
 so here we only explain the query.
 
 ### Query
+
 The following method shows the query method of the priority scheduler.
 The query in the case study specifies whether there exists a timestep
 `t` where the third input buffer is blocked for more than five timesteps.
@@ -446,7 +478,7 @@ vector<NamedExp> PrioSTS::query() {
 }
 ```
 
-To know whether a buffer is blocked we check if it is backlogged and 
+To know whether a buffer is blocked we check if it is backlogged and
 it doesn't output any packets.
 
 ### `StsRunner` class
@@ -454,8 +486,8 @@ it doesn't output any packets.
 This class is responsible for reading the individual workloads from file,
 and translating them into constraints over the input buffers.
 
-It then uses the Z3 solver, to verify the model of the CP alongside the 
-base workload, query and the workload generated by FPerf. 
+It then uses the Z3 solver, to verify the model of the CP alongside the
+base workload, query and the workload generated by FPerf.
 We also read the expected verification result from the FPerf's output, and
 raise an exception if our result is different from FPerf.
 

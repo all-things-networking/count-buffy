@@ -62,7 +62,7 @@ void LoomStsRunner::run() {
     filesystem::create_directories(parent_dir);
     string out_file_path = format("{}/{}.{}.txt", parent_dir, model, buff_cap);
     ofstream out(out_file_path, ios::out);
-    out << "scheduler,buf_size,wl_idx,time_millis,solver_res" << endl;
+    out << "contention_point,buf_size,wl_idx,time_millis,solver_res" << endl;
     for (int i = 0; i < wls.size(); ++i) {
         auto wl = wls[i];
         slv.s.push();
@@ -70,6 +70,8 @@ void LoomStsRunner::run() {
         string res_stat = wl[0];
         wl.erase(wl.begin());
         parser.parse(wl);
+        cout << "Verifying WL for buf size = " << buff_cap << ": " << i + 1 << "/" << wls.size() << ", expected result="
+                << res_stat << endl;
 
         slv.add(merge(query(slv, O), "not query").negate());
         auto start_t = chrono::high_resolution_clock::now();
@@ -80,7 +82,6 @@ void LoomStsRunner::run() {
         slv.s.pop();
         auto end_t = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(end_t - start_t);
-        cout << "Loom[mem]," << buff_cap << "," << i << "," << duration.count() << "," << res_stat << endl;
         out << "Loom[mem]," << buff_cap << "," << i << "," << duration.count() << "," << res_stat << endl;
     }
 }
