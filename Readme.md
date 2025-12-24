@@ -175,9 +175,27 @@ Following lines specify the workload's constraints.
 ```
 
 The steps are as follows:
+
 1- Verify each workload file in FPerf
+
 2- Verify each workload file in 🧛‍♀️ and record the verification time
+
 3- Draw plots comparing the average verification of time in FPerf vs 🧛‍♀️
+
+#### Small vs All Experiments
+
+To make sure the setup is correct and everything is working,
+run the following command to run the all the following steps only for the `prio` 
+case study and only for buffer sizes `10,25,50`:
+```bash
+cp .env.example.small .env
+```
+This way you can quickly run all the following commands and make sure everything
+is working. 
+Then to run all experiments use the following command:
+```bash
+cp .env.example .env
+```
 
 #### 1- Verify Workloads in FPerf
 
