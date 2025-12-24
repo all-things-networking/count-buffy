@@ -1,3 +1,10 @@
+## Table of Contents
+- [Background and Motiviation 🧛‍♀️](#count-buffy-️)
+- [Description of Experiments](#experiments)
+- [Hello World Example](#getting-started)
+- [Running the Experiments to Reproduce the Results](#experiments-1)
+- [How 🧛‍♀️is Implemented](#walkthrough-of-the-prio-case-study)
+
 # Count Buffy 🧛‍♀️
 
 Count Buffy (🧛‍♀️) is a verification tool for performance verification of packet
@@ -82,7 +89,7 @@ for each buffer size.
 
 Install [Docker](https://docs.docker.com/get-started/get-docker/)
 
-#### Clone
+### Clone
 
 ```shell
 git clone https://github.com/all-things-networking/count-buffy.git
@@ -91,7 +98,7 @@ git submodule update --init --recursive
 cp .env.example .env
 ```
 
-#### Pull 🧛‍♀️ Image
+### Pull 🧛‍♀️ Image
 
 ```shell
 docker compose pull
@@ -108,10 +115,12 @@ docker compose run --rm buffy hello-world
 
 The output shows a sequence of input and output traffic.
 Each sequence shows the number of packets at each time step.
-In the output traffic, there should be at most on packet
+In the output traffic, there should be at most one packet
 within each two subsequent time steps.
 
-## Experiments Summary
+## Experiments 
+
+### Summary of Experiments
 
 | Experiment id | Description                            |
 |---------------|----------------------------------------|
@@ -169,7 +178,7 @@ The steps are as follows:
 2- Verify each workload file in 🧛‍♀️ and record the verification time
 3- Draw plots comparing the average verification of time in FPerf vs 🧛‍♀️
 
-### 1- Verify Workloads in FPerf
+#### 1- Verify Workloads in FPerf
 
 The following scripts verifies all workload files for all case studies
 in FPerf:
@@ -178,7 +187,7 @@ in FPerf:
 docker compose run --rm buffy fperf_verify_all_workloads.sh
 ```
 
-### 2- Verify Workloads in 🧛‍♀️
+#### 2- Verify Workloads in 🧛‍♀️
 
 Now, we verify all workloads in 🧛‍♀️.
 We feed a workload file into 🧛‍♀️ and output is a log file that includes
@@ -207,7 +216,7 @@ docker compose run --rm buffy buffy_verify_all_workloads.sh
 
 After a successful execution, 🧛‍♀️ log files are saved into the `data/logs` directory.
 
-### 3- Draw plots of average verification times
+#### 3- Draw plots of average verification times
 
 After the previous step, we have all the required data to compare the verification time of FPerf and 🧛‍♀️:
 
@@ -421,7 +430,7 @@ vector<NamedExp> PrioSTS::query() {
 To know whether a buffer is blocked we check if it is backlogged and 
 it doesn't output any packets.
 
-#### `StsRunner`
+#### `StsRunner` class
 
 This class is responsible for reading the individual workloads from file,
 and translating them into constraints over the input buffers.
